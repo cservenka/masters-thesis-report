@@ -1,0 +1,298 @@
+\ProvidesPackage{preamble}
+
+% General
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[includeheadfoot, margin = 2.54cm]{geometry}
+\usepackage[english]{babel}
+\usepackage{microtype}
+
+% Title page graphics and figures
+\usepackage{eso-pic, graphicx}
+\DeclareGraphicsExtensions{.pdf,.png,.jpg}
+\graphicspath{{images/}}
+
+% Chapter titles
+\usepackage{titlesec}
+\titleformat{\chapter}[display]
+    {\bfseries\LARGE}
+    {\filleft\MakeUppercase{\chaptertitlename}\quad\Huge\thechapter}
+    {4ex}
+    {\titlerule\vspace{1ex}\filright}
+    [\vspace{1ex}\titlerule]
+\titlespacing*{\chapter}
+    {0pt}
+    {0pt}
+    {30pt}
+
+% Footnotes
+\usepackage[bottom, flushmargin]{footmisc}
+\addtolength{\footnotesep}{1mm}
+\usepackage{chngcntr}
+\counterwithout{footnote}{chapter}
+
+% Font for listings
+\usepackage{courier}
+
+% Listings
+%\usepackage{minted}
+%\usemintedstyle{tango}
+
+\usepackage{listings}
+\lstset{inputpath = {code/}}
+\lstdefinestyle{basic} {
+    basicstyle = \scriptsize\ttfamily,
+    numbers = left,
+    numberstyle = \tiny,
+    numbersep = 5pt,
+    backgroundcolor = \color{white},
+    showspaces = false,
+    showstringspaces = false,
+    showtabs = false,
+    frame = tB,
+    rulecolor = \color{black},
+    captionpos = b,
+    commentstyle = \color{darkgreen},
+    stringstyle = \color{darkblue},
+    keywordstyle = \color{black}\bfseries,
+    xleftmargin = .04\textwidth,
+    xrightmargin = .04\textwidth,
+    belowskip = \smallskipamount
+}
+
+\lstdefinelanguage{roopl} {
+    morekeywords = {, class,
+                      inherits,
+                      method,
+                      call,
+                      uncall,
+                      construct,
+                      destruct,
+                      skip,
+                      from,
+                      do,
+                      loop,
+                      until,
+                      int,
+                      nil,
+                      if,
+                      then,
+                      else,
+                      fi,
+                      local, 
+                      delocal,
+                      constructor, }
+    sensitive = false,
+    morecomment = [l]{//},
+    morecomment = [s]{/*}{*/},
+    morestring = [b]"
+}
+
+\lstdefinelanguage{janus} {
+    morekeywords = {, procedure,
+                      int,
+                      stack,
+                      call,
+                      uncall,
+                      local,
+                      delocal,
+                      skip,
+                      from,
+                      do,
+                      loop,
+                      until,
+                      int,
+                      nil,
+                      if,
+                      then,
+                      else,
+                      fi,
+                      empty,
+                      top, 
+                      push, 
+                      pop, }
+    sensitive = false,
+    morecomment = [l]{//},
+    morecomment = [s]{/*}{*/},
+    morestring = [b]"
+}
+
+\lstdefinelanguage{unstructured} {
+    morekeywords = {, start,
+                      goto,
+                      if,
+                      from,
+                      return, }
+    sensitive = false,
+    morecomment = [l]{//},
+    morecomment = [s]{/*}{*/},
+    morestring = [b]"
+}
+
+\lstdefinelanguage{r} {
+    morekeywords = {, defmain,
+                      defsub,
+                      defword,
+                      defarray,
+                      call,
+                      rcall,
+                      if,
+                      then,
+                      for,
+                      to,
+                      let,
+                      printword,
+                      println, }
+    sensitive = false,
+    morecomment = [l]{;},
+    morecomment = [s]{/*}{*/},
+    morestring = [b]"
+}
+
+\lstdefinelanguage{pisa} {
+    morekeywords = {, ADD,
+                      ADDI,
+                      AND,
+                      ANDIX,
+                      NORX,
+                      NEG,
+                      ORX,
+                      ORIX,
+                      RL,
+                      RLV,
+                      RR,
+                      RRV,
+                      SLLX,
+                      SLLVX,
+                      SRAX,
+                      SRAVX,
+                      SRLX,
+                      SRLVX,
+                      SUB,
+                      XOR,
+                      XORI,
+                      BEQ,
+                      BGEZ,
+                      BGTZ,
+                      BLEZ,
+                      BLTZ,
+                      BNE,
+                      BRA,
+                      EXCH,
+                      SWAPBR,
+                      RBRA,
+                      START,
+                      FINISH,
+                      DATA, }
+    sensitive = false,
+    morecomment = [l]{;},
+    morestring = [b]"
+}
+
+% For page numbers and page styling
+\usepackage{fancyhdr, lastpage}
+\pagestyle{fancy}
+\fancyhf{}
+\lfoot{\nouppercase\rightmark}
+\rfoot{\thepage\ of \pageref*{LastPage}}
+\renewcommand{\headrulewidth}{0.0pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\renewcommand{\chaptermark}[1]{\markright{\chaptertitlename\ \thechapter\quad #1}}
+\renewcommand{\sectionmark}[1]{}
+\fancypagestyle{plain}{}
+
+% Table of Contents
+\AtBeginDocument{\renewcommand{\contentsname}{Table of Contents}}
+
+% List of Figures
+\usepackage[titles]{tocloft}
+\setlength{\cftfignumwidth}{30pt}
+
+% Bibliography
+\usepackage[backend = biber,
+            sorting = none,
+            style = numeric,
+            bibencoding = utf8,
+            maxcitenames = 2,
+            uniquelist = false]{biblatex}
+\DefineBibliographyStrings{english}{
+  mathesis = {Master's Thesis},
+  phdthesis = {PhD Thesis}
+}
+\addbibresource{bibliography.bib}
+
+\newcommand{\printreferences}[0] {
+    \phantomsection
+    \addcontentsline{toc}{chapter}{References}
+    \printbibliography[title={References}]
+}
+
+% Appendix
+\usepackage[title, titletoc]{appendix}
+
+% Math packages
+\usepackage{amsmath, amsthm, amssymb, amsfonts, stmaryrd, centernot, ellipsis}
+\def\notimplies{\centernot\Rightarrow}
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[chapter] % Reset theorem numbering for each chapter
+\newtheorem{definition}{Definition}[chapter] % Reset theorem numbering for each chapter
+\usepackage{textcase}
+
+\usepackage{changepage}
+\newenvironment{case}
+{ \begin{adjustwidth}{2.5em}{0pt}\setlength{\parindent}{0pt} }
+{ \end{adjustwidth} }
+
+% Quotes
+\usepackage{csquotes}
+\renewcommand*{\mkcitation}[1]{ \cite{#1}}
+\usepackage{epigraph}
+\setlength{\epigraphrule}{0pt}
+\setlength{\epigraphwidth}{8cm}
+
+% Colors
+\usepackage{color}
+\definecolor{darkgreen}{RGB}{0, 100, 0}
+\definecolor{darkblue}{RGB}{0, 0, 100}
+\definecolor{darkred}{RGB}{100, 0, 0}
+\definecolor{mauve}{RGB}{150, 0, 210}
+\definecolor{grey}{RGB}{245, 245, 245}
+\definecolor{darkgrey}{RGB}{220, 220, 220}
+
+% Figures
+\usepackage[font = footnotesize, labelfont = bf]{caption}
+\usepackage{subcaption}
+\usepackage[countmax]{subfloat}
+\usepackage{booktabs}
+
+% TikZ
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, calc}
+\tikzstyle{none} = [rectangle,
+                    minimum width = 0cm,
+                    minimum height = 0cm,
+                    draw = none]
+\tikzstyle{block} = [rectangle,
+                     minimum width = 1cm,
+                     minimum height = 1cm,
+                     text centered,
+                     draw = black]
+\tikzstyle{conditional} = [diamond,
+                           minimum width = 1cm,
+                           minimum height = 1cm,
+                           text centered,
+                           draw = black]
+\tikzstyle{assertion} = [circle,
+                         minimum size = 1cm,
+                         text centered,
+                         draw = black]
+\tikzstyle{arrow} = [-{Stealth[length = 3mm, width = 3mm]}, semithick]
+
+% Lists
+\usepackage{enumitem}
+
+% TEMPORARY
+\usepackage{lipsum}
+
+\usepackage[hidelinks]{hyperref}
+%\def\UrlFont{\bfseries\ttfamily}
