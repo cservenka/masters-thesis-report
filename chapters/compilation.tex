@@ -8,23 +8,23 @@ The following section presents a discussion of various heap manager layouts alon
 \subsection{Heap manager layout}
 Heap managers can be implemented in numerous ways. Different layouts yield advantages when allocating memory, finding a free block or when collecting garbage. As our goal is to construct a garbage-free heap manager, our finalized design should emphasize and reflect this objective in particular. Furthermore, we should attempt to allocate and deallocate memory as efficiently as possible, as merging blocks would be a non-reversible action.
 
-\subsubsection{Fixed-sized records}
-A simple layout for a heap manager would allocate memory by allocating the same amount (fixed-size) of memory regardless of the actual size of the record. This would simplify the implementation greatly as the free list simply is a linked list of free cells of identical size. However, a huge disadvantage to this approach is large amounts of garbage is generated if the difference in sizes between different types of records are significant.
+\subsubsection{Memory Pools}
+A simple layout for a heap manager would allocate memory using fixed-size blocks regardless of the actual size of the record~\cite{bk:memorypool}. This would simplify the implementation greatly as the free list simply is a linked list of free cells of identical size. However, a huge disadvantage to this approach is large amounts of garbage is generated due to fragmentation.
 
-\texttt{TODO: Visualization}
-
+\subsubsection{Buddy Memory}
+In this approach we have all blocks be variable-size of the power-of-two. Having different block sizes and methods for splitting a larger block into smaller ones reduces fragmentation. In terms of implementation, reversible splitting and merging might be possible as we're always doubling the size when merging and halving when splitting, thus making the operations logically inverse of each other~\cite{dk:buddyalloc}.
 
 \subsubsection{One heap per record}
 Another layout approach would be maintaining one heap per record in the program. During compilation classes would be analysed and a heap for each class would be created. The advantage of this approach would be less garbage generation as each allocation is tailored as closely as possible to the size of the record obtained from a static analysis during compilation. The obvious disadvantage is the amount of book-keeping and workload associated with growing and shrinking a heap and its neighbours.
 
-\texttt{TODO: Visualization} 
-
-\subsubsection{Variable-sized records}
-In this approach the free list is a linked list of small fixed-size blocks. When allocating space for a record, $n$ blocks of at least the size of the record is allocated. This layout is simple to implement as we avoid having to determine free list block size dependent in the size of program's classes. Furthermore, maintenance of the free list is simple as the blocks are fixed size. Garbage is however guaranteed to build up as we always allocate memory at least the size of the record, thus in most cases we "over-allocate", which effectively leaves garbage in the memory as the space is allocated and never used.\\
-
-\texttt{TODO: Visualize}
-
 \subsubsection{Shared heap, record-specific free lists}
-A combination of the previous layouts would consist of a single heap, but record-specific free lists. This way, we ensure minimal garbage build-up when allocating and freeing as the different free lists ensures that allocation of a record matches its optimal size, hence eliminating the "over-allocation" problem of the previous approach. By only keeping one heap, we eliminate the growth/shrinking issues of the multiple heap layout. There is however still a considerable amount of book-keeping involved in maintaining multiple free-lists. The bigger the number of unique classes defined in a program, the more free-lists we need to maintain during execution. If the free-lists are not allowed to point at the same free block (which they intuitively shouldn't in order to ensure reversibility), programs with many classes, say one hundred, could potentially fill up the heap with one hundred free lists, but only ever allocate objects for one of the classes, thus wasting a lot of memory on unused free lists. This scenario could potentially be avoided with compiler optimizations.\\
+A combination of the previous layouts would consist of a single heap, but record-specific free lists. This way, we ensure minimal fragmentation when allocating and freeing as the different free lists ensures that allocation of an object wastes as little memory as possible. By only keeping one heap, we eliminate the growth/shrinking issues of the multiple heap layout. There is however still a considerable amount of book-keeping involved in maintaining multiple free-lists. The bigger the number of unique classes defined in a program, the more free-lists we need to maintain during execution. If the free-lists are not allowed to point at the same free block (which they intuitively shouldn't in order to ensure reversibility), programs with many classes, say one hundred, could potentially fill up the heap with one hundred free lists, but only ever allocate objects for one of the classes, thus wasting a lot of memory on unused free lists. This scenario could potentially be avoided with compiler optimizations.\\
 
-\texttt{TODO: Visualization}
+\subsubsection{Other layouts to consider (?)}
+\texttt{Idea: Slab-like allocation}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.7\textwidth]{heap-designs}
+  \caption{Heap memory layouts (Draft)}
+\end{figure}
