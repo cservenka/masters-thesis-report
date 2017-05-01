@@ -1,0 +1,30 @@
+\chapter{Compilation}
+
+\section{Dynamic Memory Management}
+Native support of complex data structures is not a trivial matter to implement in a reversible computing environment. Variable-sized records and frames needs to be stored efficiently in a structured heap, while avoiding garbage build-up to maintain reversibility. A reversible heap manager layout has been proposed for a simplified version of the reversible functional language \textsc{RFun} and later expanded to allow references to avoid deep copying values~\cite{ha:heap, ty:rfun, tm:refcounting}.
+
+The following section presents a discussion of various heap manager layouts along with their advantages and disadvantages in terms of implementation difficulty, garbage build-up and the OOP domain. 
+
+\subsection{Heap manager layout}
+
+\subsubsection{Fixed-sized records}
+
+\subsubsection{One heap per record}
+
+\subsubsection{Variable-sized records}
+
+\subsubsection{Small number of fixed-sized blocks}
+
+\subsubsection{Shared heap, record-specific free lists}
+
+
+% Linked list of fixed-size records
+
+% One heap per class
+
+% Variable-size records as linked lists
+
+% Small number of fixed-size blocks
+%	- Heap per size, free list per size, heap per class
+
+% Shared heap, class specific free list

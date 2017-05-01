@@ -210,8 +210,10 @@
 
 % Bibliography
 \usepackage[backend = biber,
-            sorting = none,
             style = numeric,
+            sorting = nyt,
+            %sortcites=true,
+            firstinits=true,
             bibencoding = utf8,
             maxcitenames = 2,
             uniquelist = false]{biblatex}
@@ -220,6 +222,7 @@
   phdthesis = {PhD Thesis}
 }
 \addbibresource{bibliography.bib}
+\DeclareNameAlias{author}{last-first}
 
 \newcommand{\printreferences}[0] {
     \phantomsection
@@ -296,3 +299,9 @@
 
 \usepackage[hidelinks]{hyperref}
 %\def\UrlFont{\bfseries\ttfamily}
+
+% Version History
+\usepackage{vhistory}
+
+% ROOPL++
+\newcommand{\rooplpp}{\textsc{Roopl\texttt{++}} }
