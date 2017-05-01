@@ -28,6 +28,9 @@
 *.brf
 *.run.xml
 
+*.hst
+*.ver
+
 ## Build tool auxiliary files:
 *.fdb_latexmk
 *.synctex
