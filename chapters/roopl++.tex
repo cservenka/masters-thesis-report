@@ -11,12 +11,14 @@ With the design and implementation of the \textsc{Reversible Object-Oriented Pro
 
 \newpage
 \section{Syntax}
-A \rooplpp program consists, analogously to a \textsc{Roopl} program, of one or more class definitions, each with a varying number of fields and class methods.
+A \rooplpp program consists, analogously to a \textsc{Roopl} program, of one or more class definitions, each with a varying number of fields and class methods.\\
+
+\texttt{TODO: Local block}
 
 \begin{figure}[h]
 \centering
-
 \vspace{3mm}
+
 \textbf{\rooplpp Grammar}
 
 \begin{align}
@@ -28,7 +30,7 @@ A \rooplpp program consists, analogously to a \textsc{Roopl} program, of one or 
     			&\ |\ \qquad \textbf{if}\ e\ \textbf{then}\ s\ \textbf{else}\ s\ \textbf{fi}\ e\tag{conditional}\\
     			&\ |\ \qquad \textbf{from}\ e\ \textbf{do}\ s\ \textbf{loop}\ s\ \textbf{until}\ e\tag{loop}\\
     			&\ |\ \qquad \textbf{new}\ c\ x  \tag{object construction}\\
-    			&\ |\ \qquad \textbf{delete}\ x \tag{object deconstruction}\\
+    			&\ |\ \qquad \textbf{delete}\ c\ x \tag{object deconstruction}\\
     			&\ |\ \qquad \textbf{call}\ q\textbf{\texttt{(}}x,\ \dots,\ x\textbf{\texttt{)}}\ |\ \textbf{uncall}\ q\textbf{\texttt{(}}x,\ \dots,\ x\textbf{\texttt{)}}\tag{local method invocation}\\
     			&\ |\ \qquad \textbf{call}\ x\textbf{\texttt{::}}q\textbf{\texttt{(}}x,\ \dots,\ x\textbf{\texttt{)}}\ |\ \textbf{uncall}\ x\textbf{\texttt{::}}q\textbf{\texttt{(}}x,\ \dots,\ x\textbf{\texttt{)}}\tag{method invocation}\\
     			&\ |\ \qquad \textbf{skip}\ |\ s\ s\tag{statement sequence}\\
@@ -50,6 +52,8 @@ A \rooplpp program consists, analogously to a \textsc{Roopl} program, of one or 
 \caption{Syntax domains and EBNF grammar for \rooplpp}
 \label{fig:roopl-grammar}
 \end{figure}
+
+
 
 \newpage
 \section{Object Instantiation}
