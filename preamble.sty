@@ -40,7 +40,7 @@
 %\usemintedstyle{tango}
 
 \usepackage{listings}
-\lstset{inputpath = {code/}}
+\lstset{inputpath = {code/}, mathescape=true}
 \lstdefinestyle{basic} {
     basicstyle = \scriptsize\ttfamily,
     numbers = left,
@@ -50,15 +50,17 @@
     showspaces = false,
     showstringspaces = false,
     showtabs = false,
-    frame = tB,
-    rulecolor = \color{black},
+    frame = tb,
+    %rulecolor = \color{black},
+    tabsize=4,
     captionpos = b,
     commentstyle = \color{darkgreen},
     stringstyle = \color{darkblue},
     keywordstyle = \color{black}\bfseries,
-    xleftmargin = .04\textwidth,
-    xrightmargin = .04\textwidth,
-    belowskip = \smallskipamount
+	%xleftmargin = .04\textwidth,
+   	%xrightmargin = .04\textwidth,
+    belowskip = \medskipamount,
+    aboveskip = \medskipamount
 }
 
 \lstdefinelanguage{roopl} {
@@ -306,3 +308,9 @@
 
 % ROOPL++
 \newcommand{\rooplpp}{\textsc{Roopl\texttt{++}} }
+
+% Paragraph vspace
+\usepackage{parskip}
+
+% No paragraph indent
+\setlength\parindent{0pt}% globally suppress indentation
