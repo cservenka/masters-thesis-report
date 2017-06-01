@@ -1,0 +1,51 @@
+procedure next_power_of_two(int pow_2_n)
+    local int cur_pow = pow_2_n
+    pow_2_n += (cur_pow * 2) - cur_pow
+    delocal int cur_pow = pow_2_n / 2
+
+procedure allocate(int object_size, int free_lists[])
+    local int pow_2_n = 2
+
+    // Find power of two big enough for our object
+    from pow_2_n = 2 loop
+        call next_power_of_two(pow_2_n)
+    until (2 * pow_2_n) > object_size && free_lists[pow_2_n] != 0
+
+    // Determine if we need to split blocks
+    if (pow_2_n / 2) >= object_size then
+        from (pow_2_n / 2) >= object_size loop
+            free_lists[pow_2_n / 2] += 2
+            free_lists[pow_2_n] -= 1
+            uncall next_power_of_two(pow_2_n)
+        until ((pow_2_n / 2) < object_size) && (free_lists[pow_2_n] > 0)
+    fi pow_2_n >= object_size && free_lists[pow_2_n] != 0
+
+    // Allocate immidiately
+    free_lists[pow_2_n] -= 1
+
+    from pow_2_n > 2 loop
+        local int cur_pow = pow_2_n
+            pow_2_n += cur_pow / 2
+            pow_2_n -= cur_pow
+        delocal int cur_pow = pow_2_n * 2
+    until pow_2_n = 2
+
+    delocal int pow_2_n = 2
+
+procedure main()
+    int object_size
+    int free_lists[9]
+
+    // Works
+    object_size += 4
+    free_lists[8] += 1
+
+    // Broken
+    //object_size += 8
+    //free_lists[8] += 1
+
+    // Broken
+    //object_size += 2
+    //free_lists[2] += 1    
+
+    call allocate(object_size, free_lists)
