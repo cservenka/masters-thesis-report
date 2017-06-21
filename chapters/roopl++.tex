@@ -1,66 +1,183 @@
 \chapter{The \textsc{Roolp\texttt{++}} Language}
+\label{chp:rooplpp}
 With the design and implementation of the \textsc{Reversible Object-Oriented Programming Language} (\textsc{Roopl}), the first steps into the uncharted lands of Object-Oriented Programming (OOP) and reversibility was taken. In this chapter, we will present \rooplpp, the natural successor of \textsc{Roopl}, improving the language's object instantiation by letting objects live outside \texttt{construct / deconstruct} blocks, allowing complex, reversible programs to be written using OOP methodologies. As with its predecessor, \rooplpp is purely reversible and each component of a program written in \rooplpp is locally invertible. This ensures no computation history is required nor added program size for backwards direction program execution.\\
 
-\texttt{TODO: Arrays at some point}\\
+Inspired by other language successors such as \textsc{C\texttt{++}} was to \textsc{C}, \rooplpp is a superset of \textsc{Roopl}, containing all original functionality of its predecessor, extended with new object instantiation methods for increased programming usability and an array type.
 
-\texttt{TODO: \rooplpp example program}\\
-
-\texttt{Idea: Let \rooplpp be a superset of \textsc{Roopl}}\\
-
-\texttt{Idea: String type?}
-
+%TODO: Insert example of ROOPL++ program here!
+\begin{figure}
+    \texttt{TODO}
+    \caption{Example \rooplpp program}   
+\end{figure}
 \newpage
+
+% TODO: String type maybe?
+% TODO: Update new / delete for array assignment
 \section{Syntax}
-A \rooplpp program consists, analogously to a \textsc{Roopl} program, of one or more class definitions, each with a varying number of fields and class methods.\\
-
-\texttt{TODO: Local block}
-
+\label{sec:syntax}
+A \rooplpp program consists, analogously to a \textsc{Roopl} program, of one or more class definitions, each with a varying number of fields and class methods. The program's entry point is a nullary main method, defined exactly once and is instantiated during program start-up. Fields of the main object will serve as output of the program, exactly as in \textsc{Roopl}.
 \begin{figure}[h]
 \centering
 \vspace{3mm}
-
 \textbf{\rooplpp Grammar}
-
 \begin{align}
     prog		\quad&::= \quad cl^+ \tag{program}\\
     cl			\quad&::=\quad \textbf{class}\ c\ (\textbf{inherits}\ c)^?\ (t\ x)^*\ m^+\tag{class definition}\\
-    t			\quad&::=\quad \textbf{int}\ |\ c\tag{data type}\\
+    d           \quad&::=\quad c\ |\ \textbf{vector}\texttt{<}t\texttt{>} \tag{class and array}\\
+    t			\quad&::=\quad \textbf{int}\ |\ c\ |\ \textbf{vector}\texttt{<}t\texttt{>} \tag{data type}\\
     m			\quad&::=\quad \textbf{method}\ q\textbf{\texttt{(}}t\ x,\ \dots,\ t\ x\textbf{\texttt{)}}\ s\tag{method}\\
-    s			\quad&::=\quad x\ \odot\textbf{\texttt{=}}\ e\ |\ x\ \textbf{\texttt{<=>}}\ x\tag{assignment}\\
+    s			\quad&::=\quad x\ \odot\textbf{\texttt{=}}\ e\ |\ x\ \textbf{\texttt{<=>}}\ x\tag{assignment}\ |\ x[e]\ \odot\textbf{\texttt{=}}\ e\\\
     			&\ |\ \qquad \textbf{if}\ e\ \textbf{then}\ s\ \textbf{else}\ s\ \textbf{fi}\ e\tag{conditional}\\
     			&\ |\ \qquad \textbf{from}\ e\ \textbf{do}\ s\ \textbf{loop}\ s\ \textbf{until}\ e\tag{loop}\\
-    			&\ |\ \qquad \textbf{new}\ c\ x  \tag{object construction}\\
-    			&\ |\ \qquad \textbf{delete}\ c\ x \tag{object deconstruction}\\
+                &\ |\ \qquad \textbf{construct}\ d\ x\quad s\quad\textbf{destruct}\ x\tag{object block}\\
+                &\ |\ \qquad \textbf{local}\ t\ x\ \texttt{=}\ e\quad s\quad\textbf{delocal}\ t\ x\ \texttt{=}\ e\tag{local variable block}\\
+    			&\ |\ \qquad \textbf{new}\ d\ x\ |\ \textbf{delete}\ d\ x \tag{object con- and destruction}\\
     			&\ |\ \qquad \textbf{call}\ q\textbf{\texttt{(}}x,\ \dots,\ x\textbf{\texttt{)}}\ |\ \textbf{uncall}\ q\textbf{\texttt{(}}x,\ \dots,\ x\textbf{\texttt{)}}\tag{local method invocation}\\
     			&\ |\ \qquad \textbf{call}\ x\textbf{\texttt{::}}q\textbf{\texttt{(}}x,\ \dots,\ x\textbf{\texttt{)}}\ |\ \textbf{uncall}\ x\textbf{\texttt{::}}q\textbf{\texttt{(}}x,\ \dots,\ x\textbf{\texttt{)}}\tag{method invocation}\\
     			&\ |\ \qquad \textbf{skip}\ |\ s\ s\tag{statement sequence}\\
-    e			\quad&::=\quad \overline{n}\ |\ x\ |\ \textbf{\texttt{nil}}\ |\ e\ \otimes\ e\tag{expression}\\
+    e			\quad&::=\quad \overline{n}\ |\ x\ |\ x[e]\ |\ \textbf{\texttt{nil}}\ |\ e\ \otimes\ e\tag{expression}\\
     \odot	\quad&::=\quad \textbf{\texttt{+}}\ |\ \textbf{\texttt{-}}\ |\ \textbf{\texttt{\^}}\tag{operator}\\
     \otimes\quad&::=\quad \odot\ |\ \textbf{\texttt{*}}\ |\ \textbf{\texttt{/}}\ |\ \textbf{\texttt{\%}}\ |\ \textbf{\texttt{\&}}\ |\ \textbf{\texttt{|}}\ |\ \textbf{\texttt{\&\&}}\ |\ \textbf{\texttt{||}}\ |\ \textbf{\texttt{<}}\ |\ \textbf{\texttt{\textgreater}}\ |\ \textbf{\texttt{=}}\ |\ \textbf{\texttt{!=}}\ |\ \textbf{\texttt{<=}}\ |\ \textbf{\texttt{\textgreater=}}\tag{operator}
 \end{align}
-
 \vspace{2mm}
 \textbf{Syntax Domains}
-
 \begin{align*}
     prog &\in \text{Programs} & s &\in \text{Statements}      & n &\in \text{Constants} \\
     cl   &\in \text{Classes}  & e &\in \text{Expressions}     & x &\in \text{VarIDs}    \\
     t    &\in \text{Types}    & \odot &\in \text{ModOps}      & q &\in \text{MethodIDs} \\
     m    &\in \text{Methods}  & \otimes &\in \text{Operators} & c &\in \text{ClassIDs}
 \end{align*}
-
 \caption{Syntax domains and EBNF grammar for \rooplpp}
 \label{fig:roopl-grammar}
 \end{figure}
 
+% TODO: Add short line about vectors
+The \rooplpp grammar extends \textsc{Roopl}'s grammar with a new dynamic array type in form of \textbf{vector}s and a new object lifetime option in form of working with objects outside of blocks, using the \textbf{new} and \textbf{delete} approach. Furthermore, the local block extension proposed in~\cite{th:roopl} has become a standard part of the language. Class definitions remains unchanged, an consists of a \textbf{class} keyword followed by a class name. Subclasses must be specified using the \textbf{inherits} keyword and a following parent class name. Classes can have any number of fields of any of the data types, including the new vector type. A class definition is required to include at least one method, defined by the \textbf{method} keyword followed by a a method name, a comma-separated list of parameters and a body.
 
+Reversible assignments for integer variables and vector elements uses similar syntax as \textsc{Janus} assignments, by updating a variable through any of the addition (\texttt{+=}), subtraction or bitwise XOR operators. As with \textsc{Janus}, when updating a variable $x$ using any of said operators, the right-hand side of the operator argument must be entirely independent of $x$ to maintain reversibility. Usage of these reversible assignment operators for object or vector variables are undefined.
 
-\newpage
+\rooplpp objects can be instantiated in two ways. Either using object blocks known from \textsc{Roopl}, or by using the \textbf{new} statement. The object-blocks have a limited lifetime, as the object only exists within the \textbf{construct} and \textbf{destruct} segments. Using \textbf{new} allows the object to live until program termination, if the program terminates with a \textbf{delete} call. By design, it is the programmers responsibility to deallocate objects instantiated by the usage of \textbf{new}.
+
+The methodologies for argument aliasing and its restrictions on method on invocations from \textsc{Roopl} carries over in \rooplpp and object fields are as such disallowed as arguments to local methods to prevent irreversible updates and non-local method calls to a passed objects are prohibited. The parameter passing scheme remains call-by-reference and the \textsc{Roopl}'s object model remains unchanged in \rooplpp.
+
+%TODO: Something about referencing?
 \section{Object Instantiation}
-\texttt{TODO}
+\label{sec:object-instantiation}
+%TODO: Example of new/delete
+Object instantiation through the \textbf{new} statement, follows the pattern of the mechanics of the \textbf{construct}/\textbf{destruct} blocks from \textsc{Roopl}, except for the less limited scoping and lifetime of objects. The mechanisms of the statement 
+
+\begin{align*}
+\textbf{construct}\ c\ x\ \quad s\ \quad \textbf{destruct}\ x
+\end{align*}
+
+are as follows:
+
+\begin{enumerate}
+\item Memory for an object of class $c$ is allocated. All fields are automatically zero-initialized by virtue of residing in already zero-cleared memory.
+\item The block statement $s$ is executed, with the name $x$ representing a reference to the newly allocated object.
+\item The reference $x$ may be modified by swapping its value with that of other references of the same type, but it should be restored to its original value within the statement block $s$, otherwise the meaning of the object block is undefined.
+\item Any state that is accumulated within the object should be cleared or uncomputed before the end of the statement is reached, otherwise the meaning of the object block is undefined.
+\item The zero-cleared memory is reclaimed by the system.
+\end{enumerate}
+
+The statement pair consisting of
+
+\begin{align*}
+\textbf{new}\ c\ x\ \quad s\ \quad \textbf{delete}\ c\ x\
+\end{align*}
+
+could be considered an \textit{fluid} block, meaning we can have overlapping blocks. We can as such initialize an object $x$ of class $c$ and an object $y$ of class $d$ and destroy $x$ before we destroy $y$, a feature that was not possible in \textsc{Roopl}. The mechanisms of the \textbf{new} statement are as follows
+
+\begin{enumerate}
+\item Memory for an object of class $c$ is allocated. All fields are automatically zero-initialized by virtue of residing in already zero-cleared memory.
+\item The block statement $s$ is executed, with the name $x$ representing a reference to the newly allocated object.
+\end{enumerate}
+
+and the mechanisms of the \textbf{delete} statement are as follow
+
+\begin{enumerate}
+\item The reference $x$ may be modified by swapping its value with that of other references of the same type, but it should be restored to its original value before a \textbf{delete} statement is called on $x$, otherwise the meaning of the object deletion is undefined.
+\item Any state that is accumulated within the object should be cleared or uncomputed before the \textbf{delete} statement is executed, otherwise the meaning of the object block is undefined.
+\item The zero-cleared memory is reclaimed by the system.
+\end{enumerate}
+
+The mechanisms of the \textbf{new} and \textbf{delete} statements are, essentially, a split of the mechanisms of the \textbf{construct}/\textbf{destruct} blocks into two separate statements. As with \textsc{Roopl}, fields must be zero-cleared after object deletion, otherwise it is impossible for the system to reclaim the memory reversibly. This is the responsibility of the of the programmer to maintain this, and to ensure that objects are indeed deleted in the first place. A \textbf{new} statement without a corresponding \textbf{delete} statement targeting the same object further ahead in the program is undefined.
+
+
+\section{Vector Model}
+\label{sec:vector-model}
+Besides asymmetric object lifetimes, \rooplpp also introduces reversible, dynamic arrays in form of the \textbf{vector} type. While \textsc{Roopl} on featured integers and custom data types in form of classes, one of its main inspirations, \textsc{Janus}, implemented static, reversible arrays~\cite{rg:janus}.
+
+While \textsc{Roopl} by design did not include any data storage language constructs, as they are not especially noteworthy nor interesting from an OOP perspective, they do generally improve the expressiveness of the language. For \rooplpp these were decided to be part of the core language as array, especially multi-dimensional, dynamic arrays become interesting from a memory management perspective.
+
+\rooplpp's dynamic arrays expand upon the array model from \textsc{Janus}. Arrays are index by integers, starting from 0. In \textsc{Janus}, only integer arrays were allowed and arrays were one-dimensional. In \rooplpp arrays of any type can be defined, meaning either integer arrays, custom data types in form of class array or from other array types and have as such potential to be multi-dimensional. 
+
+Array element accessing is permitted using the bracket notation expression presented in \textsc{Janus}. Accessing an out-of-bounds index is undefined.
+Vector instantiation and element assignments, aliasing and circularity is described in detail in the following section.
+
+Vectors can contain elements of different classes if, say class $A$ and $B$ both inherit from some class $C$ and vector $x$ is a $\textbf{vector}\texttt{<}C\texttt{>}$ type. In this case, the array can hold elements of type $A$, $B$, and $C$.
 
 \section{Vector Instantiation}
-\texttt{Idea: Implement dynamic array (named vector).}\\
-\texttt{Idea: Instantiate with alloc call.}\\
-\texttt{Idea: Inverse operation: dealloc}\\
+\label{sec:vector-instatiation}
+Vector instantiation uses the \textbf{new} and \textbf{delete} keywords to reversibly construct and destruct vector types. In irreversible OOP languages,  instantiation and insertion/deletion of elements are usually executed in the the following steps for empty, dynamic arrays
 
+\begin{enumerate}
+\item A small amount of memory is reserved for the overhead of an array
+\item Once the array is non-empty, a pointer for the overhead place in memory points to the beginning of the data.
+\item As elements are inserted, the data memory is expanded to fit new elements, if we need indexes higher than the current size of the array.
+\item As the highest indexed elements are deleted, the data memory is collapsed to reduce the overall size of the array object.
+\end{enumerate}
+
+Consider the statement
+\begin{align*}
+\textbf{new}\ \textbf{vector}\texttt{<}\textbf{int}\texttt{>}\ x
+\end{align*} 
+
+in which we reserve memory for an \textbf{int} \textbf{vector} with the mechanics following mechanics
+
+\begin{enumerate}
+\item A small amount of memory is reserved for the overhead of an array.
+\item On the first element insert, e.g. $x[n]\ \texttt{+=}\ 1$, a block of memory suitable for storing $|[0, 1, ..., n]|$ integer values are reserved, with the newly updated value of $x[n]$ inserted and uninitialized cells zero-cleared, and a pointer from the overhead to the data is linked.
+\item If a value is inserted at, say, $x[n+1]$, a similar action is dispatched, but deallocating the old block after allocating the new one first.
+\item When the highest indexed cell element is zero-cleared, a allocation action is dispatched for obtaining a smaller block for our array data, while the old, larger block is freed.
+\end{enumerate}
+
+In \rooplpp, we only allow instantiation of empty, dynamic arrays. As shown above, Integer elements are assigned using one of the reversible assignment operators. For class \textbf{vector}s and \textbf{vector} \textbf{vectors}, we assign cell elements a little differently. We make use of the \textbf{new} and \textbf{delete} statements, but instead of specifying which variable should hold the newly created/deleted object or array, we specify which array cell it should be stored in. The mechanisms of these assignments are equal to the example for \textbf{int} \textbf{vector}s; we grow the array on assignments to higher-than-current-max indexes and we shrink on zero-clearing of highest-indexed element.
+
+\texttt{TODO: Code example of assigning $\textbf{new}\ c\ x[3]$ to empty array}
+
+As with \rooplpp objects instantiated outside of \textbf{construct}/\textbf{destruct} blocks, \textbf{vector}s must be deleted before program termination to reversibly allow the system to reclaim the memory. Before deletion of a vector, all its elements must be zero-cleared such that the array is shrunk to the empty array.
+
+Consider the statement
+\begin{align*}
+\textbf{delete}\ \textbf{vector}\texttt{<}\textbf{int}\texttt{>}\ x
+\end{align*}
+
+with the following mechanics
+
+\begin{enumerate}
+\item The reference $x$ may be modified by swapping, assigning cell element values and zero-clearing cell element values, but must be restored to a 0-element sized array before the \textbf{delete} statement. Otherwise, the meaning of the statement is undefined.
+\item If the reference $x$ is the empty array upon the \textbf{delete} statement execution, the zero-cleared memory is reclaimed by the system.
+\end{enumerate}
+
+With reversible, dynamic arrays of varying types and dimensionality, we must be extremely careful when updating and assigning values, to ensure we maintain reversibility and avoid irreversible statements. Therefore, when assigning or updating integer elements with one of the reversible assignment operators, we prohibit the cell value from being reference on the right hand side, meaning the following statement is prohibited
+\begin{align*}
+x[5] \texttt{+=}\ x[5] + 1 
+\end{align*}
+
+However, we do allow other, initialized (non-zero-cleared array elements) to be referenced in the right hand side of the statement.
+
+\section{Local blocks}
+%TODO: Alias for construct/destruct block for objects
+
+\section{Type System}
+\label{sec:type-system}
+
+\section{Language Semantics}
+\label{sec:language-semantics}
+
+\section{Program Inversion}
+\label{sec:program-inversion}
+
+\section{Computational Strength}
+\label{sec:computational-strength}

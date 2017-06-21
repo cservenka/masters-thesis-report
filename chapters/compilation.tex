@@ -152,7 +152,6 @@ A huge disadvantage to using fixed-sized memory blocks is the external fragmenta
 
 \texttt{TODO: Present various layout using fixed-size blocks - Trees, continuous?}
 
-
 \subsubsection{Buddy Memory}
 In this approach we have all blocks be variable-size of the power-of-two. Having different block sizes and methods for splitting a larger block into smaller ones reduces fragmentation. In terms of implementation, reversible splitting and merging might be possible as we're always doubling the size when merging and halving when splitting, thus making the operations logically inverse of each other~\cite{dk:buddyalloc}.
 
