@@ -3,7 +3,7 @@ procedure next_power_of_two(int pow_2_n)
     pow_2_n += cur_pow
     delocal int cur_pow = pow_2_n / 2
 
-procedure allocate(int object_size, int free_lists[])
+procedure allocate(int object_size, int free_lists[], stack block_history)
     local int pow_2_n = object_size
 
     // Find suitable power of two with free block
@@ -11,9 +11,11 @@ procedure allocate(int object_size, int free_lists[])
         call next_power_of_two(pow_2_n)
     until (2 * pow_2_n) > object_size && free_lists[pow_2_n] != 0
 
+    local int found_block = pow_2_n
+    push(found_block, block_history)
+    delocal int found_block = 0
 
-    local int half_of_found_power_of_two = pow_2_n / 2
-    from pow_2_n > half_of_found_power_of_two do
+    from pow_2_n > top(block_history) / 2 do
         // Allocate block
         free_lists[pow_2_n] -= 1
     loop 
@@ -22,15 +24,15 @@ procedure allocate(int object_size, int free_lists[])
         free_lists[pow_2_n] += 2
     until pow_2_n = object_size
 
-    delocal int half_of_found_power_of_two = half_of_found_power_of_two
     delocal int pow_2_n = object_size
 
 
 procedure main()
     int object_size
-    int free_lists[9]
+    int free_lists[33]
+    stack block_history
    
-   object_size += 2
-   free_lists[8] += 1
+   object_size += 8
+   free_lists[16] += 1
 
-    call allocate(object_size, free_lists)
+    call allocate(object_size, free_lists, block_history)
