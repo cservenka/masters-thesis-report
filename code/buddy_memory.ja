@@ -1,4 +1,4 @@
-    procedure double(int target)
+procedure double(int target)
     local int current = target
     target += current
     delocal int current = target / 2
