@@ -1,60 +1,108 @@
-procedure next_power_of_two(int pow_2_n)
-    local int cur_pow = pow_2_n
-    pow_2_n += cur_pow
-    delocal int cur_pow = pow_2_n / 2
+    procedure double(int target)
+    local int current = target
+    target += current
+    delocal int current = target / 2
 
-procedure allocate(int object_size, int free_lists[])
-    local int pow_2_n = 2
-    
 
-    // Find power of two big enough for our object
-    from pow_2_n = 2 loop
-        call next_power_of_two(pow_2_n)
-    until (2 * pow_2_n) > object_size && free_lists[pow_2_n] != 0
+procedure malloc(int p, int object_size, int free_lists[], int next_block[])
+    local int counter = 0
+    local int csize = 2
+    call malloc1(p, object_size, free_lists, counter, csize, next_block)
+    delocal int csize = 2
+    delocal int counter = 0
 
-    //local int before_alloc = 0
 
-    if (pow_2_n = object_size) && free_lists[pow_2_n] != 0 then
-        //before_alloc += free_lists[pow_2_n]
-        // Allocate
-        free_lists[pow_2_n] -= 1
-
+procedure malloc1(int p, int object_size, int free_lists[], int counter, int csize, int next_block[])
+    //printf("Malloc call with\n\tp's address %d \n\tcounter: %d \n\tcsize: %d\n", p, counter, csize)
+    if (csize < object_size) then
+        counter += 1
+        call double(csize)
+        call malloc1(p, object_size, free_lists, counter, csize, next_block) 
+        uncall double(csize)
+        counter -= 1
     else
-        // Determine if we need to split blocks
-        from (pow_2_n / 2) >= object_size do
-            free_lists[pow_2_n / 2] += 2
-            free_lists[pow_2_n] -= 1
-            uncall next_power_of_two(pow_2_n)
-        until ((pow_2_n / 2) < object_size) && (free_lists[pow_2_n] > 0)
+        if free_lists[counter] != 0 then
+            p += free_lists[counter]
+            free_lists[counter] -= p
 
-            // Allocation
-        free_lists[pow_2_n] -= 1
-
-        call next_power_of_two(pow_2_n)
-    fi pow_2_n = object_size
-    
-    from pow_2_n != 1 do
-        show(pow_2_n)
-        uncall next_power_of_two(pow_2_n)
-        show(pow_2_n)
-    until pow_2_n = 1
-
-    delocal int pow_2_n = 1
+            //printf("Found free block of size %d at address %d\n", csize, p)
+        
+            // Swap head of free list with p's next block
+            free_lists[counter] ^= next_block[p]
+            next_block[p] ^= free_lists[counter]
+            free_lists[counter] ^= next_block[p]
+        else
+            counter += 1
+            call double(csize)
+            call malloc1(p, object_size, free_lists, counter, csize, next_block)
+            //printf("Splitting block of size %d!\n", csize)
+            uncall double(csize)
+            counter -= 1
+            free_lists[counter] += p
+            p += csize
+            
+        //fi p - csize != free_lists[counter]
+        fi free_lists[counter] = 0 || p - csize != free_lists[counter]
+    fi csize < object_size
+            
 
 procedure main()
-    int object_size
-    int free_lists[9]
+    int p1
+    int p2
+    int p3
+    int p4
+    int object_size2
+    int object_size4
+    int object_size8
+    int object_size7
 
-    // Works
-    object_size += 4
-    free_lists[8] += 1
+    // free_lists[i] contains the address of the first free block of size 2^(i+1)
+    int free_lists[4]
 
-    // Works
-    //object_size += 8
-    //free_lists[8] += 1
+    // Since Janus only allows int lists for the list of free list implementation
+    // we hold next blocks in this list. next_block[i] is the address of of the next block
+    // to the block at address i
+    int next_block[21]
 
-    // Broken
-    //object_size += 2
-    //free_lists[2] += 1    
+    object_size2 += 2
+    object_size4 += 4
+    object_size7 += 7
+    object_size8 += 8
 
-    call allocate(object_size, free_lists)
+    // Set one block of size 2^4 at address +4
+    free_lists[3] += 4
+
+    // Set next block of address at +4 at +20
+    next_block[4] += 20
+
+    // Allocate object of size 2.
+    // We'll split 3 times, thus ending with:
+    //   1 block of size 2^3 at address +4
+    //   1 block of size 2^2 at address +12
+    //   1 block of size 2^1 at address +16
+    //  and our object is allocated at +18
+    call malloc(p1, object_size2, free_lists, next_block)
+    printf("Object of size %d allocated at address +%d", object_size2, p1)
+
+    // Allocate 3 objects, using our remaing free blocks
+    call malloc(p2, object_size7, free_lists, next_block)
+    printf("Object of size %d allocated at address +%d", object_size7, p2)
+
+    call malloc(p3, object_size4, free_lists, next_block)
+    printf("Object of size %d allocated at address +%d", object_size4, p3)
+
+    call malloc(p4, object_size2, free_lists, next_block)
+    printf("Object of size %d allocated at address +%d", object_size2, p4)
+
+    // Deallocate
+    printf("Freeing object of size %d at address +%d", object_size2, p4)
+    uncall malloc(p4, object_size2, free_lists, next_block)
+
+    printf("Freeing object of size %d at address +%d", object_size4, p3)
+    uncall malloc(p3, object_size4, free_lists, next_block)
+    
+    printf("Freeing object of size %d at address +%d", object_size7, p2)
+    uncall malloc(p2, object_size7, free_lists, next_block)
+
+    printf("Freeing object of size %d at address +%d", object_size2, p1)
+    uncall malloc(p1, object_size2, free_lists, next_block)
