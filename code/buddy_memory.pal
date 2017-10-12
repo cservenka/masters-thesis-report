@@ -1,0 +1,62 @@
+l_m_top:		BRA l_m_bot                ;; 
+				POP registerRO registerSP 	;; Pop return offset from stack
+
+l_m_entry:		SWAPBR registerRO  			;; Malloc1 entry/exit point
+				NEG registerRO            	;; Restore return offset
+				PUSH registerRO registerSP	;; Push return offset to stack
+				...							;; r_fl <- Get address of free_list[counter]
+				...							;; r_block <- Get value of free_list[counter]
+				...                         ;; Set r_e1 <- c_size < obj_size
+				XOR rt r_e1_outer           ;; r_t = r_e1_o 
+				...				            ;; Clear r_e1_o
+
+l_o_test:		BEQ rt registerZero l_o_test_f			;; if csize < obj_size
+				XORI rt 1          			;; S1_outer start
+				ADDI r_counter 1   			;; counter++
+				RL r_csize 1       			;; call double(csize)
+				BRA l_m_entry				;; call malloc1()
+				RR r_csize 1        		;; uncall double(csize)
+				XORI rt 1           		;; S1_outer end
+
+l_o_assert_t:	BRA l_o_assert
+l_o_test_f:		BRA l_o_test        		;; S2_outer start
+				...							;; Set r_e1_i <- free_list[counter] != 0
+				XOR rt2 r_e1_inner         	;; Set rt2 <- r_e1_i         
+				...							;; Clear r_e1_i
+
+l_i_test:		BEQ rt2 registerZero l_i_test_f			;; if free_list[counter] != 0 (value)
+				XORI rt2 1 		      		;; S1_inner start
+				ADD r_p r_block				;; Set address of p to said block
+				SUB r_block r_p				;; Clear r_block
+				EXCH r_tmp r_p				;; Load address of next block
+				EXCH r_tmp r_fl     		;; Set address of next block as head of current free list
+				XORI r_tmp vtable			;; Store vtable at address of p 
+				EXCH r_tmp r_p				;; Store address of vtable in newly alloc'd obj
+				XORI rt2 1         			;; S1_inner end
+
+l_i_assert_t:	BRA l_i_assert
+l_i_test_f:		BRA l_i_test
+				ADDI r_counter 1   			;; S2_inner start
+				RL r_csize 1       			;; call double(csize)
+				....						;; TODO: INVERT r_fl && r_block
+				BRA l_m_entry       		;; call malloc1()			
+				RR r_csize 1       			;; uncall double(csize)
+				SUBI r_counter 1    		;; counter -= 1
+				XOR r_tmp r_p       		;; Copy current address of p
+				EXCH r_tmp r_fl     		;; Store address in current free list
+				ADD r_p r_csize				;; Set p to other half of the block we're splitting
+
+l_i_assert:		BNE rt2 registerZero l_i_assert_t
+				XOR r_tmp r_p				;; Set r_tmp <- r
+				SUB r_tmp r_csize   		;; Set r_tmp <- p - csize
+				...							;; set r_i_2 <- p - csize != free_list[counter]
+				XOR rt2 r_e2_i      		;; Set rt2 -> r_i_2
+				...				            ;; Clear r_i_2
+				ADD r_tmp r_csize   
+				XOR r_tmp r_p       		;; S2_outer end 
+
+l_o_assert:		BNE rt registerZero l_o_assert_t         
+				...					        ;; Set r_e1 -> c_size < obj_size
+				XOR rt r_e2_outer        	;; r_t = r_e1_o 
+				...				            ;; Clear r_e1_o
+l_m_bot:		BRA l_m_top         ;; Go to top

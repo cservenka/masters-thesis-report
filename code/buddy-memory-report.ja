@@ -1,0 +1,40 @@
+procedure double(int target)
+    local int current = target
+    target += current
+    delocal int current = target / 2
+
+
+procedure malloc(int p, int object_size, int free_lists[], int next_block[])
+    local int counter = 0
+    local int csize = 2
+    call malloc1(p, object_size, free_lists, counter, csize, next_block)
+    delocal int csize = 2
+    delocal int counter = 0
+
+
+procedure malloc1(int p, int object_size, int free_lists[], int counter, int csize, int next_block[])
+    if (csize < object_size) then
+        counter += 1
+        call double(csize)
+        call malloc1(p, object_size, free_lists, counter, csize, next_block) 
+        uncall double(csize)
+        counter -= 1
+    else
+        if free_lists[counter] != 0 then
+            p += free_lists[counter]
+            free_lists[counter] -= p
+
+            // Swap head of free list with p's next block
+            free_lists[counter] ^= next_block[p]
+            next_block[p] ^= free_lists[counter]
+            free_lists[counter] ^= next_block[p]
+        else
+            counter += 1
+            call double(csize)
+            call malloc1(p, object_size, free_lists, counter, csize, next_block)
+            uncall double(csize)
+            counter -= 1
+            free_lists[counter] += p
+            p += csize
+        fi free_lists[counter] = 0 || p - csize != free_lists[counter]
+    fi csize < object_size   

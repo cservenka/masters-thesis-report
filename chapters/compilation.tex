@@ -1,11 +1,11 @@
 \chapter{Compilation}
 \label{chp:compilation}
 % TODO: PISA cite
-The following chapter will present the design for the reversible heap manager and the translation schemes used in the process of translating \rooplpp to the reversible low-level machine language \textsc{PISA}.
+The following chapter will present the considerations and designs for the reversible heap manager and the schemes used in the process of translating \rooplpp to the reversible low-level machine language \textsc{PISA}.
 
 \section{Dynamic Memory Management}
 \label{sec:dynamic-memory-management}
-Native support of complex data structures is not a trivial matter to implement in a reversible computing environment. Variable-sized records and frames need to be stored efficiently in a structured heap, while avoiding garbage build-up to maintain reversibility. A reversible heap manager layout has been proposed for a simplified version of the reversible functional language \textsc{RFun} and later expanded to allow references to avoid deep copying values~\cite{ha:heap, ty:rfun, tm:refcounting}.
+Native support of complex data structures is a non-trivial matter to implement in a reversible computing environment. Variable-sized records and frames need to be stored efficiently in a structured heap, while avoiding garbage build-up to maintain reversibility. A reversible heap manager layout has been proposed for a simplified version of the reversible functional language \textsc{RFun} and later expanded to allow references to avoid deep copying values~\cite{ha:heap, ty:rfun, tm:refcounting}.
 
 The following section presents a discussion of various heap manager layouts along with their advantages and disadvantages in terms of implementation difficulty, garbage build-up and the OOP domain. 
 
@@ -16,6 +16,7 @@ An important matter to consider when designing a heap layout for dynamic memory 
 We distinguish different types of fragmentation as internal or external fragmentation.
 
 \subsubsection{Internal Fragmentation}
+% TODO: Revise
 Internal fragmentation occurs in the memory heap when part of an allocated memory block is unused. This type of fragmentation can arise from a number of different scenarios, but mostly it originates from \textit{over-allocating}. 
 
 An example of \textit{over-allocating} would be a scenario where we are allocating memory for an object of size $m$ onto a simple, fixed-sized block heap, where the fixed block size is $n$ and $m \neq n$. If $n > m$, internal fragmentation would occur of size $n-m$ for every object of size $m$ allocated in said heap. If $n < m$, numerous blocks would be required for allocation to fit our object. In this case the internal fragmentation would be of size $m + n - (m + n) \mod n$ per allocated object of size $m$. 
@@ -32,6 +33,7 @@ Figure~\ref{fig:internal-frag-example} visualizes the examples of internal fragm
 Intuitively, internal fragmentation can be prevented by ensuring that the size of the block(s) being used for allocating space for an object of size $m$ either match or sums to this exact size.
 
 \subsubsection{External Fragmentation}
+% TODO: Revise
 External fragmentation materializes in the memory heap when a freed block becomes partly or completely unusable for future allocation if it, say, is surrounded by allocated blocks but the size of the freed block is too small to contain any object on its own.
 
 This type of fragmentation is generally a more substantial cause of problems than internal fragmentation, as the size of external fragmentation blocks usually are larger than the ones created from internal fragmentation, depending on the heap implementation (In a layout using variable-sized blocks of, say, size $2^n$, the internal fragment size becomes considerable for large $n$s). 
@@ -45,37 +47,18 @@ Non-allocatable external fragments become a problem when there it is impossible 
 \label{fig:external-frag-example}
 \end{figure}
 
-\subsubsection{Consequences of Fragmentation in the Reversible Setting}
-Fragmentation management and handling is particularly interesting within in the reversible setting. As reversible programmers we strive to maintain an \textit{exact} (or equivalent) computational state during program execution, such that we at any time can reverse the computational direction and return the a previous state. If external memory fragmentation is left unchecked in a reversible dynamic memory allocation implementation, we can easily run into the following scenario
-
-\begin{itemize}
-\item Object $A$, $B$ and $C$ are allocated on the heap in that order. The size of $A$ is one block of memory, $B$' size is two blocks and $C$'s size is three blocks.
-\item $B$ is freed, leaving external fragmentation of two blocks in between $A$ and $C$.
-\item $C$ is freed, thus leaving a total of five blocks of freed memory after $A$.
-\item The computational direction is reverted and we now allocate $C$ again, which is allocated in the first three blocks next to $A$.
-\item $B$ is then allocated again, thus giving us the order $A-C-B$ instead of the original $A-B-C$ order.
-\end{itemize}  
-
-Figure~\ref{fig:external-frag-comp-state-conseq} shows this exact scenario.
-
-\begin{figure}[ht]
-\centering
-\texttt{TODO}
-\caption{Potential state-changing side effect of external fragmentation in the reversible setting}
-\label{fig:external-frag-comp-state-conseq}
-\end{figure}
-
-Furthermore, it is in our interest to limit external fragmentation as removing it during program execution would require a garbage collector, which is a non-trivial matter to implement. \citeauthor{tm:garbage} presented a heap manager for reversible functional languages using reference counts and hashing to achieve garbage collection in \cite{tm:garbage}, but it is not immediately clear how this garbage collection could translate to an object-oriented language.
 
 \subsection{Memory Garbage}
 \label{subsec-memory-garbage}
-Traditionally, freed memory blocks are simply re-added to the free-list during deallocation and no modification of the actual data stored in the block is done. In the reversible setting we must return the memory block to the original state the block was in before the allocation occurred (e.g. zero-cleared registers), to uphold the time-invertible and two-directional computational model. 
+In the reversible setting it should be our goal to return the memory to its original state after program termination.
 
-Thus, in the reversible setting it should be our goal to also return the memory to its original state after program termination. With heap allocation, we will need one or more free-lists to keep track of free blocks during program execution, which must be stored in memory, besides the actual heap representation. These free-lists can essentially be considered garbage and as such, they must also be returned to their original state after execution. Furthermore, the if the heap grows during execution, it should be returned to its original size.
+Traditionally, in non-reversible programming languages, freed memory blocks are simply re-added to the free-list during deallocation and no modification of the actual data stored in the block is done. In the reversible setting we must return the memory block to its original state after the block has been freed (e.g. zero-cleared), to uphold the time-invertible and two-directional computational model. 
 
-Returning the free-list(s) to their original states is a non-trivial matter, depending on the heap layout. \citeauthor{ha:heap} introduced heap allocation and deallocation, but without restoring the free-list to its original state in~\cite{ha:heap}. The argument for not restoring the free-list is that it can be considered harmless garbage in the sense that the free-list left after termination is equivalent, as it contains the same blocks, but linked in a different order, depending on the allocation and deallocation order during program execution.
+In heap allocation, we maintain one or more free-lists to keep track of free blocks during program execution, which are stored in memory, besides the heap representation itself. These free-lists can essentially be considered garbage and as such, they must also be returned to their original state after execution. Furthermore, the if the heap grows during execution, it should be returned to its original size.
 
-This intuitively leads to the question of garbage classification. In the reversible setting all functions are injective. Thus, given some $input_f$, the injective function $f$ produces some $output_f$ and some $garbage_f$ (e.g. storing data in the heap, so the free list changes, the heap grows, etc.). Its inverse function $f^{-1}$ must thus take $f$'s $output_f$ and $garbage_f$ as $input_{f^{-1}}$ to produce its output $output_{f^{-1}}$ which is $f$'s $input_f$. However, in the context of reversible heaps, we must consider all free-lists as of "equivalent garbage class" and thus freely substitutable with each other, as injective functions still can drastically change the block layout, free-list order, etc. during its execution in either direction. Figure~\ref{fig:equivalent-free-lists} shows how any free-list can be passed between a function $f$ and its inverse $f^{-1}$. 
+Returning the free-list(s) to their original states is a non-trivial matter, which is highly dependent on the heap layout and free-list design.~\citeauthor{ha:heap} introduced a dynamic memory manager which allowed heap allocation and deallocation, but without restoring the free-list to its original state in~\cite{ha:heap}.~\citeauthor{ha:heap} argue that an unrestored free-list is to be considered harmless garbage in the sense that the free-list left after termination is equivalent to a restored free-list, as it contains the same blocks, but linked in a different order, depending on the order of allocation and deallocation operations performed during program execution.
+
+This intuitively leads to the question of garbage classification. In the reversible setting all functions are injective. Thus, given some $input_f$, the injective function $f$ produces some $output_f$ and some $garbage_f$ (e.g. garbage in form of storing data in the heap, so the free list changes, the heap grows, etc.). Its inverse function $f^{-1}$ must thus take $f$'s $output_f$ and $garbage_f$ as $input_{f^{-1}}$ to produce its output $output_{f^{-1}}$ which is $f$'s $input_f$. However, in the context of reversible heaps, we must consider all free-lists as of "equivalent garbage class" and thus freely substitutable with each other, as injective functions still can drastically change the block layout, free-list order, etc. during its execution in either direction. Figure~\ref{fig:equivalent-free-lists} shows how any free-list can be passed between a function $f$ and its inverse $f^{-1}$.
 
 \begin{figure}[ht]
 \centering
@@ -89,18 +72,17 @@ This intuitively leads to the question of garbage classification. In the reversi
 \label{subsec-heap-manager-layout}
 Heap managers can be implemented in numerous ways. Different layouts yield advantages when allocating memory, finding a free block or when collecting garbage. As our goal is to construct a garbage-free heap manager, our finalized design should emphasize and reflect this objective in particular. Furthermore, we should attempt to allocate and deallocate memory as efficiently as possible, as merging and splitting of blocks is a non-trivial problem in a reversible setting.
 
-For the sake of simplicity, we will not consider the the issue of retrieving memory pages reversibly. A reversible operating system is a long-term dream of the reversible programmer and as reversible programming language designers, we assume that \rooplpp will be running in a  environment, in which the operating system will be supplying memory pages and their mappings. As such, the following heap memory designs reflect this preliminary assumption, that we always can query the operating system for more memory. 
+For the sake of simplicity, we will not consider the the issue of retrieving memory pages reversibly. A reversible operating system is a long-term dream of the reversible programmer and as reversible programming language designers, we assume that \rooplpp will be running in an environment, in which the operating system will be supplying memory pages and their mappings. As such, the following heap memory designs reflect this preliminary assumption, that we always can query the operating system for more memory. 
 
 Historically, most object-oriented programming languages utilize a dynamic memory manager during program execution. In older, lower-level languages such as \textsc{C}, memory allocation had to be stated explicitly and with the requested size through the \texttt{malloc} statement and deallocated using the \texttt{free} statement. Modern languages, such as \textsc{C\texttt{++}}, \textsc{Java} and \textsc{Python}, \textit{automagically} allocates and frees space for objects and variable-sized arrays by utilizing their dynamic memory manager to dispatch \texttt{malloc}- and \texttt{free}-like operations to the operating system and managing the obtained memory blocks in private heap(s)~\cite{wh:cpp_memory, bv:jvm, py:memory}. The heap layout of these managers vary from language to language and compiler to compiler.
 
 % Reversible Heaps
 Previous work on reversible heap manipulation has been done for reversible functional languages in~\cite{ha:heap, jsk:translation, tm:garbage}.
 
-% TODO: Something about Cons/Nil heap
-\texttt{TODO: Something about Cons/Nil heap from~\cite{ha:heap}}
+% TODO: Something about Cons/Nil heap from ~\cite{ha:heap}
 
-% TODO: Modifications to said 
-\texttt{TODO: Something about ref count extension~\cite{tm:refcounting}}
+% TODO: Something about ref count extension~\cite{tm:refcounting}
+
 
 For the sake of simplicity in the following heap layout pseudo-code outlines, we assume access to the following subroutines (with parameter passing), inspired by the body of \citeauthor{ha:heap}'s \texttt{get\_free} subroutine.
 
@@ -112,112 +94,62 @@ procedure allocate_block($r_{cell}$, $r_{flp}$)
 	SWAP $r_{cell}$ $r_{flp}$
 \end{lstlisting}
 
-In order to grow the heap, we assume access to the subroutine \texttt{grow\_heap} which, given the register $r_{hp}$ containing the heap pointer and a number $n$ specifying how much the heap should grow, increments the heap pointer by $n$. Listing~\ref{lst:grow-heap-sub} shows the subroutine.
+% In order to grow the heap, we assume access to the subroutine \texttt{grow\_heap} which, given the register $r_{hp}$ containing the heap pointer and a number $n$ specifying how much the heap should grow, increments the heap pointer by $n$. Listing~\ref{lst:grow-heap-sub} shows the subroutine.
 
-\begin{lstlisting}[caption={\texttt{grow\_heap} subroutine}, language=janus, style=basic,label={lst:grow-heap-sub}]
-procedure grow_heap($r_{hp}$, $n$)
-	ADDI $r_{hp}$ $n$
-\end{lstlisting}
+% \begin{lstlisting}[caption={\texttt{grow\_heap} subroutine}, language=janus, style=basic,label={lst:grow-heap-sub}]
+% procedure grow_heap($r_{hp}$, $n$)
+% 	ADDI $r_{hp}$ $n$
+% \end{lstlisting}
 
-Finally, in order to move the heap, we assume access to the subroutine \texttt{move\_heap} which, given the register $r_{hbp}$ containing a pointer to the \textit{bottom of a heap}\footnote{assuming it exists} and the register $r_{hp}$ containing the heap pointer and a number $n$ representing the amount the heap should be moved, iterates every memory address in the heap, starting at the top, and moves the memory block $n$ spaces. This is down using a top-down approach to avoid overwriting data. 
+% Finally, in order to move the heap, we assume access to the subroutine \texttt{move\_heap} which, given the register $r_{hbp}$ containing a pointer to the \textit{bottom of a heap}\footnote{assuming it exists} and the register $r_{hp}$ containing the heap pointer and a number $n$ representing the amount the heap should be moved, iterates every memory address in the heap, starting at the top, and moves the memory block $n$ spaces. This is down using a top-down approach to avoid overwriting data. 
 
-\begin{lstlisting}[caption={\texttt{move\_heap} subroutine}, language=janus, style=basic,label={lst:move-heap-sub}]
-procedure move_heap($r_{hbp}$, $r_{hp}$, $n$, $m$)
-	from  i = $r_{hp}$
-    do
-        SWAP $r_i$ $r_{i+n}$
-        i -= 1 				; 1 word (?)
-    until i = r_{hbp} - n
-\end{lstlisting}
+% \begin{lstlisting}[caption={\texttt{move\_heap} subroutine}, language=janus, style=basic,label={lst:move-heap-sub}]
+% procedure move_heap($r_{hbp}$, $r_{hp}$, $n$, $m$)
+% 	from  i = $r_{hp}$
+%     do
+%         SWAP $r_i$ $r_{i+n}$
+%         i -= 1 				; 1 word (?)
+%     until i = r_{hbp} - n
+% \end{lstlisting}
 
 
 \subsubsection{Memory Pools}
-A simple layout for a heap manager would allocate memory using fixed-size blocks regardless of the actual size of the record, which is known as memory pooling~\cite{bk:memorypool}. The advantage of a heap layout following this approach would lie in the simplicity of its implementation, as a simple linked list of identical-sized free cells would need to be maintained. If we assume a our fixed-sized blocks are of size $n$ machine words, the following \texttt{get\_free} subroutine allocates and deallocates memory cells for a record of size $m$.
+Perhaps the simplest layout for a heap manager would be memory pooling. In this design, memory is allocated from "pools" of fixed-size blocks regardless of the actual size of the record. The advantages of a heap layout following this approach would lie in the simplicity of its implementation, as a simple linked list of identical-sized free cells would need to be maintained. 
+
+If we assume a our fixed-sized blocks are of size $n$ machine words, the following \texttt{get\_free} subroutine allocates and deallocates memory cells for a record of size $m$.
 
 \begin{lstlisting}[mathescape=true, caption={Allocating and deallocating records of size $m$ using block of a fixed size $n$. Code modified from~\cite{ha:heap}}, language=janus, style=basic,label={lst:memory-pool}]
-if ($r_{flp}$ == 0) 
+// Check if we have enough free blocks to hold the object 
+if (sizeof $r_{flp}$ >= m + (n - (m % n))) 
 then
-	XOR $r_{cell}$ $r_{hp}$
-	call grow_heap($r_{hp}$, $m + n - (m + n)  \% n$)
-else
-	call allocate_block($r_{cell}$, $r_{flp}$)
-fi ($r_{flp}$ == 0) && ($r_{cell}$ == $r_{hp}$ - ($m + n - (m + n)  \% n$))
+    call allocate_block($r_{cell}$, $r_{flp}$)
+    // Code for clearing m + (n - (m % n)) - n next blocks 
+else 
+	// Code for growing heap
+fi ($r_{cell}$ != 0)
 \end{lstlisting}
 
-Listing~\ref{lst:memory-pool} shows the modified \texttt{get\_free} subroutine for allocating and deallocating memory blocks in a memory pool layout. If the free-list is empty, the block which the heap pointer is currently pointing at is allocated and the heap is grown by $m + n - (m + n)  \% n$ blocks (rounding up to nearest number of blocks of size $n$ when allocating object of size $m$). If the free-list is non-empty, the \texttt{allocate\_block} subroutine is called.  
+Listing~\ref{lst:memory-pool} shows the modified \texttt{get\_free} subroutine for allocating and deallocating memory blocks in a memory pool layout. If the free-list has enough blocks available to hold the record of size $m$, the first $m + (n - (m \% n))$ ($m$ rounded up to nearest number dividable by $n$) blocks will be removed from the free list. If the free list is empty, the heap needs to be expended through some subroutine (Code not provided). The rounding of $m$ to nearest number dividable by $n$ could be computed at compile time.
 
 A huge disadvantage to using fixed-sized memory blocks is the external fragmentation that occurs when freeing blocks, if the program's objects are not of the same size. When freeing a number of blocks in the middle of a section of allocated blocks, external fragmentation occurs, which becomes a problem if we need to allocate space for a large record but only have small sections of fixed-blocks available, scattered throughout the heap. A garbage collector could solve this issue, but is a non-trivial matter to implement.
 
-\texttt{TODO: Graphics}
+% TODO: Graphics
 
-\texttt{TODO: Present various layout using fixed-size blocks - Trees, continuous?}
+% TODO: Present various layout using fixed-size blocks - Trees, continuous?
 
-\subsubsection{Buddy Memory}
-In this approach we have all blocks be variable-size of the power-of-two. Having different block sizes and methods for splitting a larger block into smaller ones reduces fragmentation. In terms of implementation, reversible splitting and merging might be possible as we're always doubling the size when merging and halving when splitting, thus making the operations logically inverse of each other~\cite{dk:buddyalloc}.
+\subsubsection{One Heap Per Record Type}
+This layout uses multiple heaps, one per record type in the program. During compilation, classes would be analyzed and a heap for each class would be created. 
 
-We can reversibly and recursively split blocks using subroutine \texttt{split\_block}. The subroutine takes two registers $r_{cell1}$ and $r_{cell2}$ to contain the split block. If the passed register $r_{fpl}$ containing the free-list pointer of the heap for $2^{n+1}$ is empty, we recursively call the \texttt{split\_block}\footnote{Unsure if this works?}. If the free-list of the heap for $2^{n+1}$ heap is not empty, we pop the head of the free list into $r_{cell1}$ and split the block by setting the pointer halfway through the block in register $r_{cell2}$. Listing~\ref{lst:split-block-sub} shows the subroutine.   
+The advantage of this approach would be less fragmentation, as each allocation is tailored as closely as possible to the size of the record obtained from a static analysis during compilation.
 
-\begin{lstlisting}[caption={\texttt{split\_block} subroutine}, language=janus, style=basic,label={lst:split-block-sub}]
-procedure split_block($r_{cell1}$, $r_{cell2}$, $r_{fpl}$, $n$)
-	if ($r_{flp}$ == 0) 
-	then
-		call split_block($r_{cell1}$, $r_{cell2}$, $r_{fpl}$, $n*2$)
-	else
-		EXCH $r_{cell1}$ $r_{flp}$
-		SWAP $r_{cell1}$ $r_{flp}$
-		EXCH $r_{cell2}$ $r_{cell1}$ + n / 2
-	fi ($r_{flp}$ == 0)
-\end{lstlisting}
-\texttt{TODO: Consider Torben's suggesting with only merging/splitting if adjacent block}
+The obvious disadvantage is the amount of book-keeping and workload associated with growing and shrinking a heap and its neighbours, in case the program requests additional memory from the operating system. In real world object-oriented programming, most classes features a small number of fields, very rarely more than 16. As such, multiple heaps of same record size would exist, which intuitively seems inefficient. Additional, small helper classes would spawn additional heaps and additional book-work, making the encapsulation concept of OOP rather unattractive, for the optimization-oriented reversible programmer.
 
-Assuming we have access to an array of pointers $flps[]$, pointing to the beginning of a free list, index at its power-of-two and subroutine in Listing~\ref{lst:split-block-sub}, we could allocate and deallocate a record of size $n$ in a buddy memory layout reversibly in the following manner
+% TODO: Sketch algorithm
+% TODO: Graphics
 
-\begin{lstlisting}[mathescape=true, caption={Allocating and deallocating records of size $n$ using Buddy Memory}, language=janus, style=basic]
-maxPo2 = 2^10
-from powerOfTwo = 2
-do
-	powerOfTwo = powerOfTwo * 2
-until powerOfTwo < n
-	
-if (flps[powerOfTwo] == 0) 
-then
-	from nextPo2 = powerOfTwo * 2
-	do
-		call split_block($r_{cell}^{powerOfTwo}$, $r_{cell2}^{powerOfTwo}$, flps[nextPo2], nextPo2)
-	until (nextPo2 > maxPo2)
-	
-	 if (flps[powerOfTwo] == 0)
-	 then
-	 	call grow_heap(r_{hp}^{maxPo2}, maxPo2)
-		call split_block($r_{cell}^{powerOfTwo}$, $r_{cell2}^{powerOfTwo}$, flps[nextPo2], nextPo2)
-	else
-		EXCH flps[powerOfTwo] $r_{cell2}^{powerOfTwo}$
-	fi (flps[powerOfTwo] == 0)
-else
-	call allocate_block($r_{cell}^{powerOfTwo}$, flps[powerOfTwo])
-fi (flps[powerOfTwo] == 0) 
-\end{lstlisting}
-\texttt{TODO: Consider need\_max\_heap\_grow subroutine?}
 
-The \texttt{get\_free} modification for a buddy memory layout starts by finding the $2^n$ heap which the record of size $n$ can fit it. Afterwards, if the free-list pointer for the found heap is empty, the \texttt{split\_block} subroutine is called to obtain two blocks of the given size. If no blocks can be found and split (recursively), the biggest $2^n$ heap is grown by one block and the then \texttt{split\_block} is called again (recursively) to obtain two blocks of the desired size. Once two blocks have been obtained, the first is used for allocating our object and the second is set as the head of the free list. In the case we the free list of the found heap is non-empty, we simply call the \texttt{allocate\_block} subroutine.
-
-\texttt{TODO: Graphics}
-
-\subsubsection{One heap per record type}
-Another layout approach would be maintaining one heap per record type in the program. During compilation, classes would be analysed and a heap for each class would be created. The advantage of this approach would be less garbage generation, as each allocation is tailored as closely as possible to the size of the record obtained from a static analysis during compilation. The obvious disadvantage is the amount of book-keeping and workload associated with growing and shrinking a heap and its neighbours.
-
-\texttt{Algorithm: Determine heap for record type, call get\_free on found heap}
-
-\texttt{TODO: Graphics}
-
-\subsubsection{Shared heap, record type-specific free lists}
-A combination of the previous layouts would consist of a single heap, but record-specific free lists. This way, we ensure minimal fragmentation when allocating and freeing as the different free lists ensures that allocation of an object wastes as little memory as possible. By only keeping one heap, we eliminate the growth/shrinking issues of the multiple heap layout. There is, however, still a considerable amount of book-keeping involved in maintaining multiple free-lists. The bigger the number of unique classes defined in a program, the more free-lists we need to maintain during execution. If the free-lists are not allowed to point at the same free block (which they intuitively shouldn't in order to ensure reversibility), programs with many classes, say one hundred, could potentially fill up the heap with one hundred free lists, but only ever allocate objects for one of the classes, thus wasting a lot of memory on unused free lists. This scenario could potentially be avoided with compiler optimizations.
-
-\texttt{Algorithm: Find block size for record type-specific free list, call get\_free on shared heap}
-
-\texttt{TODO: Graphics}
-
-\subsubsection{One heap per power-of-two}
+\subsubsection{One Heap Per Power-Of-Two}
+% TODO: Revise
 A different approach as to having one heap per record type, would be having one heap per power-of-two until some arbitrary size. Using this approach, records would be stored in the heap which has a block size of a power-of-two closes matching to the record's size. This layout is a distinction from the "one heap per record type" as it still retains the size-optimized storing idiom but allows the heaps to contain records of mixed types. For programs with a large amount of small, simple classes needed to model some system, where each class is roughly the same size, the amount of heaps constructed would be substantially smaller than using one heap per record type, as many records will fit within the same heap. Implementation wise, the number of heaps can be determined at compile time. Furthermore, to ensure we do not end up with heaps of very large memory blocks, an arbitrary power-of-two size limit could be set at, say, 1 kb . If any record exceeds said limit, it could be split into $\sqrt{n}$ size chunks and stored in their respective heaps.\\
 This approach does, however, also suffer from large amount of book-keeping and fiddling when shrinking and growing adjacent heaps.
 
@@ -225,13 +157,404 @@ This approach does, however, also suffer from large amount of book-keeping and f
 
 \texttt{TODO: Graphics}
 
+\subsubsection{Shared Heap, Record Type-Specific Free Lists}
+A natural proposal, considering the disadvantages of the previously presented design, would be using a shared heap instead of record-specific heaps. 
+This way, we ensure minimal fragmentation when allocating and freeing as the different free lists ensures that allocation of an object wastes as little memory as possible. By only keeping one heap, we eliminate the growth/shrinking issues of the multiple heap layout. 
+
+There is, however, still a considerable amount of book-keeping involved in maintaining multiple free-lists. The bigger the number of unique classes defined in a program, the more free-lists we need to maintain during execution. If the free-lists are not allowed to point at the same free block (which they intuitively shouldn't in order to ensure reversibility), a program with, say one hundred different classes of size 2, would require a hundred identical free lists. 
+
+% TODO: Algorithm: Find block size for record type-specific free list, call get\_free on shared heap
+% TODO: Graphics
+
+\subsubsection{Buddy Memory}
+\label{sec:buddy-memory}
+The Buddy Memory layout utilizes blocks of variable-sizes of the power-of-two, typically with one free list per power-of-two using a shared heap. When allocating an object of size $m$, we simply check the free lists for a free block of size $n$, where $n \geq m$. Is such a block found and if $n > m$, we split the block into two halves recursively, until we obtain the smallest block capable of storing $m$. When deallocating a block of size $m$, do the action described above in reverse, thus merging the blocks again, where possible.
+
+This layout is somewhat of a middle ground between the previous three designs, addressing a number of problems found in these. The Buddy Memory layout uses a single heap for all record-types, thus eliminating the problems related to moving adjacent heaps reversibly in a multi-heap layout. To prevent multiple, identical free-lists (e.g. free-lists pointing to same size blocks) occurring from having one free-list per record-type, we instead maintain free-lists per power-of-two.
+
+The only drawback from this layout is the amount of internal fragmentation. As we only allocate blocks of a power-of-two size, substantial internal fragmentation follows when allocating large records, i.e. a allocating a block of size 128 for a record of size 65. However, as most real world programs uses much smaller sized records, we do not consider this a very frequent scenario.
+
+Implementation-wise, this design would require doubling and halving of numbers related to the power-of-two. This action translates well into the reversible setting, as a simply bit-shifting directly gives us the desired result.
+
+\lstinputlisting[caption={The Buddy Memory algorithm implemented in extended Janus.}, language=janus, style=basic, label={lst:buddy-memory}]{buddy-memory-report.ja}
+
+% TODO: Extended Janus ref
+Listing~\ref{lst:buddy-memory} shows the buddy memory algorithm implemented in extended Janus. For simplification in object sizes are rounded to the nearest power-of-two and we only allow allocations using the heads of the free lists.
+The body of the allocation function is executed recursively until a free block larger or equal to the size of the object has been found. Once found, said block is popped from the free list. If the block is larger than the object we are allocating (rounded to nearest power-of-two), the block is split recursively until a block the desired size is obtained.
+
+% TODO: Graphics of buddy memory layout
+
+
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.7\textwidth]{heap-designs}
+%   \includegraphics[width=0.7\textwidth]{heap-designs}
   \caption{Heap memory layouts (Draft)}
 \end{figure}
 
 
 \section{\rooplpp Memory Layout}
 \label{sec:rooplpp-memory-layout}
-\texttt{TBD}
+\rooplpp builds upon its predecessor's memory layout with dynamic memory management. The reversible Buddy Memory heap layout presented in section~\ref{sec:buddy-memory} is utilized in \rooplpp as it is an interesting layout, naturally translates into a reversible setting with one simple restriction (i.e only blocks which are heads of their respectable free lists are allocatable) and since its only drawback is dismissible in most real world scenarios.
+
+Figure~\ref{fig:memory-layout} shows the full layout of a \rooplpp program stored in memory.
+
+\begin{itemize}
+    \item As with \textsc{Roopl}, the static storage segment contains load-time labelled \inst{data} instructions, initialized with virtual function tables and other static data needed by the translated program.
+
+    \item The program segment is stored right after the static storage and contains the translate \rooplpp program instructions.
+
+    \item The free lists maintained by the Buddy Memory heap layout is placed right after the program segment, with the \textit{free list pointer} $flp$ pointing at the first free list. The free lists are simple the address to the first block of its respective size. The free lists are stores such that the free list at address $flp + i$ corresponds to the free list of size $2^{i+1}$.   
+
+    \item The heap begins directly following the free lists. Its beginning is marked by the \textit{heap pointer} $(hp)$. 
+
+    \item Unlike in \textsc{Roopl}, where the stack grows upwards, the \rooplpp stack grows downwards and is begins at address $p$. The stack remains a LIFO structure, analogously to \textsc{Roopl}.
+\end{itemize}
+
+As denoted in the previous section, we assume an underlying reversible operating system providing us with additional memory when needed. With no real way of simulating this, the \rooplpp compiler places the stack at a fixed address $p$ and sets one free block in the largest $2^n$ free list initially. The number of free lists and the address $p$ is configurable in the source code, but is defaulted to $10$ free lists, meaning initially one block of size $1024$ is available and the stack is placed at address $2048$.
+
+In traditional compilers, the heap pointer usually points to the end of the heap. For reasons stated above, we never grow the heap as we start with a heap of fixed size. As such, the heap pointer simply points to the beginning of the heap.
+
+\begin{figure}[ht]
+    \centering
+    
+    \begin{tikzpicture}
+        \fill[fill = grey] (0, 0) rectangle (2.5, 3) node[midway] {Static Data};
+        \fill[fill = darkgrey] (2.5, 0) rectangle (5, 3) node[midway] {Program};
+        \fill[fill = grey] (5, 0) rectangle (7, 3) node[midway] {Free lists};
+        \fill[fill = grey] (7, 0) rectangle (8.5, 3) node[midway] {Heap};
+        \fill[fill = grey] (12.5, 0) rectangle (14, 3) node[midway] {Stack}; 
+        
+        \draw (0, 0) -- (15, 0);
+        \draw (0, 3) -- (15, 3);
+        \draw (0, 0) -- (0, 3);
+        \draw (15, 0) -- (15, 3);
+        \draw (2.5, 0) -- (2.5, 3);
+        \draw (5, 0) -- (5, 3); 
+        \draw (7, 0) -- (7, 3);
+        \draw (14, 0) -- (14, 3); 
+        \draw[dashed] (8.5, 0) -- (8.5, 3); 
+        \draw[dashed] (12.5, 0) -- (12.5, 3);   
+    
+        \node at (10.5, 2.5) {(unused memory)};
+        \node at (0, -.3) {$0$};
+        \node at (5, -.3) {$flp$};
+        \node at (7, -.3) {$hp$};
+        \node at (14, -.3) {$p$};
+        \node at (12.5, -.3) {$sp$};
+        \node at (15, -.3) {$2^{31} - 1$};
+        \node at (7.5, -1) {$\longleftarrow$ Address Space $\longrightarrow$};
+
+        \draw[arrow, dashed] (8.5, 1.5) -- (10.1, 1.5);
+        \node at (9.4, 1.2) {\scriptsize{\textit{heap grows}}};
+
+        \draw[arrow, dashed] (12.5, 1.5) -- (10.9, 1.5); 
+        \node at (11.6, 1.2) {\scriptsize{\textit{stack grows}}};
+    \end{tikzpicture}
+    
+    \caption{Memory layout of a \rooplpp program}
+    \label{fig:memory-layout}
+\end{figure}
+
+\section{Inherited \textsc{Roopl} features}
+As mentioned, a number of features from \textsc{Roopl} carries over in \rooplpp.
+
+The dynamic dispatching mechanism presented in~\cite{th:roopl} is inherited. As such, the invocation of a method implementation is based on the type of the object at run time. Virtual function tables are still the implementation strategy used in the dynamic dispatching implementation.
+
+Evaluation of expressions and control flow remains unchanged. 
+
+For completeness, object blocks are included and still stack allocated as their life time is limited to the scope of their block and the dynamic allocation process is quite expensive in terms of register pressure and number of instructions compared to the stack allocated method presented implemented in the \textsc{Roopl} compiler.
+
+The object layout remains unchanged (\textit{for now, until reference counting is added}) and is shown in figure~\ref{fig:object-layout}
+
+\begin{figure}[h]
+    \centering
+    
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \begin{tikzpicture}
+            \draw[dashed] (0, 1.5) -- (0, 2);
+            \draw[dashed] (3, 1.5) -- (3, 2);
+            \filldraw[fill = grey, draw = black] (0, 1) rectangle (3, 1.5) node[midway] {addr(vtable)};
+            \filldraw[fill = darkgrey, draw = black] (0, .5) rectangle (3, 1) node[midway] {x};
+            \filldraw[fill = grey, draw = black] (0, 0) rectangle (3, .5) node[midway] {y};
+            \draw[dashed] (0, 0) -- (0, -.5);
+            \draw[dashed] (3, 0) -- (3, -.5);
+    
+            \node at (-.3, 1.25) {\texttt{+}$0$};
+            \node at (-.3, .75) {\texttt{+}$1$};
+            \node at (-.3, .25) {\texttt{+}$2$};
+            \draw[->] (3.5, 1.25) -- (3.1, 1.25);
+            \node[rotate = 270] at (3.7, 1.25) {$r_{shape}$};
+            
+            \node at (1.5, 2.5) {\textbf{Shape}};
+        \end{tikzpicture}
+    \end{subfigure}
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \begin{tikzpicture}
+            \draw[dashed] (0, 1.5) -- (0, 2);
+            \draw[dashed] (3, 1.5) -- (3, 2);
+            \filldraw[fill = grey, draw = black] (0, 1) rectangle (3, 1.5) node[midway] {addr(vtable)};
+            \filldraw[fill = darkgrey, draw = black] (0, .5) rectangle (3, 1) node[midway] {x};
+            \filldraw[fill = grey, draw = black] (0, 0) rectangle (3, .5) node[midway] {y};
+            \filldraw[fill = darkgrey, draw = black] (0, -.5) rectangle (3, 0) node[midway] {radius};
+            \draw[dashed] (0, -.5) -- (0, -1);
+            \draw[dashed] (3, -.5) -- (3, -1);
+    
+            \node at (-.3, 1.25) {\texttt{+}$0$};
+            \node at (-.3, .75) {\texttt{+}$1$};
+            \node at (-.3, .25) {\texttt{+}$2$};
+            \node at (-.3, -.25) {\texttt{+}$3$};
+            \draw[->] (3.5, 1.25) -- (3.1, 1.25);
+            \node[rotate = 270] at (3.7, 1.25) {$r_{circ}$};
+            
+            \node at (1.5, 2.5) {\textbf{Circle}};
+        \end{tikzpicture}
+    \end{subfigure}
+    \begin{subfigure}[t]{.32\textwidth}
+        \vskip 0pt
+        \centering
+        \begin{tikzpicture}
+            \draw[dashed] (0, 1.5) -- (0, 2);
+            \draw[dashed] (3, 1.5) -- (3, 2);
+            \filldraw[fill = grey, draw = black] (0, 1) rectangle (3, 1.5) node[midway] {addr(vtable)};
+            \filldraw[fill = darkgrey, draw = black] (0, .5) rectangle (3, 1) node[midway] {x};
+            \filldraw[fill = grey, draw = black] (0, 0) rectangle (3, .5) node[midway] {y};
+            \filldraw[fill = darkgrey, draw = black] (0, -.5) rectangle (3, 0) node[midway] {a};
+            \filldraw[fill = grey, draw = black] (0, -1) rectangle (3, -.5) node[midway] {b};
+            \draw[dashed] (0, -1) -- (0, -1.5);
+            \draw[dashed] (3, -1) -- (3, -1.5);
+    
+            \node at (-.3, 1.25) {\texttt{+}$0$};
+            \node at (-.3, .75) {\texttt{+}$1$};
+            \node at (-.3, .25) {\texttt{+}$2$};
+            \node at (-.3, -.25) {\texttt{+}$3$};
+            \node at (-.3, -.75) {\texttt{+}$4$};
+            \draw[->] (3.5, 1.25) -- (3.1, 1.25);
+            \node[rotate = 270] at (3.7, 1.25) {$r_{rect}$};
+            
+            \node at (1.5, 2.5) {\textbf{Rectangle}};
+        \end{tikzpicture}
+    \end{subfigure}
+    
+    \caption[Illustration of object memory layout]{Illustration of prefixing in the memory layout of 3 \rooplpp objects}
+    \label{fig:object-layout}
+    \end{figure}
+
+\section{Program Structure}
+\label{sec:program-structure}
+The program structure of a translated \rooplpp is analogous to the program structure of a \textsc{Roopl} program with the addition of free lists and heap initialization. The full structure is shown in figure~\ref{fig:pisa-program-layout}. 
+
+\begin{figure}[h]
+\centering
+
+\resizebox{.8\linewidth}{!}{
+\begin{minipage}{\linewidth}
+\begin{alignat*}{6}
+&\textbf{(1)}\quad&& &&\cdots\cdots && && &&\text{; Static data declarations}\\
+&\textbf{(2)}\quad&& &&\cdots\cdots && && &&\text{; Code for program class methods}\\
+&\textbf{(3)}\quad&&start\ \texttt{:}\quad&&\inst{start}\quad&& && &&\text{; Program starting point}\\
+&\textbf{(4)}\quad&& &&\inst{addi}\quad &&r_{flps}\quad &&p&&\text{; Initialize free lists pointer}\\
+&\textbf{(5)}\quad&& &&\inst{xor}\quad &&r_{hp}\quad &&r_{flps}\qquad &&\text{; Initialize heap pointer}\\
+&\textbf{(6)}\quad&& &&\inst{addi}\quad &&r_{hp}\quad &&size_{fls}&&\text{; Initialize heap pointer}\\
+&\textbf{(7)}\quad&& &&\inst{xor}\quad &&r_{b}\quad &&r_{hp}\qquad &&\text{; Store address of initial free memory block in $r_b$}\\
+&\textbf{(8)}\quad&& &&\inst{ADDI}\quad &&r_{flps}\quad &&size_{fls}\quad &&\text{; Index to end of free lists}\\
+&\textbf{(9)}\quad&& &&\inst{SUBI}\quad &&r_{flps}\quad && 1\quad &&\text{; Index to last element of free lists}\\
+&\textbf{(10)}\quad&& &&\inst{EXCH}\quad &&rb\quad &&r_{flps}\quad &&\text{; Store address of first block in last element of free lists}\\
+&\textbf{(11)}\quad&& &&\inst{ADDI}\quad &&r_{flps}\quad && 1\quad &&\text{; Index to end of free lists}\\
+&\textbf{(12)}\quad&& &&\inst{SUBI}\quad &&r_{flps}\quad &&s\quad &&\text{; Index to beginning of free lists}\\
+&\textbf{(13)}\quad&& &&\inst{addi}\quad &&r_{sp}\quad &&offset_{stack}&&\text{; Initialize stack pointer}\\
+&\textbf{(14)}\quad&& &&\inst{xor}\quad &&r_m\quad &&r_{sp}\qquad &&\text{; Store address of main object in $r_m$}\\
+&\textbf{(15)}\quad&& &&\inst{xori}\quad &&r_v\quad &&label_{vt}\qquad &&\text{; Store address of vtable in $r_v$}\\
+&\textbf{(16)}\quad&& &&\inst{exch}\quad &&r_v\quad &&r_{sp}\qquad &&\text{; Push address of vtable onto stack}\\
+&\textbf{(17)}\quad&& &&\inst{subi}\quad &&r_{sp}\quad &&size_m\qquad &&\text{; Allocate space for main object}\\
+&\textbf{(18)}\quad&& &&\inst{push}\quad &&r_m\quad && &&\text{; Push '\textit{this}' onto stack}\\
+&\textbf{(19)}\quad&& &&\inst{bra}\quad &&label_m \span\omit\span \qquad&&\text{; Call main procedure}\\
+&\textbf{(20)}\quad&& &&\inst{pop}\quad &&r_m\quad && &&\text{; Pop '\textit{this}' from stack}\\
+&\textbf{(21)}\quad&& &&\inst{subi}\quad &&r_{sp}\quad &&size_m\qquad &&\text{; Deallocate space of main object}\\
+&\textbf{(22)}\quad&& &&\inst{exch}\quad &&r_v\quad &&r_{sp}\qquad &&\text{; Pop vtable address into $r_v$}\\
+&\textbf{(23)}\quad&& &&\inst{xori}\quad &&r_v\quad &&label_{vt}\qquad &&\text{; Clear $r_v$}\\
+&\textbf{(24)}\quad&& &&\inst{xor}\quad &&r_m\quad &&r_{sp}\qquad &&\text{; Clear $r_m$}\\
+&\textbf{(25)}\quad&& &&\inst{subi}\quad &&r_{sp}\quad &&offset_{stack} &&\text{; Clear stack pointer}\\
+&\textbf{(26)}\quad&& &&\inst{subi}\quad &&r_{hp}\quad &&size_{fls} &&\text{; Clear heap pointer}\\
+&\textbf{(27)}\quad&& &&\inst{xor}\quad &&r_{hp}\quad &&r_{flsp} &&\text{; Clear heap pointer}\\
+&\textbf{(28)}\quad&& &&\inst{subi}\quad &&r_{flps}\quad &&p &&\text{; Clear free lists pointer}\\
+&\textbf{(29)}\quad&&finish\ \texttt{:}\quad&&\inst{finish}\quad && && &&\text{; Program exit point}
+\end{alignat*}
+\end{minipage}
+}
+
+\caption{Overall layout of a translated \rooplpp program}
+\label{fig:pisa-program-layout}
+\end{figure}
+
+This PISA code block initializes the free lists pointer, the heap pointer, the stack pointer, allocates the main object on the stack, calls the main method, deallocates the main object and finally clears the free lists, heap and stack pointers.
+
+The free lists pointer is initialized by adding the base address, which varies with the size of the translated program, to the register $r_{flps}$. In figure~\ref{fig:pisa-program-layout} the base address is denoted by $p$.
+
+The heap pointer is initialized directly after the free lists pointer by adding the size of the free lists. One free lists is the size of one word and the full size of the free lists is configured in the source code (defaulted to 10, as described earlier).
+
+Once the heap pointer and free lists pointer is initialized, the initial block of free memory is placed in the largest free lists by indexing to said list, by adding the length of the list of free lists, subtracting 1, writing the address of the first block (which is the same address as the heap pointer, which points to the beginning of the heap) to the last free list and then resetting the free lists pointer to point to the 1st list again, afterwards.
+
+The stack pointer is initialized simply by adding the stack offset to the stack register $r_{sp}$. The stack offset is configured in the source code and defaults to $2048$, as described earlier in this chapter. Once the stack pointer has been initialized, the main object is allocated on the stack and the main method called, analogously to the \textsc{Roopl} program structure.
+
+When the program terminates and the main method returns, the main object is popped from the stack and deallocated and the stack pointer is cleared. The heap pointer is then cleared followed by the free lists pointer. The contents of the free lists and whatever is left on the heap is untouched at this point. It is the programmers responsibility to free dynamically allocated objects in their \rooplpp program. Furthermore, depending on the deallocation order, we might not end up with exactly one fully merged block in the end and as such, we do not invert the steps taken to initialize this initial free memory block.
+Analogously to \textsc{Roopl}, the values of the main object are left in stack section of memory.
+
+
+\section{Object Allocation and Deallocation}
+\label{sec:object-allocation-deallocation}
+As allocation and deallocation intuitively should be each other's inverse, numerous instructions are shared between the two, mainly the core of the reversible buddy algorithm shown in listing~\ref{lst:buddy-memory}. The PISA translated version of the \texttt{malloc1} function from listing~\ref{lst:buddy-memory} is shown in figure~\ref{fig:malloc1-pisa}.
+
+In the translated \texttt{malloc1} function, the \inst{swapbr} functions as entry and exit point, as PISA's paired jumps could not work here, as we need to jump the entry point of the function from multiple locations, so support the recursiveness of the function. Once the entry point has been reached, the return offset obtained from the \inst{swapbr} instruction is negated and stored on the heap. When the function reaches the bottom of the instruction block, a jump to the top is performed where the negated return offset is popped from the stack before the \inst{swapbr} instruction is called again, resulting in a jump to the location which originally branched to the \textit{$malloc1_{entry}$} label. As with the Janus implementation of the algorithm, the PISA version is dependent on a number of arguments, which should be stored in registers. Register $r_{sc}$ hold the block size counter, $r_c$ the free list index counter and $r_{size_c}$ the size of the class. Once the \texttt{malloc1} instructions has completed $r_p$ contains the address of the allocated object. The allocation and deallocation entry points are responsible for settings these, as seen in figure~\ref{fig:pisa-allocation-deallocation}
+
+\begin{figure}[ht]
+    \centering
+    
+    \begin{subfigure}[t]{0.495\linewidth}
+    \vskip 0pt
+    \centering
+    \begin{equation*} 
+        \textbf{new}\ c\ x
+    \end{equation*}
+    
+    \resizebox{.8\linewidth}{!}{
+    \begin{minipage}{1.025\linewidth}
+    \begin{alignat*}{5}
+    &\textbf{(1)}\quad&&\inst{addi}\quad &&r_{sc}\quad && 2 \quad &&\text{; Init block size counter}\\
+    &\textbf{(2)}\quad&&\inst{xor}\quad &&r_{c}\quad && r_0 &&\text{; Init free list index counter}\\
+    &\textbf{(3)}\quad&&\inst{addi}\quad &&r_{size_c}\quad && size_c &&\text{; Init class size}\\
+    &\textbf{(4)}\quad&&\inst{bra}\quad &&malloc_{entry_q}\quad \span\omit\span &&\text{; Jump to malloc entry}\\
+    &\textbf{(5)}\quad&&\cdots\cdots\quad && && &&\text{; Code for malloc1 (Fig~\ref{fig:malloc1-pisa)})}\\
+    &\textbf{(6)}\quad&&\inst{xori}\quad &&r_{t}\quad && label_{vt} &&\text{; Store address of vtable in $r_t$}\\
+    &\textbf{(7)}\quad&&\inst{exch}\quad &&r_{t}\quad && r_p &&\text{; Write vtable address in object}\\
+    &\textbf{(8)}\quad&&\inst{subi}\quad &&r_{size_c}\quad && size_c &&\text{; Inverse of \textbf{(3)}}\\
+    &\textbf{(9)}\quad&&\inst{xor}\quad &&r_{c}\quad && r_0 &&\text{; Inverse of \textbf{(2)}}\\ 
+    &\textbf{(10)}\quad&&\inst{subi}\quad &&r_{sc}\quad && 2 &&\text{; Inverse of \textbf{(1)}} 
+    \end{alignat*}
+    \end{minipage}
+    }
+    \end{subfigure}
+    \begin{subfigure}[t]{0.495\linewidth}
+    \vskip 0pt
+    \centering
+    \begin{equation*}
+        \textbf{delete}\ c\ x
+    \end{equation*}
+    
+    \resizebox{.8\linewidth}{!}{
+    \begin{minipage}{1.025\linewidth}
+    \begin{alignat*}{5}
+        &\textbf{(1)}\quad&&\inst{exch}\quad &&r_{t}\quad && r_p &&\text{; Clear vtable in object}\\
+        &\textbf{(2)}\quad&&\inst{xori}\quad &&r_{t}\quad && label_{vt} &&\text{; Clear $r_t$}\\
+        &\textbf{(3)}\quad&&\inst{addi}\quad &&r_{sc}\quad && 2 \quad &&\text{; Init block size counter}\\
+        &\textbf{(4)}\quad&&\inst{xor}\quad &&r_{c}\quad && r_0 &&\text{; Init free list index counter}\\
+        &\textbf{(5)}\quad&&\inst{addi}\quad &&r_{size_c}\quad && size_c &&\text{; Init class size}\\
+        &\textbf{(6)}\quad&&\inst{bra}\quad &&malloc_{entry_q}\quad \span\omit\span &&\text{; Jump to inverted malloc entry}\\
+        &\textbf{(7)}\quad&&\cdots\cdots\quad && && &&\text{; Code for inverted malloc1 (Fig~\ref{fig:malloc1-pisa)})}\\
+        &\textbf{(8)}\quad&&\inst{subi}\quad &&r_{size_c}\quad && size_c &&\text{; Inverse of \textbf{(5)}}\\
+        &\textbf{(9)}\quad&&\inst{xor}\quad &&r_{c}\quad && r_0 &&\text{; Inverse of \textbf{(4)}}\\
+        &\textbf{(10)}\quad&&\inst{subi}\quad &&r_{sc}\quad && 2 &&\text{; Inverse of \textbf{(3)}}
+    \end{alignat*}
+    \end{minipage}
+    }
+    \end{subfigure}
+    
+    \caption{PISA translation of heap allocation and deallocation for objects}
+    \label{fig:pisa-allocation-deallocation}
+    \end{figure}
+
+As mentioned, the \texttt{malloc(1)} is executed recursively, scanning through free blocks in free lists holding blocks of equal or greater size of the $size_c$ we want to allocate. Once such a block has been found, it is recursively split, if its size isn't equal to $size_c$. Before each recursive call (or rather branching in PISA), we must push a number of temporary register values to the stack, to ensure we can re-obtain theres values once the next recursive call returns. These temporary values includes the address of the current free list and the address of its first block, the expression evaluation results needed for the 2 conditional statements along with a temporary register, holding different date depending on where the algorithm branches from. As can be seen in~\ref{fig:malloc1-pisa}, the register pressure is quite high for the heap allocation and deallocation translations. In fact, 11 free registers besides the 4 registers initiated in the code generation for $new$ and $free$ are needed for the translation to succeed. This number of register should obviously be optimized to reduce the register pressure, as taking up 15 registers for allocating or deallocating an object, would only leave 10 free registers available in the current scope, as the free lists, heap and stack pointer further take up 3 registers, the return offset register $r_{ro}$ and register 0 takes up an additional 2. This effectively means that no more than 10 objects can be heap allocation in the same scope, as of writing. The main register hogging part of the translation scheme is the expression evaluation required for the two conditionals (Line 16, 23, 39 and 40 in listing~\ref{lst:buddy-memory}) as the composite expressions such as \texttt{free\_lists[counter] = 0 || p - csize != free\_lists[counter]} currently requires 3 temporary registers for evaluating \texttt{free\_lists[counter] = 0}, \texttt{p - csize != free\_lists[counter]} and finally \texttt{free\_lists[counter] = 0 || p - csize != free\_lists[counter]} separately.  
+
+\begin{figure}[ht]
+    \centering
+    
+    \resizebox{.8\linewidth}{!}{
+    \begin{minipage}{\linewidth}
+    \begin{alignat*}{7}
+    &\textbf{(1)}\quad&&malloc1_{top}\ \texttt{:}\quad  &&\inst{bra}\quad &&malloc1_{bot} \span\omit\span\quad \span\omit\span\quad &&\text{; Receive jump}\\ 
+    &\textbf{(2)}\quad&& &&\inst{pop}\quad&&r_{ro}&& && &&\text{; Pop return offset from the stack}\\
+    &\textbf{(3)}\quad&& &&\cdots\cdots && && && &&\text{; Inverse of \textbf{(7)}}\\
+    &\textbf{(4)}\quad&&malloc1_{entry}\ \texttt{:}\quad&&\inst{swapbr}\quad &&r_{ro} && && &&\text{; Malloc1 entry and exit point}\\
+    &\textbf{(5)}\quad&& &&\inst{neg}\quad &&r_{ro} && && &&\text{; Negate return offset}\\        
+    &\textbf{(6)}\quad&& &&\inst{push}\quad &&r_{ro} && && &&\text{; Store return offset on stack}\\  
+    &\textbf{(7)}\quad&& &&\cdots\cdots && && && &&\text{; Code for $r_{fl}\ \leftarrow\ addr(free\_lists[counter])$}\\
+    &\textbf{(8)}\quad&& &&\cdots\cdots && && && &&\text{; Code for $r_{block}\ \leftarrow\ value(free\_lists[counter])$}\\
+    &\textbf{(9)}\quad&& &&\cdots\cdots && && && &&\text{; Code for $r_{e1_o}\ \leftarrow\ \llbracket c_{size} < object_{size} \rrbracket$}\\
+    &\textbf{(10)}\quad&& &&\inst{xor}\quad &&r_t && r_{e1_o} && &&\text{; Copy value of $c_{size} < object_{size}$ into $r_t$}\\        
+    &\textbf{(11)}\quad&& &&\cdots\cdots && && && &&\text{; Inverse of \textbf{(9)}}\\ 
+    &\textbf{(12)}\quad&&o_{test}\ \texttt{:}\quad &&\inst{beq} &&r_t && r_0 && o_{test_f} && \text{; Receive jump}\\
+    &\textbf{(13)}\quad&& &&\inst{xori} &&r_t && 1 && && \text{; Clear $r_t$}\\
+    &\textbf{(14)}\quad&& &&\inst{addi} &&r_{c} && 1 && && \text{; $Counter\texttt{++}$}\\
+    &\textbf{(15)}\quad&& &&\inst{rl} &&r_{sc}\ && 1 && && \text{; Call $double(c_{size}$)}\\
+    &\textbf{(16)}\quad&& &&\cdots\cdots && && && &&\text{; Code for pushing temp reg values to stack}\\
+    &\textbf{(17)}\quad&& &&\inst{bra}\quad &&malloc1_{entry} \span\omit\span\quad \span\omit\span\quad && \text{; Call $malloc1()$)}\\
+    &\textbf{(18)}\quad&& &&\cdots\cdots && && && &&\text{; Inverse of \textbf{(16)}}\\
+    &\textbf{(19)}\quad&& &&\inst{rr} &&r_{sc}\ && 1 && && \text{; Inverse of \textbf{(15)}}\\
+    &\textbf{(20)}\quad&& &&\inst{subi} &&r_{c} && 1 && && \text{; Inverse of \textbf{(14)}}\\
+    &\textbf{(21)}\quad&& &&\inst{xori} &&r_t && 1 && && \text{; Set $r_t = 1$}\\
+    &\textbf{(22)}\quad&&o_{assert_t}\ \texttt{:}\quad &&\inst{bra} &&o_{assert} \span\omit\span\quad \span\omit\span\quad && \text{; Jump}\\
+    &\textbf{(23)}\quad&&o_{test_f}\ \texttt{:}\quad &&\inst{bra} &&o_{test} \span\omit\span\quad \span\omit\span\quad && \text{; Receive jump}\\
+    &\textbf{(24)}\quad&& &&\cdots\cdots && && && &&\text{; Code for $r_{e1_i}\ \leftarrow\ \llbracket addr(free\_lists[counter]) \neq 0 \rrbracket$}\\
+    &\textbf{(25)}\quad&& &&\inst{xor}\quad &&r_{t2} && r_{e1_i} && &&\text{; Copy value of $r_{e1_i}$ into $r_{t2}$}\\        
+    &\textbf{(26)}\quad&& &&\cdots\cdots && && && &&\text{; Inverse of \textbf{(24)}}\\
+    &\textbf{(27)}\quad&&i_{test}\ \texttt{:}\quad &&\inst{beq} &&r_{t2} && r_0 && i_{test_f} && \text{; Receive jump}\\
+    &\textbf{(28)}\quad&& &&\inst{xori} &&r_{t2} && 1 && && \text{; Clear $r_{t2}$}\\
+    &\textbf{(29)}\quad&& &&\inst{add} &&r_{p} && r_{block} && && \text{; Copy address of the current block to p}\\
+    &\textbf{(30)}\quad&& &&\inst{sub} &&r_{block}\ && r_{p} && && \text{; Clear $r_{block}$}\\
+    &\textbf{(31)}\quad&& &&\inst{exch} &&r_{tmp} && r_{p} && && \text{; Load address of next block}\\
+    &\textbf{(32)}\quad&& &&\inst{exch} &&r_{tmp} && r_{fl} && && \text{; Set address of next block as new head of free list}\\
+    &\textbf{(33)}\quad&& &&\inst{xor} &&r_{tmp} && r_{p} && && \text{; Clear address of next block}\\
+    &\textbf{(34)}\quad&& &&\inst{xori} &&r_{t2} && 1 && && \text{; Set $r_{t2} = 1$}\\
+    &\textbf{(35)}\quad&&i_{assert_t}\ \texttt{:}\quad &&\inst{bra} &&i_{assert} \span\omit\span\quad \span\omit\span\quad && \text{; Jump}\\
+    &\textbf{(36)}\quad&&i_{test_f}\ \texttt{:}\quad &&\inst{bra} &&i_{test} \span\omit\span\quad \span\omit\span\quad && \text{; Receive jump}\\
+    &\textbf{(37)}\quad&& &&\inst{addi} &&r_{c} && 1 && && \text{; $Counter\texttt{++}$}\\
+    &\textbf{(38)}\quad&& &&\inst{rl} &&r_{sc}\ && 1 && && \text{; Call $double(c_{size}$)}\\
+    &\textbf{(39)}\quad&& &&\cdots\cdots && && && &&\text{; Code for pushing temp reg values to stack}\\
+    &\textbf{(40)}\quad&& &&\inst{bra}\quad &&malloc1_{entry} \span\omit\span\quad \span\omit\span\quad && \text{; Call $malloc1()$)}\\
+    &\textbf{(41)}\quad&& &&\cdots\cdots && && && &&\text{; Inverse of \textbf{(39)}}\\
+    &\textbf{(42)}\quad&& &&\inst{rr} &&r_{sc}\ && 1 && && \text{; Inverse of \textbf{(38)}}\\
+    &\textbf{(43)}\quad&& &&\inst{subi} &&r_{c} && 1 && && \text{; Inverse of \textbf{(37)}}\\
+    &\textbf{(44)}\quad&& &&\inst{xor} &&r_{tmp} && r_p && && \text{; Copy current address of p}\\
+    &\textbf{(45)}\quad&& &&\inst{exch} &&r_{tmp} && r_{fl} && && \text{; Store current address of p in current free list}\\
+    &\textbf{(46)}\quad&& &&\inst{add} &&r_{p} && r_{cs} && && \text{; Split block by setting p to the second half of the current block}\\
+    &\textbf{(47)}\quad&&i_{assert}\ \texttt{:}\quad &&\inst{bne} &&r_{t2} && r_0 && i_{assert_t} && \text{; Receive jump}\\
+    &\textbf{(48)}\quad&& &&\inst{exch} &&r_{tmp} && r_{fl} && && \text{; Load address of head of current free list}\\
+    &\textbf{(49)}\quad&& &&\inst{sub} &&r_{p} && r_{cs} && && \text{; Set p to previous block address}\\
+    &\textbf{(50)}\quad&& &&\cdots\cdots && && && &&\text{; Code for $r_{e2_{i1}}\ \leftarrow\ \llbracket p - c_{size} \neq addr(free\_lists[counter])\rrbracket$}\\
+    &\textbf{(51)}\quad&& &&\cdots\cdots && && && &&\text{; Code for $r_{e2_{i2}}\ \leftarrow\ \llbracket addr(free\_lists[counter]) = 0 \rrbracket$}\\
+    &\textbf{(52)}\quad&& &&\cdots\cdots && && && &&\text{; Code for $r_{e2_{i3}}\ \leftarrow\ \llbracket (p - c_{size} \neq addr(free\_lists[counter])) \vee (addr(free\_lists[counter]) = 0) \rrbracket$}\\
+    &\textbf{(53)}\quad&& &&\inst{xor} &&r_{r2} && r_{e2_{i3}} && && \text{; Copy value of $r_{e2_{i3}}$ into $r_{t2}$}\\
+    &\textbf{(54)}\quad&& &&\cdots\cdots && && && &&\text{; Inverse of \textbf{(52)}}\\
+    &\textbf{(55)}\quad&& &&\cdots\cdots && && && &&\text{; Inverse of \textbf{(51)}}\\
+    &\textbf{(56)}\quad&& &&\cdots\cdots && && && &&\text{; Inverse of \textbf{(50)}}\\
+    &\textbf{(57)}\quad&& &&\inst{add} &&r_{p} && r_{cs} && && \text{; Inverse of \textbf{(49)}}\\
+    &\textbf{(58)}\quad&& &&\inst{exch} &&r_{tmp} && r_{fl} && && \text{; Inverse of \textbf{(48)}}\\
+    &\textbf{(59)}\quad&&o_{assert}\ \texttt{:}\quad &&\inst{bne} &&r_{t} && r_0 && o_{assert_t} && \text{; Receive jump}\\
+    &\textbf{(60)}\quad&& &&\cdots\cdots && && && &&\text{; Code for $r_{e2_o}\ \leftarrow\ \llbracket c_{size} < object_{size} \rrbracket$}\\
+    &\textbf{(61)}\quad&& &&\inst{xor}\quad &&r_t && r_{e2_o} && &&\text{; Copy value of $c_{size} < object_{size}$ into $r_t$}\\        
+    &\textbf{(62)}\quad&& &&\cdots\cdots && && && &&\text{; Inverse of \textbf{(60)}}\\ 
+    &\textbf{(63)}\quad&&malloc1_{bot}\ \texttt{:}\quad  &&\inst{bra}\quad &&malloc1_{top} \span\omit\span\quad \span\omit\span\quad &&\text{; Jump}\\
+    \end{alignat*}
+    \end{minipage}
+    }
+    
+    \caption{The core of the reversible buddy memory algorithm translated into PISA. For deallocation the inverse of this block is generated during compile-time.}
+    \label{fig:malloc1-pisa} 
+    \end{figure}
+
+\newpage    
+
+\section{Vectors}
+TBD
+
+\section{Error Handling}
+TBD
+
+\section{Implementation}
+
+
+
+\texttt{TBD} 

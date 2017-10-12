@@ -17,7 +17,9 @@ procedure malloc1(int p, int object_size, int free_lists[], int counter, int csi
     if (csize < object_size) then
         counter += 1
         call double(csize)
+        printf("ENTERING BRANCH WITH COUNTER: %d", counter)
         call malloc1(p, object_size, free_lists, counter, csize, next_block) 
+        printf("LEAVING BRANCH WITH COUNTER: %d", counter)
         uncall double(csize)
         counter -= 1
     else
@@ -34,7 +36,9 @@ procedure malloc1(int p, int object_size, int free_lists[], int counter, int csi
         else
             counter += 1
             call double(csize)
+            printf("ENTERING BRANCH WITH COUNTER: %d", counter)
             call malloc1(p, object_size, free_lists, counter, csize, next_block)
+            printf("LEAVING BRANCH WITH COUNTER: %d", counter)
             //printf("Splitting block of size %d!\n", csize)
             uncall double(csize)
             counter -= 1
@@ -43,8 +47,7 @@ procedure malloc1(int p, int object_size, int free_lists[], int counter, int csi
             
         //fi p - csize != free_lists[counter]
         fi free_lists[counter] = 0 || p - csize != free_lists[counter]
-    fi csize < object_size
-            
+    fi csize < object_size            
 
 procedure main()
     int p1
@@ -52,7 +55,9 @@ procedure main()
     int p3
     int p4
     int object_size2
+    int object_size3
     int object_size4
+    int object_size5
     int object_size8
     int object_size7
 
@@ -65,44 +70,57 @@ procedure main()
     int next_block[21]
 
     object_size2 += 2
+    object_size3 += 3
     object_size4 += 4
+    object_size5 += 5
     object_size7 += 7
     object_size8 += 8
 
     // Set one block of size 2^4 at address +4
-    free_lists[3] += 4
+    free_lists[1] += 4
 
-    // Set next block of address at +4 at +20
-    next_block[4] += 20
-
-    // Allocate object of size 2.
-    // We'll split 3 times, thus ending with:
-    //   1 block of size 2^3 at address +4
-    //   1 block of size 2^2 at address +12
-    //   1 block of size 2^1 at address +16
-    //  and our object is allocated at +18
     call malloc(p1, object_size2, free_lists, next_block)
     printf("Object of size %d allocated at address +%d", object_size2, p1)
 
-    // Allocate 3 objects, using our remaing free blocks
-    call malloc(p2, object_size7, free_lists, next_block)
-    printf("Object of size %d allocated at address +%d", object_size7, p2)
+    call malloc(p2, object_size2, free_lists, next_block)
+    printf("Object of size %d allocated at address +%d", object_size2, p2)
+    // Set next block of address at +4 at +20
+    //next_block[4] += 20
 
-    call malloc(p3, object_size4, free_lists, next_block)
-    printf("Object of size %d allocated at address +%d", object_size4, p3)
+    //// Allocate object of size 2.
+    //// We'll split 3 times, thus ending with:
+    ////   1 block of size 2^3 at address +4
+    ////   1 block of size 2^2 at address +12
+    ////   1 block of size 2^1 at address +16
+    ////  and our object is allocated at +18
+    //call malloc(p1, object_size2, free_lists, next_block)
+    //printf("Object of size %d allocated at address +%d", object_size2, p1)
 
-    call malloc(p4, object_size2, free_lists, next_block)
-    printf("Object of size %d allocated at address +%d", object_size2, p4)
+    //// Allocate 3 objects, using our remaing free blocks
+    //call malloc(p2, object_size7, free_lists, next_block)
+    //printf("Object of size %d allocated at address +%d", object_size7, p2)
 
-    // Deallocate
-    printf("Freeing object of size %d at address +%d", object_size2, p4)
-    uncall malloc(p4, object_size2, free_lists, next_block)
+    //call malloc(p3, object_size4, free_lists, next_block)
+    //printf("Object of size %d allocated at address +%d", object_size4, p3)
 
-    printf("Freeing object of size %d at address +%d", object_size4, p3)
-    uncall malloc(p3, object_size4, free_lists, next_block)
+    //call malloc(p4, object_size2, free_lists, next_block)
+    //printf("Object of size %d allocated at address +%d", object_size2, p4)
+
+    //// Deallocate
+    //printf("Freeing object of size %d at address +%d", object_size2, p1)
+    //uncall malloc(p1, object_size2, free_lists, next_block)
+
+    //printf("Freeing object of size %d at address +%d", object_size7, p2)
+    //uncall malloc(p2, object_size7, free_lists, next_block)
+
+    //printf("Freeing object of size %d at address +%d", object_size4, p3)
+    //uncall malloc(p3, object_size4, free_lists, next_block)
+
+    //printf("Freeing object of size %d at address +%d", object_size2, p4)
+    //uncall malloc(p4, object_size2, free_lists, next_block)
+
     
-    printf("Freeing object of size %d at address +%d", object_size7, p2)
-    uncall malloc(p2, object_size7, free_lists, next_block)
+    
+    
 
-    printf("Freeing object of size %d at address +%d", object_size2, p1)
-    uncall malloc(p1, object_size2, free_lists, next_block)
+    

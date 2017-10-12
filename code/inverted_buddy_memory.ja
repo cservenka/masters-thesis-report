@@ -1,0 +1,71 @@
+procedure double(int target)
+    local int current = target / 2
+    target -= current
+    delocal int current = target
+
+procedure malloc(int p, int object_size, int free_lists[], int next_block[])
+    local int counter = 0
+    local int csize = 2
+    call malloc1(p, object_size, free_lists, counter, csize, next_block)
+    delocal int csize = 2
+    delocal int counter = 0
+
+procedure malloc1(int p, int object_size, int free_lists[], int counter, int csize, int next_block[])
+    if csize < object_size then
+        counter += 1
+        uncall double(csize)
+        call malloc1(p, object_size, free_lists, counter, csize, next_block)
+        call double(csize)
+        counter -= 1
+    else
+        if p - csize != free_lists[counter] then
+            free_lists[counter] ^= next_block[p]
+            next_block[p] ^= free_lists[counter]
+            free_lists[counter] ^= next_block[p]
+            free_lists[counter] += p
+            p -= free_lists[counter]
+        else
+            p -= csize
+            free_lists[counter] -= p
+            counter += 1
+            uncall double(csize)
+            call malloc1(p, object_size, free_lists, counter, csize, next_block)
+            call double(csize)
+            counter -= 1
+        fi free_lists[counter] != 0
+    fi csize < object_size
+
+procedure main()
+    int p1
+    int p2
+    int p3
+    int p4
+    int object_size
+    int free_lists[4]
+    int next_block[21]
+    
+    object_size += 2
+    free_lists[3] += 4
+    next_block[4] += 20
+    call malloc(p1, object_size, free_lists, next_block)
+    printf("Object of size %d allocated at address +%d", object_size, p1)
+    object_size += 6
+    call malloc(p2, object_size, free_lists, next_block)
+    printf("Object of size %d allocated at address +%d", object_size, p2)
+    object_size -= 4
+    call malloc(p3, object_size, free_lists, next_block)
+    printf("Object of size %d allocated at address +%d", object_size, p3)
+    object_size -= 2
+    call malloc(p4, object_size, free_lists, next_block)
+    printf("Object of size %d allocated at address +%d", object_size, p4)
+    printf("Freeing object of size %d at address +%d", object_size, p4)
+    uncall malloc(p4, object_size, free_lists, next_block)
+    object_size += 2
+    printf("Freeing object of size %d at address +%d", object_size, p3)
+    uncall malloc(p3, object_size, free_lists, next_block)
+    object_size += 4
+    printf("Freeing object of size %d at address +%d", object_size, p2)
+    uncall malloc(p2, object_size, free_lists, next_block)
+    object_size -= 6
+    printf("Freeing object of size %d at address +%d", object_size, p1)
+    uncall malloc(p1, object_size, free_lists, next_block)

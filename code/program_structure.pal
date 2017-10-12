@@ -1,0 +1,20 @@
+..... 				; Static data declarations
+..... 				; Code for program class methods
+START 				; Program starting point
+ADDI r_sp s 		; Initialize the stack pointer
+ADDI r_flps p 		; Initialize free list pointer list
+ADDI r_hp r_flps	; 1/2 Initialize heap pointer after the free list 1/2
+ADDI r_hp size_flps	; 2/2 Initialize heap pointer
+XOR r_m r_sp 		; Store address of main object in r_m TODO: Allocate on heap instead
+XORI r_v label_vt 	; Store address of vtable in r_v
+EXCH r_v r_sp 		; Push address of vtable onto stack
+ADDI r_sp size_m 	; Allocate space for main object
+PUSH r_m 			; Push ’this ’ onto stack
+BRA label_m 		; Call main procedure
+POP r_m 			; Pop ’this ’ from stack
+SUBI r_sp size_m 	; Deallocate space of main object
+EXCH r_v r_sp 		; Pop vtable address into r_v
+XORI r_v label_vt 	; Clear vtable address
+XOR r_m r_sp 		; Clear main object address
+SUBI r_sp p  		; Clear stack pointer
+FINISH 				; Program exit point 

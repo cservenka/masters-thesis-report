@@ -1,6 +1,6 @@
 \chapter{The \textsc{Roolp\texttt{++}} Language}
 \label{chp:rooplpp}
-With the design and implementation of the \textsc{Reversible Object-Oriented Programming Language} (\textsc{Roopl}), the first steps into the uncharted lands of Object-Oriented Programming (OOP) and reversibility was taken. In this chapter, we will present \rooplpp, the natural successor of \textsc{Roopl}, improving the language's object instantiation by letting objects live outside \texttt{construct / deconstruct} blocks, allowing complex, reversible programs to be written using OOP methodologies. As with its predecessor, \rooplpp is purely reversible and each component of a program written in \rooplpp is locally invertible. This ensures no computation history is required nor added program size for backwards direction program execution.\\
+With the design and implementation of the \textsc{Reversible Object-Oriented Programming Language} (\textsc{Roopl}), the first steps into the uncharted lands of Object-Oriented Programming (OOP) and reversibility was taken. In this chapter, we will present \rooplpp, the natural successor of \textsc{Roopl}, improving the language's object instantiation by letting objects live outside \texttt{construct / deconstruct} blocks, allowing complex, reversible programs to be written using OOP methodologies. As with its predecessor, \rooplpp is purely reversible and each component of a program written in \rooplpp is locally invertible. This ensures no computation history is required nor added program size for backwards direction program execution.
 
 Inspired by other language successors such as \textsc{C\texttt{++}} was to \textsc{C}, \rooplpp is a superset of \textsc{Roopl}, containing all original functionality of its predecessor, extended with new object instantiation methods for increased programming usability and an array type.
 
@@ -11,7 +11,7 @@ Inspired by other language successors such as \textsc{C\texttt{++}} was to \text
 \end{figure}
 \newpage
 
-% TODO: String type maybe?
+% TODO: String type maybe? 
 % TODO: Update new / delete for array assignment
 \section{Syntax}
 \label{sec:syntax}
@@ -106,7 +106,7 @@ The mechanisms of the \textbf{new} and \textbf{delete} statements are, essential
 
 \section{Vector Model}
 \label{sec:vector-model}
-Besides asymmetric object lifetimes, \rooplpp also introduces reversible, dynamic arrays in form of the \textbf{vector} type. While \textsc{Roopl} on featured integers and custom data types in form of classes, one of its main inspirations, \textsc{Janus}, implemented static, reversible arrays~\cite{rg:janus}.
+Besides asymmetric object lifetimes, \rooplpp also introduces reversible, dynamic arrays in form of the \textbf{vector} type. While \textsc{Roopl} on featured integers and custom data types in form of classes, one of its main inspirations, \textsc{Janus}, implemented static, reversible arrays~\cite{ty:janus}.
 
 While \textsc{Roopl} by design did not include any data storage language constructs, as they are not especially noteworthy nor interesting from an OOP perspective, they do generally improve the expressiveness of the language. For \rooplpp these were decided to be part of the core language as array, especially multi-dimensional, dynamic arrays become interesting from a memory management perspective.
 
@@ -168,16 +168,5 @@ x[5] \texttt{+=}\ x[5] + 1
 However, we do allow other, initialized (non-zero-cleared array elements) to be referenced in the right hand side of the statement.
 
 \section{Local blocks}
+\label{sec:local-blocks}
 %TODO: Alias for construct/destruct block for objects
-
-\section{Type System}
-\label{sec:type-system}
-
-\section{Language Semantics}
-\label{sec:language-semantics}
-
-\section{Program Inversion}
-\label{sec:program-inversion}
-
-\section{Computational Strength}
-\label{sec:computational-strength}

@@ -12,7 +12,7 @@ procedure allocate(int object_size, int free_lists[], stack block_history)
     until (2 * pow_2_n) > object_size && free_lists[pow_2_n] != 0
 
     local int found_block = pow_2_n
-    push(found_block, block_history)
+        push(found_block, block_history)
     delocal int found_block = 0
 
     from pow_2_n > top(block_history) / 2 do
@@ -36,3 +36,11 @@ procedure main()
    free_lists[16] += 1
 
     call allocate(object_size, free_lists, block_history)
+
+    object_size -= 4
+    call allocate(object_size, free_lists, block_history)
+    call allocate(object_size, free_lists, block_history)
+
+    local int x = top(block_history)
+    uncall allocate(x, free_lists, block_history)
+    delocal int x = 4
