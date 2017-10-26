@@ -31,7 +31,8 @@ A \rooplpp program consists, analogously to a \textsc{Roopl} program, of one or 
     			&\ |\ \qquad \textbf{from}\ e\ \textbf{do}\ s\ \textbf{loop}\ s\ \textbf{until}\ e\tag{loop}\\
                 &\ |\ \qquad \textbf{construct}\ d\ x\quad s\quad\textbf{destruct}\ x\tag{object block}\\
                 &\ |\ \qquad \textbf{local}\ t\ x\ \texttt{=}\ e\quad s\quad\textbf{delocal}\ t\ x\ \texttt{=}\ e\tag{local variable block}\\
-    			&\ |\ \qquad \textbf{new}\ d\ x\ |\ \textbf{delete}\ d\ x \tag{object con- and destruction}\\
+                &\ |\ \qquad \textbf{new}\ d\ x\ |\ \textbf{delete}\ d\ x \tag{object con- and destruction}\\
+                &\ |\ \qquad \textbf{copy}\ d\ x\ x\ |\ \textbf{uncopy}\ d\ x\ x \tag{reference con- and destruction}\\
     			&\ |\ \qquad \textbf{call}\ q\textbf{\texttt{(}}x,\ \dots,\ x\textbf{\texttt{)}}\ |\ \textbf{uncall}\ q\textbf{\texttt{(}}x,\ \dots,\ x\textbf{\texttt{)}}\tag{local method invocation}\\
     			&\ |\ \qquad \textbf{call}\ x\textbf{\texttt{::}}q\textbf{\texttt{(}}x,\ \dots,\ x\textbf{\texttt{)}}\ |\ \textbf{uncall}\ x\textbf{\texttt{::}}q\textbf{\texttt{(}}x,\ \dots,\ x\textbf{\texttt{)}}\tag{method invocation}\\
     			&\ |\ \qquad \textbf{skip}\ |\ s\ s\tag{statement sequence}\\
@@ -170,3 +171,142 @@ However, we do allow other, initialized (non-zero-cleared array elements) to be 
 \section{Local blocks}
 \label{sec:local-blocks}
 %TODO: Alias for construct/destruct block for objects
+
+
+\section{Type System}
+\label{sec:type-system}
+
+\section{Language Semantics}
+\label{sec:language-semantics}
+
+\section{Program Inversion}
+\label{sec:program-inversion}
+
+
+
+
+\section{Computational Strength}
+\label{sec:computational-strength}
+Traditional, non-reversible programming languages have their computational strength measured in terms of their abilities to simulate the Turing machine (TM). If any arbitrary Turing machine can be implemented in some programming language, the language is said to be computationally universal or Turing-complete. In essence, Turing-completeness marks when a language can compute all computable functions. Reversible programming languages, like \textsc{Janus}, \textsc{Roopl} and \rooplpp, are not Turing-complete as they only are capable of computing injective, computable functions.
+
+For determining computing strength of reversible programming languages,~\citeauthor{ty:ejanus} suggests that the reversible Turing machine (RTM) could serve as the baseline criterion~\cite{ty:ejanus}. As such, if a reversible programming language is reversibly universal or r-Turing complete if it is able to simulate a reversible Turing machine cleanly, i.e. without generating garbage data. If garbage was left on the tape, the function simulated by the machine would not be an injective function and as such, no garbage should be left after termination of the simulation.
+
+\subsection{Reversible Turing Machines}
+\label{subsec:reversible-turing-machine}
+Before we show that \rooplpp in fact is r-Turing complete, we present the formalized reversible Turing machine definition, as used in~\cite{ty:ejanus}.
+\vspace{4mm}
+\begin{definition}
+    \label{def:quadruple-tm}(Quadruple Turing Machine)\vspace{4mm}\\
+    \noindent A TM T is a tuple $(Q,\ \Gamma,\ b,\ \delta,\ q_s,\ q_f)$ where
+    %
+    \begin{itemize}[label = {}, itemsep = 1pt]
+        \item $Q$ is the finite non-empty set of states
+        \item $\Gamma$ is the finite non-empty set of tape alphabet symbols
+        \item $b\ \in\ \Gamma$ is the blank symbol
+        \item $\delta\ :\ (Q\ \times\ \Gamma\ \times\ \Gamma\ \times\ Q)\ \cup\ (Q\ \times\ \{/\}\ \times\ \{L,\ R\}\ \times\ Q)$ is the partial function representing the transitions
+        \item $q_s\ \in\ Q$ is the starting state
+        \item $q_f\ \in\ Q$ is the final state
+    \end{itemize}
+    %
+    The symbols $L$ and $R$ represent the tape head shift-directions left and right. A quadruple is either a symbol rule of the form $(q_1,\ s_1,\ s_2,\ q_2)$ or a shift rule of the form $(q_1,\ /,\ d,\ q_2)$ where $q_1 \in Q$, $q_2 \in Q$, $s_1 \in \Gamma$, $s_2 \in \Gamma$ and $d$ being either $L$ or $R$.
+    
+    A symbol rule $(q_1,\ s_1,\ s_2,\ q_2)$ means that in state $q_1$, when reading $s_1$ from the tape, write $s_2$ to the tape and change to state $q_2$. A shift rule $(q_1,\ /,\ d,\ q_2)$ means that in state $q_1$, move the tape head in direction $d$ and change to state $q_2$.
+\end{definition}
+\vspace{4mm}
+\begin{definition}
+    \label{def:reversible-tm}(Reversible Turing Machine)\vspace{4mm}\\
+    \noindent A TM T is a reversible TM iff, for any distinct pair of quadruples $(q_1,\ s_1,\ s_2,\ q_2)\ \in\ \delta_T$ and $(q'_1,\ s'_1,\ s'_2,\ q'_2)\ \in\ \delta_T$, we have
+    %
+    \begin{itemize}[label = {}, itemsep = 1pt]
+        \item $q_1\ =\ q'_1\ \implies\ (t_1\ \neq\ / \quad \wedge \quad t'_1\ \neq\ / \quad \wedge \quad t_1\ \neq\ t'_1)$ (forward determinism)
+        \item $q_2\ =\ q'_2\ \implies\ (t_1\ \neq\ / \quad \wedge \quad t'_1\ \neq\ / \quad \wedge \quad t_2\ \neq\ t'_2)$ (backward determinism)
+    \end{itemize}
+\end{definition}
+
+\citeauthor{th:roopl} describe a RTM simulation implemented in \textsc{Roopl} by representing the set of states $\{q_1,\ \dots,\ q_n\}$ and the tape alphabet $\Gamma$ as integers and the rule $/$ and direction symbols $L$ and $R$ as the uppercase integer literals \inst{SLASH}, \inst{LEFT} and \inst{RIGHT}. As \textsc{Roopl} contains no array or stack primitives, the transition table $\delta$ was suggested to be represented as a linked list of objects containing four integers ${\textbf{q1}}$, ${\textbf{s1}}$, ${\textbf{s2}}$ and ${\textbf{q2}}$ each, where ${\textbf{s1}}$ equals \inst{SLASH} for shift rules. In \rooplpp, we do, however, has an array primitive and as such, we can simply simulate transitions, by having rules ${\textbf{q1}}$, ${\textbf{s1}}$, ${\textbf{s2}}$ and ${\textbf{q2}}$ represented as arrays, where the number of cells in each array is \inst{PC\_MAX}, in a similar fashion as in~\cite{ty:ejanus}.
+
+\subsection{Tape Representation}
+\label{subsec:tape-representation}
+As with regular Turing machines, the tape of the machine is of infinite length. Therefore, we must simulate tape growth in either direction.
+\citeauthor{ty:ejanus} represented the tape using two stack primitives in the Janus RTM interpreter and \citeauthor{th:roopl} used list of objects. In \rooplpp, we could implement a stack, as objects are not statically scoped as in \textsc{Roopl}. However, in terms of easy of use, a linked-list implementation, of simple objects containing a \textit{value} and \textit{next} field, is more intuitive.
+
+As such, the cell index which the tape head currently hovers over is represented by an integer variable, which simply is the index into the linked list of tape cells. At the end of each simulated step of the RTM, the position of the tape head variable is bounds-checked to determine if the tape head has moved off the current tape length to either the left or the right. In either case, a new cell is allocated and prepended to the linked list, if the tape head moved off the tape to the left and appended to the linked list, if the tape head moved off the tape to the right. Thus allowing the tape to grow unboundedly in either direction.
+
+\subsection{Reversible Turing Machine Simulation}
+\label{subsec:rtm-simulation}
+Figure~\ref{fig:rtm-instruction-method} shows the modified method \textit{inst} from~\cite{ty:ejanus}, which executes a single instruction given a the current state, symbol, program counter and the four arrays representing the transition rules. 
+
+\begin{figure}[ht]
+    % TODO: Fix referencing
+    \centering
+    \begin{lstlisting}[style = basic, language = roopl]
+    method inst(int state, int symbol, int q1[], int s1[], int s2[], int q2[], int pc)
+        if (state = q1[pc]) && (symbol = s1[pc]) then   // Symbol rule:
+            state += q2[pc]-q1[pc]                      // set state to q2[pc]
+            symbol += s2[pc]-s1[pc]                     // set symbol to s2[pc]
+        fi (state = q2[pc]) && (symbol = s2[pc])
+        if (state = q1[pc]) && (s1[pc] = SLASH) then    // Move rule:
+            state += q2[pc]-q1[pc]                      // set state to q2[pc]
+            if s2[pc] = RIGHT then
+                pos += 1                                // Move tape head right
+            fi s2[pc] = RIGHT
+            if s2[pc] = LEFT then
+                pos -= 1                                // Move tape head left
+            fi s2[pc] = LEFT
+        fi (state = q2[pc]) && (s1[pc] = SLASH)
+    \end{lstlisting}
+    \caption{Method for executing a single TM transition}
+    \label{fig:rtm-instruction-method}
+\end{figure}
+
+Figure~\ref{fig:rtm-simulation-method} shows the simulate method which is the main method responsible for running the RTM simulation. The tape is extended in either direction when needed and the program counter it incremented.
+
+Unlike the \textsc{Roopl} simulation, \rooplpp is not limited by stack allocated, statically-scoped objects. Due to this limitation, the \textsc{Roopl} RTM simulator cannot finish with the TM tape as its program output when the RTM halts, as the call stack of the simulation must unwind before termination. As \rooplpp has dynamically-scoped objects, this limitation is lifted and as such, the TM tape will exist as the program out when the RTM halts.
+
+\begin{figure}[ht]
+    \centering
+    \begin{lstlisting}[style = basic, language = roopl]
+    method simulate(Cell tape, int pos, int state, int q1[], 
+                    int s1[], int s2[], int q2[], int pc)
+        local int len = 0
+        call tape::length(len)                                  //Calculate length of tape
+
+        if pos > len then                                       //Append new tape cell
+            new Cell cell(BLANK, empty)
+            call tape::insert(pos, len, cell)
+            call simulate(                                      //Continue simulation
+            Cell tape, int pos, int state, int q1[], 
+            int s1[], int s2[], int q2[], int pc) 
+        else
+            if pos < 0 then //Prepend new tape cell
+                new Cell cell(BLANK, tape)
+                tape <=> cell
+                pos += 1
+                call simulate(                                  //Continue simulation
+                    Cell tape, int pos, int state, int q1[], 
+                    int s1[], int s2[], int q2[], int pc)         
+            else
+                call incrementPc(pc, PC_MAX)                    //Increment pc
+                local int symbol = 0
+                call tape::lookup(pos, symbol)                  //Fetch current symbol
+                call inst(state, symbol, q1, s1, s2, q2, pc)
+                uncall tape::lookup(pos, symbol)                //Zero-clear symbol    
+                delocal symbol = 0
+                             
+                if state = Qf then                              //If RTM simulation is finished
+                    call tape::get(result)                      //Copy result of simulation
+                else
+                    call simulate(                              //Continue simulation
+                        Cell tape, int pos, int state, int q1[], 
+                        int s1[], int s2[], int q2[], int pc)     
+                fi state = Qf
+            fi pos < 0
+        fi pos > len
+
+        uncall tape::length(len)                                //Clear length of tape
+        delocal len = 0
+    \end{lstlisting}
+    \caption{Main RTM simulation method}
+    \label{fig:rtm-simulation-method}
+\end{figure}
+
