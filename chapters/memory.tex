@@ -11,29 +11,111 @@ An important matter to consider when designing a heap layout for dynamic memory 
 We distinguish different types of fragmentation as internal or external fragmentation.
 
 \subsection{Internal Fragmentation}
-% TODO: Revise
 Internal fragmentation occurs in the memory heap when part of an allocated memory block is unused. This type of fragmentation can arise from a number of different scenarios, but mostly it originates from \textit{over-allocating}. 
 
-An example of \textit{over-allocating} would be a scenario where we are allocating memory for an object of size $m$ onto a simple, fixed-sized block heap, where the fixed block size is $n$ and $m \neq n$. If $n > m$, internal fragmentation would occur of size $n-m$ for every object of size $m$ allocated in said heap. If $n < m$, numerous blocks would be required for allocation to fit our object. In this case the internal fragmentation would be of size $m + n - (m + n) \mod n$ per allocated object of size $m$. 
+An example of \textit{over-allocating} would be a scenario where we are allocating memory for an object of size $m$ onto a simple, fixed-sized block heap, where the fixed block size is $n$ and $m \neq n$. If $n > m$, internal fragmentation would occur of size $n-m$ for every object of size $m$ allocated in said heap. If $n < m$, numerous blocks would be required for allocation to fit our object. In this case the internal fragmentation would be of size $n - m\ mod\ n$ per allocated object of size $m$. 
 
 \begin{figure}[ht]
-\centering
-\texttt{TODO}
-\caption{Example of internal fragmentation due to \textit{over-allocation}}
-\label{fig:internal-frag-example}
-\end{figure}
+  \centering
+  \begin{subfigure}{.4\textwidth}
+    \centering
+    \begin{tikzpicture}
+      % Background
+      \fill[fill = grey] (0, 0) rectangle (3, 3) node[midway] {};
+  
+      % Frame
+      \draw (0, 0) -- (3, 0);
+      \draw (0, 0) -- (0, 3);
+      \draw (3, 3) -- (0, 3);
+      \draw (3, 3) -- (3, 0); 
+  
+      % Grid
+      \draw (1, 0) -- (1, 3);
+      \draw (2, 0) -- (2, 3);
+      \draw (0, 0.5) -- (3, 0.5);
+      \draw (0, 1) -- (3, 1);
+      \draw (0, 1.5) -- (3, 1.5);
+      \draw (0, 2) -- (3, 2);
+      \draw (0, 2.5) -- (3, 2.5);
+    \end{tikzpicture}
+  \end{subfigure}
+  \begin{subfigure}{.4\textwidth}
+    \centering
+    \begin{tikzpicture}
+      % Background
+      \fill[fill = grey] (0, 0) rectangle (3, 3) node[midway] {};
+  
+      % Frame
+      \draw (0, 0) -- (3, 0);
+      \draw (0, 0) -- (0, 3);
+      \draw (3, 3) -- (0, 3);
+      \draw (3, 3) -- (3, 0); 
+  
+      % Grid
+      \draw (1, 0) -- (1, 3);
+      \draw (2, 0) -- (2, 3);
+      \draw (0, 0.5) -- (3, 0.5);
+      \draw (0, 1) -- (3, 1);
+      \draw (0, 1.5) -- (3, 1.5);
+      \draw (0, 2) -- (3, 2);
+      \draw (0, 2.5) -- (3, 2.5);
+    \end{tikzpicture}
+  \end{subfigure}
+  \begin{subfigure}{.4\textwidth}
+    \centering
+    \begin{tikzpicture}
+      % Background
+      \fill[fill = grey] (0, 0) rectangle (3, 3) node[midway] {};
+  
+      % Frame
+      \draw (0, 0) -- (3, 0);
+      \draw (0, 0) -- (0, 3);
+      \draw (3, 3) -- (0, 3);
+      \draw (3, 3) -- (3, 0); 
+  
+      % Grid
+      \draw (1, 0) -- (1, 3);
+      \draw (2, 0) -- (2, 3);
+      \draw (0, 0.5) -- (3, 0.5);
+      \draw (0, 1) -- (3, 1);
+      \draw (0, 1.5) -- (3, 1.5);
+      \draw (0, 2) -- (3, 2);
+      \draw (0, 2.5) -- (3, 2.5);
+    \end{tikzpicture}
+  \end{subfigure}
+  \caption{Example of internal fragmentation due to \textit{over-allocation}}
+  \label{fig:internal-frag-example}
+\end{figure}  
+
+% \begin{figure}
+%   \centering
+%   \begin{subfigure}{.5\textwidth}
+%     \centering
+%     \texttt{jaja}
+%     \caption{A subfigure}
+%     \label{fig:sub1}
+%   \end{subfigure}%
+%   \begin{subfigure}{.5\textwidth}
+%     \centering
+%     \texttt{jaja}
+%     \caption{A subfigure} 
+%     \label{fig:sub2}
+%   \end{subfigure}
+%   \caption{Example of internal fragmentation due to \textit{over-allocation}}
+%   \label{fig:internal-frag-example}
+% \end{figure}
+  
 
 Figure~\ref{fig:internal-frag-example} visualizes the examples of internal fragmentation build-up from \textit{over-allocating} memory. 
 
 Intuitively, internal fragmentation can be prevented by ensuring that the size of the block(s) being used for allocating space for an object of size $m$ either match or sums to this exact size.
 
 \subsection{External Fragmentation}
-% TODO: Revise
-External fragmentation materializes in the memory heap when a freed block becomes partly or completely unusable for future allocation if it, say, is surrounded by allocated blocks but the size of the freed block is too small to contain any object on its own.
+External fragmentation materializes in the memory heap when a freed block becomes partly or completely unusable for future allocation if it, say, is surrounded by allocated blocks but the size of the freed block is too small to contain objects on its own.
 
-This type of fragmentation is generally a more substantial cause of problems than internal fragmentation, as the size of external fragmentation blocks usually are larger than the ones created from internal fragmentation, depending on the heap implementation (In a layout using variable-sized blocks of, say, size $2^n$, the internal fragment size becomes considerable for large $n$s). 
+This type of fragmentation is generally a more substantial cause of problems than internal fragmentation, as the amount of wasted memory typically is larger and less predictable in external fragmentation blocks than in internal fragmentation blocks. Depending on the heap implementation, i.e. a layout using variable-sized blocks of, say, size $2^n$, the internal fragment size becomes considerable for large $n$s. 
 
-Non-allocatable external fragments become a problem when there it is impossible to allocate space for a large object as a result of too many non-consecutive blocks scattered around the heap, caused by the external fragmentation. Physically, there is enough space to store the object, but not in the current heap state. In this scenario we would need a garbage collector to clean the heap and relocate blocks in such a manner that the fragmentation disperses.
+Non-allocatable external fragments become a problem when there it is impossible to allocate space for a large object as a result of too many non-consecutive blocks scattered around the heap, caused by the external fragmentation. Physically, there is enough space to store the object, but not in the current heap state. In this scenario we would need to relocate blocks in such a manner that the fragmentation disperses.
 
 \begin{figure}[ht]
 \centering
@@ -57,10 +139,18 @@ This intuitively leads to the question of garbage classification. In the reversi
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.7\textwidth]{garbage-classes}
+% \includegraphics[width=0.7\textwidth]{garbage-classes}
 \caption{All free-lists are considered equivalent in terms of injective functions (Temporary photo)}
 \label{fig:equivalent-free-lists}
 \end{figure}
+
+\section{Linearity and reference counting}
+\label{sec:referencing}
+Reversible programming languages such as \textsc{Janus} and \textsc{Roopl} are linear in the sense that object and variable pointers cannot be copied and are only deleted during deallocation. Pointer copying greatly increases the flexibility of programming, especially in a reversible settings where zero-clearing is critical. For variables, pointer copying is not particular interesting, nor would it add much flexibility as the values of a variable simply can be copied into statically-scoped local blocks. For objects however, tedious amounts of boilerplate work must be done if object $A$ and $B$ need to work on the same object $C$ and only one reference to each object is allowed.
+
+ \citeauthor{tm:refcounting} presented the reversible functional language \textsc{Rcfun} which used reference counting to allow multiple pointers to the same memory nodes as well as a translation from \textsc{Rcfun} into \textsc{Janus}. In \textsc{Rcfun}, reference counting is used to manage and trace the number of pointer copies made by respectively incrementing and decrementing a \textit{reference count} stored in the memory node, whenever the original node pointer is copied or a copy pointer is deleted. For the presented heap manage, deletion of object nodes was only allowed when no references to a node remained.
+
+In non-reversible languages, reference counting is also used in garbage collection by automatically deallocating unreachable objects and variables which contains no referencing. 
 
 
 \section{Heap manager layouts}
@@ -182,6 +272,7 @@ The body of the allocation function is executed recursively until a free block l
 
 \begin{figure}[H]
   \centering
-%   \includegraphics[width=0.7\textwidth]{heap-designs}
+  % \includegraphics[width=0.7\textwidth]{heap-designs}
   \caption{Heap memory layouts (Draft)}
 \end{figure}
+

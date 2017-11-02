@@ -11,7 +11,6 @@ Inspired by other language successors such as \textsc{C\texttt{++}} was to \text
 \end{figure}
 \newpage
 
-% TODO: String type maybe? 
 % TODO: Update new / delete for array assignment
 \section{Syntax}
 \label{sec:syntax}
@@ -104,6 +103,34 @@ and the mechanisms of the \textbf{delete} statement are as follow
 
 The mechanisms of the \textbf{new} and \textbf{delete} statements are, essentially, a split of the mechanisms of the \textbf{construct}/\textbf{destruct} blocks into two separate statements. As with \textsc{Roopl}, fields must be zero-cleared after object deletion, otherwise it is impossible for the system to reclaim the memory reversibly. This is the responsibility of the of the programmer to maintain this, and to ensure that objects are indeed deleted in the first place. A \textbf{new} statement without a corresponding \textbf{delete} statement targeting the same object further ahead in the program is undefined.
 
+\section{Object Referencing}
+Besides dynamically scoped objects, \rooplpp also increases program flexibility by allowing multiple references to objects through the usage of the \textbf{copy} statement. Once instantiated through either a \textbf{new} or \textbf{construct/destruct} block, an object reference can be copied into a new variable. The reference acts as a regular class instance and can be modified through methods as per usual. To delete a reference, the logical inverse statement \textbf{uncopy} must be used.
+
+The syntax for referencing consists of the statement
+\begin{align*}
+    \textbf{copy}\ c\ x\ x'
+\end{align*}
+which makes a reference of variable $x$, an instance of class $c$, and stores the reference in variable $x'$.
+
+For deleting copies, the following statement is used
+\begin{align*}
+    \textbf{uncopy}\ c\ x\ x'
+\end{align*}    
+which simply zero-clears variable $x'$, which is a reference to variable $x$, an instance of class $x$.
+
+The mechanism of the \textbf{copy} statement is simply as follows
+\begin{enumerate}
+    \item The memory address stored in variable $x$ is copied into the zero-cleared variable $x'$. If $x'$ is not zero-cleared or $x$ is not a class instance, then \textbf{copy} is undefined.
+\end{enumerate}
+
+The mechanism of the \textbf{uncopy} statement is simply as follows
+\begin{enumerate}
+    \item The memory address stored in variable $x'$ is zero-cleared if it matches the address stored in $x$. If $x'$ is not a copy of $x$ or $x$ has been zero-cleared before the \textbf{uncopy} statement is executed, said statement is undefined.
+\end{enumerate}
+As references does not require all fields to be zero-cleared (as they simply are pointers to existing objects), the reversible programmer should carefully ensure that all references to objects are un-copied before deleting said object, as copied references to cleared objects would be pointing to cleared memory, which might be used later by the system. These type of references are also known as \textit{dangling pointers}.
+
+It should be noted, that from a language design perspective, it is the programmer's responsibility to ensure such situations does not occur. From an implementation perspective, such situations are usually checked by the compiler either statically during compilation or during the actual runtime of the program. This is addressed later in section .... % TODO: Reference to error handling and referencing counting sections
+
 
 \section{Vector Model}
 \label{sec:vector-model}
@@ -175,6 +202,285 @@ However, we do allow other, initialized (non-zero-cleared array elements) to be 
 
 \section{Type System}
 \label{sec:type-system}
+% TODO: Cite winskell
+The type system of \rooplpp expands on the type system of \textsc{Roopl} presented by~\citeauthor{th:roopl} in~\cite{th:roopl} and is analogously described by syntax-directed inference typing rules in the style of Winskell. As \rooplpp introduces two new types in form of \textit{references} and \textit{vectors}, a few \textsc{Roopl} typing rules must be modified to accommodate these added types. For completeness all typing rules, including unmodified rules, are included in the following sections.
+
+\subsection{Preliminaries}
+\label{subsec:preliminaries}
+The types in \rooplpp are given by the following grammar:
+\begin{equation*}
+    \tau ::= \textbf{int}\ |\ c \in \text{ClassIDs}\ |\ r \in \text{ReferenceIDs}\ |\ v \in \text{VectorIDs}
+\end{equation*}
+The type environment $\Pi$ is a finite map paring variables to types, which can be applied to an identifier $x$ using the $\Pi(x)$ notation. Notation $\Pi' = \Pi[x \mapsto \tau]$ defines updates and creation of a new type environment $\Pi'$ such that $\Pi'(x) = \tau$ and $\Pi'(y) = \Pi(y)$ if $x \not= y$, for some variable identifier $x$ and $y$. The empty type environment is denoted as $[\ ]$ and the function $vars\ :\ Expressions\ \to \text{VarIDs}$ is described by the following definition
+\begin{align*}
+    &\text{vars}(\bar{n}) &&= \emptyset\\
+    &\text{vars}(\textbf{nil}) &&= \emptyset\\
+    &\text{vars}(x) &&= \{\ x\ \}\\
+    &\text{vars}(e_1 \otimes e_2) &&= \text{vars}(e_1) \cup \text{vars}(e_2).
+\end{align*}
+The binary subtype relation $c_1 \prec: c_2$ is required for supporting subtype polymorphism as is defined as follows
+\begin{align*}
+    c_1 &\prec: c_2 &&\text{if}\ c_1\ \text{inherits from}\ c_2\\
+    c   &\prec: c   &&(reflexivity)\\
+    c_1 &\prec: c_3 &&\text{if}\ c_1 \prec: c_2\ \text{and}\ c_2 \prec: c_3\ (transitivity)
+\end{align*}
+
+% TODO: Class defintions
+
+\subsection{Expressions}
+\label{subsec:expressions}
+The type judgment
+
+\begin{prooftree}
+	\AXC{}
+    \UIC{$\Pi \vdash_{expr}\ e : \tau$} 
+\end{prooftree} 
+
+defines the type of expressions. The judgment reads as: under type environment $\Pi$, expression $e$ has type $\tau$.
+
+\begin{figure}[ht]
+    \begin{center}
+        \AXC{} % Con
+        \RL{\textsc{T-Con}}
+        \UIC{$\Pi \vdash_{expr}\ n : \textbf{int}$} 
+        \DP
+        \hskip 2em % Var
+        \AXC{$\Pi(x) = \tau$}
+        \RL{\textsc{T-Var}}
+        \UIC{$\Pi \vdash_{expr}\ x : \tau$} 
+        \DP
+        \hskip 2em % Nil
+        \AXC{$\tau \not= \textbf{int}$}
+        \RL{\textsc{T-Nil}}
+        \UIC{$\Pi \vdash_{expr}\ \textbf{nil}\ : \tau$}
+        \DP
+        
+        \vskip 2em % BinOpInt
+        \AXC{$\Pi \vdash_{expr}\ e_1 : \textbf{int}$}
+        \AXC{$\Pi \vdash_{expr}\ e_2 : \textbf{int}$}
+        \RL{\textsc{T-BinOpInt}}
+        \BIC{$\Pi \vdash_{expr}\ e_1 \otimes e_2 : \textbf{int}$}
+        \DP
+
+        \vskip 2em % BinOpObj
+        \AXC{$\Pi \vdash_{expr}\ e_1 : \textbf{int}$}
+        \AXC{$\Pi \vdash_{expr}\ e_2 : \textbf{int}$}
+        \AXC{$\ominus \in \{ \texttt{\textbf{=}}, \texttt{\textbf{!=}} \}$}
+        \RL{\textsc{T-BinOpObj}}
+        \TIC{$\Pi \vdash_{expr}\ e_1 \otimes e_2 : \textbf{int}$}
+        \DP
+    \end{center}
+    \caption{Typing rules for expressions}
+    \label{fig:typing-rules-expressions}
+\end{figure}
+
+The type rules \textsc{T-Con}, \textsc{T-Var} and \textsc{T-Nil} defines typing of the simplest expressions. Numeric literals are of type \textbf{int}, typing of variable expressions depends on the type of the variable in the type environment and the \textbf{nil} literal is a non-integer type. All Binary operations are defined for integers, while only equality-operators are defined for objects.
+
+\subsection{Statements}
+\label{subsec:statements}
+The type judgment
+
+\begin{prooftree}
+	\AXC{}
+    \UIC{$\langle \Pi,\ c\rangle\ \vdash_{stmt}^\Gamma\ s$} 
+\end{prooftree} 
+
+defines well-typed statements. The judgment reads as under type environment $\Pi$ within class $c$, statement $s$ is well-typed with class map $\Gamma$.
+
+\begin{figure}[H]
+    \begin{center}
+        % Assignment
+        \AXC{$x \not\in \text{vars}(e)$}
+        \AXC{$\Pi \vdash_{expr}\ e : \textbf{int}$}
+        \AXC{$\Pi(x) = \textbf{int}$}
+        \RL{\textsc{T-AssVar}}
+        \TIC{$\langle \Pi, c \rangle \vdash^{\Gamma}_{stmt}\ x \odot= e$}
+        \DP
+
+        \vskip 2em
+        
+        % If
+        \AXC{$\Pi \vdash_{expr}\ e_1 : \textbf{int}$}
+        \AXC{$\langle \Pi, c \rangle \vdash^{\Gamma}_{stmt}\ s_1$}
+        \AXC{$\langle \Pi, c \rangle \vdash^{\Gamma}_{stmt}\ s_2$}
+        \AXC{$\Pi \vdash_{expr}\ e_2 : \textbf{int}$}
+        \RL{\textsc{T-If}}
+        \QIC{$\langle \Pi, c \rangle \vdash^{\Gamma}_{stmt}\ \textbf{if}\ e_1\ \textbf{then}\ s_1\ \textbf{else}\ s_2\ \textbf{fi}\ e_2$}
+        \DP
+
+        \vskip 2em
+
+        % Loop
+        \AXC{$\Pi \vdash_{expr}\ e_1 : \textbf{int}$}
+        \AXC{$\langle \Pi, c \rangle \vdash^{\Gamma}_{stmt}\ s_1$}
+        \AXC{$\langle \Pi, c \rangle \vdash^{\Gamma}_{stmt}\ s_2$}
+        \AXC{$\Pi \vdash_{expr}\ e_2 : \textbf{int}$}
+        \RL{\textsc{T-Loop}}
+        \QIC{$\langle \Pi, c \rangle \vdash^{\Gamma}_{stmt}\ \textbf{from}\ e_1\ \textbf{do}\ s_1\ \textbf{loop}\ s_2\ \textbf{until}\ e_2$}
+        \DP
+
+        \vskip 2em
+        
+        % ObjectBlock + Skip
+        \AXC{$\langle \Pi[x \mapsto c'], c \rangle \vdash^{\Gamma}_{stmt}\ s$}
+        \RL{\textsc{T-ObjBlock}}
+        \UIC{$\langle \Pi, c \rangle \vdash^{\Gamma}_{stmt}\ \textbf{construct}\ c'\ x\quad s\quad \textbf{destruct}\ x$} 
+        \DP
+        \hskip 2em
+        \AXC{}
+        \RL{\textsc{T-Skip}}
+        \UIC{$\langle \Pi, c \rangle \vdash^{\Gamma}_{stmt}\ \textbf{skip}$} 
+        \DP
+
+        \vskip 2em
+
+        % Object new
+        \AXC{}
+        \RL{\textsc{T-ObjNew}}
+        \UIC{$\langle \Pi[x \mapsto c'], c \rangle  \vdash^{\Gamma}_{stmt}\ \textbf{new}\ c'\ x$} 
+        \DP
+        \hskip 2em
+        \AXC{$\Pi(x) = c'$}
+        \RL{\textsc{T-ObjDlt}}
+        \UIC{$\langle \Pi \setminus \{x\}, c \rangle  \vdash^{\Gamma}_{stmt}\ \textbf{delete}\ c'\ x$} 
+        \DP
+
+        \vskip 2em
+
+        % Object delete
+        \AXC{$\Pi(x) = c'$}
+        \RL{\textsc{T-Cp}}
+        \UIC{$\langle \Pi[x' \mapsto c'], c \rangle  \vdash^{\Gamma}_{stmt}\ \textbf{copy}\ c'\ x\ x'$} 
+        \DP
+        \hskip 2em
+        \AXC{$\Pi(x) = c'$}
+        \AXC{$\Pi(x') = c'$}
+        \RL{\textsc{T-Ucp}}
+        \BIC{$\langle \Pi \setminus \{x'\}, c \rangle  \vdash^{\Gamma}_{stmt}\ \textbf{uncopy}\ c'\ x\ x'$} 
+        \DP
+
+        \vskip 2em
+
+        % Seq + SwapVar
+        \AXC{$\langle \Pi, c \rangle \vdash^{\Gamma}_{stmt}\ s_1$}
+        \AXC{$\langle \Pi, c \rangle \vdash^{\Gamma}_{stmt}\ s_2$}
+        \RL{\textsc{T-Seq}}
+        \BIC{$\langle \Pi, c \rangle \vdash^{\Gamma}_{stmt}\ s_1\ s_2$}
+        \DP
+        \hskip 2em
+        \AXC{$\Pi(x_1) = \Pi(x_2)$}
+        \RL{\textsc{T-SwpVar}}
+        \UIC{$\langle \Pi, c \rangle \vdash^{\Gamma}_{stmt}\ x_1\ \texttt{\textbf{<=>}}\ x_2$}
+        \DP
+
+        \vskip 2em
+
+        % T-Call
+        \AXC{$\Gamma(\Pi(c)) = \Big( fields,\ methods \Big)$}
+        \DP
+        \AXC{$\Big( \textbf{method}\ q(t_1\ y_1,\ ...,\ t_n\ y_n)\ s \Big) \in methods$}
+        \DP
+        \AXC{$\{ x_1,\ ...,\ x_n \} \cap fields = \emptyset$}
+        \AXC{$i \not= j \implies x_i \not= x_j$}
+        \AXC{$\Pi(x_1) \prec: t_1\ \cdots\ \Pi(x_n) \prec: t_n$}
+        \RL{\textsc{T-Call}}
+        \TIC{$\langle \Pi, c \rangle \vdash^{\Gamma}_{stmt}\ \textbf{call}\ q(x_1,\ ...,\ x_n)$}
+        \DP
+
+        \vskip 2em
+        
+        % T-CallO
+        \AXC{$\Gamma(\Pi(x_0)) = \Big( fields,\ methods \Big)$}
+        \DP
+        \AXC{$\Big( \textbf{method}\ q(t_1\ y_1,\ ...,\ t_n\ y_n)\ s \Big) \in methods$}
+        \DP
+        \AXC{$i \not= j \implies x_i \not= x_j$}
+        \AXC{$\Pi(x_1) \prec: t_1\ \cdots\ \Pi(x_n) \prec: t_n$}
+        \RL{\textsc{T-CallO}}
+        \BIC{$\langle \Pi, c \rangle \vdash^{\Gamma}_{stmt}\ \textbf{call}\ x_0::q(x_1,\ ...,\ x_n)$}
+        \DP
+
+        \vskip 2em
+
+        % UC and UCO
+        \AXC{$\langle \Pi, c \rangle \vdash^{\Gamma}_{stmt}\ \textbf{call}\ q(x_1,\ ...,\ x_n)$}
+        \RL{\textsc{T-Uc}}
+        \UIC{$\langle \Pi, c \rangle \vdash^{\Gamma}_{stmt}\ \textbf{uncall}\ q(x_1,\ ...,\ x_n)$}
+        \DP
+        \hskip 2em
+        \AXC{$\langle \Pi, c \rangle \vdash^{\Gamma}_{stmt}\ \textbf{call}\ x_0::q(x_1,\ ...,\ x_n)$}
+        \RL{\textsc{T-Uco}}
+        \UIC{$\langle \Pi, c \rangle \vdash^{\Gamma}_{stmt}\ \textbf{uncall}\ x_0::q(x_1,\ ...,\ x_n)$}
+        \DP
+    \end{center}
+    \caption{Typing rules for statements}
+    \label{fig:typing-rules-statements}
+\end{figure}
+
+Typing rule \textsc{T-AssVar} defines variable assignments for an integer variable and an integer expression result, given that the variable $x$ does not occur in the expression $e$. 
+
+The type rules \textsc{T-If} and \textsc{T-Loop} defines reversible conditionals and loops as known from \textsc{Janus}, where entry and exit conditions are integers and branch and loop statements are well-typed statements. 
+
+The object block, introduced in \textsc{Roopl}, is only well-typed if its body statement is well-typed. 
+
+The \textsc{T-ObjNew} and \textsc{T-ObjDlt} rules defines well-typed \textbf{new} and \textbf{text}{delete} statements for dynamically scoped objects. The \textbf{new} statement is always well-typed, as long as $c' \in \text{classIDs}$ and the \textbf{delete} is well-typed if the type of $x$ under type environment $\Pi$ is equal to $c'$. 
+
+Typing rules \textsc{T-Cp} and \textsc{T-Ucp} defines well-type reference copy and un-copying statements. A well-typed \textbf{copy} statement requires that the type of $x$ is $c'$ under type environment $\Pi$, while a well-typed \textbf{uncopy} statement further requires that the type of $x'$ is $c'$ too. For \textbf{new} and \textbf{copy} statements, the type environment is updated with a new type for $x$ and $x'$ respectively. For \textbf{delete} and \textbf{uncopy} statements, $x$ and $x'$ is removed from the type environment.
+
+The \textbf{skip} statement is always well-typed, while a sequence of statements are well-typed if each of the provided statements are. Variable \textbf{swap} statements are well-typed if both operands are of the same type under type environment $\Pi$.
+
+As with \textsc{Roopl}, well-typing of local method invocation is defined in rule \textsc{T-Call} iff:
+\begin{itemize}
+    \item The number of arguments matches the method arity
+    \item No class fields are present in the arguments passed to the method (To prevent irreversible updates)
+    \item The argument list contains unique elements
+    \item Each argument is a subtype of the type of the equivalent formal parameter. 
+\end{itemize}
+
+For foreign method invocations, typing rule \textsc{T-CallO}. A foreign method invocation is well-typed using the same rules as for \textsc{T-Call} besides having no restrictions on class fields parameters in the arguments, but an added rule stating that the callee object $x_0$ must not be passed as an argument.
+
+The typing rules \textsc{T-UC} and \textsc{T-UCO} defines uncalling of methods in terms of their respective inverse counterparts.
+
+\subsection{Programs}
+\label{subsec:programs}
+As with \textsc{Roopl}, a \rooplpp program is well-typed if all of its classes and their respective methods are well-typed and if there exists a nullary main methods. Figure~\cite{fig:typing-programs} shows the typing rules for class methods, classes and programs.
+
+\begin{figure}[H]
+    \begin{center}
+        % Method
+        \AXC{$\langle \Pi[x_1 \mapsto t_1,\ ...,\ x_n \mapsto t_n],\ c \rangle \vdash^{\Gamma}_{stmt}\ s$}
+        \RL{\textsc{T-Method}}
+        \UIC{$\langle \Pi, c \rangle \vdash^{\Gamma}_{meth}\ \textbf{method}\ q(t_1 x_1,\ ...,\ t_n x_n)\ s$}
+        \DP
+
+        \vskip 2em
+
+        % Class
+        \AXC{$\Gamma(c) = \Big( \overbrace{\big\{ \langle t_1, f_1 \rangle,\ ...,\ \langle t_i, f_i \rangle \big\}}^{fields},\ \overbrace{\{ m_1,\ ...,\ m_n \}}^{methods} \Big)$}
+        \DP
+        \AXC{$\Pi = \big[ f_1 \mapsto t_1,\ ...,\ f_n \mapsto t_n \big]$}
+        \AXC{$\langle \Pi, c \rangle \vdash^{\Gamma}_{meth}\ m_1 \quad \cdots \quad \langle \Pi, c \rangle \vdash^{\Gamma}_{meth}\ m_n$}
+        \RL{\textsc{T-Class}}
+        \BIC{$\vdash^{\Gamma}_{class}\ c$}
+        \DP
+
+        \vskip 2em
+
+        \AXC{$\Big( \textbf{method main ()}\ s \Big) \in \displaystyle\bigcup^{n}_{i = 1} \text{methods}(c_i)$}
+        \DP
+        \AXC{$\Gamma = \text{gen}(c_1,\ ...,\ c_n)$}
+        \AXC{$\vdash^{\Gamma}_{class}\ c_1 \quad \cdots \quad \vdash^{\Gamma}_{class}\ c_n$}
+        \RL{\textsc{T-Prog}}
+        \BIC{$\vdash_{prog}\ c_1\ \cdots\ c_n$}
+        \DP
+    \end{center}
+    \caption{Typing rules for class methods, classes and programs}
+    \label{fig:typing-programs}
+\end{figure}
+
+
+
+
 
 \section{Language Semantics}
 \label{sec:language-semantics}
@@ -278,7 +584,7 @@ Unlike the \textsc{Roopl} simulation, \rooplpp is not limited by stack allocated
             Cell tape, int pos, int state, int q1[], 
             int s1[], int s2[], int q2[], int pc) 
         else
-            if pos < 0 then //Prepend new tape cell
+            if pos < 0 then                                     //Prepend new tape cell
                 new Cell cell(BLANK, tape)
                 tape <=> cell
                 pos += 1
@@ -308,5 +614,5 @@ Unlike the \textsc{Roopl} simulation, \rooplpp is not limited by stack allocated
     \end{lstlisting}
     \caption{Main RTM simulation method}
     \label{fig:rtm-simulation-method}
-\end{figure}
+\end{figure} 
 
