@@ -16,10 +16,10 @@ Inspired by other language successors such as \textsc{C\texttt{++}} was to \text
 \label{sec:syntax}
 A \rooplpp program consists, analogously to a \textsc{Roopl} program, of one or more class definitions, each with a varying number of fields and class methods. The program's entry point is a nullary main method, defined exactly once and is instantiated during program start-up. Fields of the main object will serve as output of the program, exactly as in \textsc{Roopl}.
 \begin{figure}[h]
-\centering
-\vspace{3mm}
-\textbf{\rooplpp Grammar}
-\begin{align}
+    \centering
+    \vspace{3mm}
+    \textbf{\rooplpp Grammar}
+    \begin{align}
     prog		\quad&::= \quad cl^+ \tag{program}\\
     cl			\quad&::=\quad \textbf{class}\ c\ (\textbf{inherits}\ c)^?\ (t\ x)^*\ m^+\tag{class definition}\\
     d           \quad&::=\quad c\ |\ \textbf{vector}\texttt{<}t\texttt{>} \tag{class and array}\\
@@ -38,17 +38,17 @@ A \rooplpp program consists, analogously to a \textsc{Roopl} program, of one or 
     e			\quad&::=\quad \overline{n}\ |\ x\ |\ x[e]\ |\ \textbf{\texttt{nil}}\ |\ e\ \otimes\ e\tag{expression}\\
     \odot	\quad&::=\quad \textbf{\texttt{+}}\ |\ \textbf{\texttt{-}}\ |\ \textbf{\texttt{\^}}\tag{operator}\\
     \otimes\quad&::=\quad \odot\ |\ \textbf{\texttt{*}}\ |\ \textbf{\texttt{/}}\ |\ \textbf{\texttt{\%}}\ |\ \textbf{\texttt{\&}}\ |\ \textbf{\texttt{|}}\ |\ \textbf{\texttt{\&\&}}\ |\ \textbf{\texttt{||}}\ |\ \textbf{\texttt{<}}\ |\ \textbf{\texttt{\textgreater}}\ |\ \textbf{\texttt{=}}\ |\ \textbf{\texttt{!=}}\ |\ \textbf{\texttt{<=}}\ |\ \textbf{\texttt{\textgreater=}}\tag{operator}
-\end{align}
-\vspace{2mm}
-\textbf{Syntax Domains}
-\begin{align*}
+    \end{align}
+    \vspace{2mm}
+    \textbf{Syntax Domains}
+    \begin{align*}
     prog &\in \text{Programs} & s &\in \text{Statements}      & n &\in \text{Constants} \\
     cl   &\in \text{Classes}  & e &\in \text{Expressions}     & x &\in \text{VarIDs}    \\
     t    &\in \text{Types}    & \odot &\in \text{ModOps}      & q &\in \text{MethodIDs} \\
     m    &\in \text{Methods}  & \otimes &\in \text{Operators} & c &\in \text{ClassIDs}
-\end{align*}
-\caption{Syntax domains and EBNF grammar for \rooplpp}
-\label{fig:roopl-grammar}
+    \end{align*}
+    \caption{Syntax domains and EBNF grammar for \rooplpp}
+    \label{fig:roopl-grammar}
 \end{figure}
 
 % TODO: Add short line about vectors
@@ -89,16 +89,16 @@ The statement pair consisting of
 could be considered an \textit{fluid} block, meaning we can have overlapping blocks. We can as such initialize an object $x$ of class $c$ and an object $y$ of class $d$ and destroy $x$ before we destroy $y$, a feature that was not possible in \textsc{Roopl}. The mechanisms of the \textbf{new} statement are as follows
 
 \begin{enumerate}
-\item Memory for an object of class $c$ is allocated. All fields are automatically zero-initialized by virtue of residing in already zero-cleared memory.
-\item The block statement $s$ is executed, with the name $x$ representing a reference to the newly allocated object.
+    \item Memory for an object of class $c$ is allocated. All fields are automatically zero-initialized by virtue of residing in already zero-cleared memory.
+    \item The block statement $s$ is executed, with the name $x$ representing a reference to the newly allocated object.
 \end{enumerate}
 
 and the mechanisms of the \textbf{delete} statement are as follow
 
 \begin{enumerate}
-\item The reference $x$ may be modified by swapping its value with that of other references of the same type, but it should be restored to its original value before a \textbf{delete} statement is called on $x$, otherwise the meaning of the object deletion is undefined.
-\item Any state that is accumulated within the object should be cleared or uncomputed before the \textbf{delete} statement is executed, otherwise the meaning of the object block is undefined.
-\item The zero-cleared memory is reclaimed by the system.
+    \item The reference $x$ may be modified by swapping its value with that of other references of the same type, but it should be restored to its original value before a \textbf{delete} statement is called on $x$, otherwise the meaning of the object deletion is undefined.
+    \item Any state that is accumulated within the object should be cleared or uncomputed before the \textbf{delete} statement is executed, otherwise the meaning of the object block is undefined.
+    \item The zero-cleared memory is reclaimed by the system.
 \end{enumerate}
 
 The mechanisms of the \textbf{new} and \textbf{delete} statements are, essentially, a split of the mechanisms of the \textbf{construct}/\textbf{destruct} blocks into two separate statements. As with \textsc{Roopl}, fields must be zero-cleared after object deletion, otherwise it is impossible for the system to reclaim the memory reversibly. This is the responsibility of the of the programmer to maintain this, and to ensure that objects are indeed deleted in the first place. A \textbf{new} statement without a corresponding \textbf{delete} statement targeting the same object further ahead in the program is undefined.
@@ -150,10 +150,10 @@ Vectors can contain elements of different classes if, say class $A$ and $B$ both
 Vector instantiation uses the \textbf{new} and \textbf{delete} keywords to reversibly construct and destruct vector types. In irreversible OOP languages,  instantiation and insertion/deletion of elements are usually executed in the the following steps for empty, dynamic arrays
 
 \begin{enumerate}
-\item A small amount of memory is reserved for the overhead of an array
-\item Once the array is non-empty, a pointer for the overhead place in memory points to the beginning of the data.
-\item As elements are inserted, the data memory is expanded to fit new elements, if we need indexes higher than the current size of the array.
-\item As the highest indexed elements are deleted, the data memory is collapsed to reduce the overall size of the array object.
+    \item A small amount of memory is reserved for the overhead of an array
+    \item Once the array is non-empty, a pointer for the overhead place in memory points to the beginning of the data.
+    \item As elements are inserted, the data memory is expanded to fit new elements, if we need indexes higher than the current size of the array.
+    \item As the highest indexed elements are deleted, the data memory is collapsed to reduce the overall size of the array object.
 \end{enumerate}
 
 Consider the statement
@@ -164,10 +164,10 @@ Consider the statement
 in which we reserve memory for an \textbf{int} \textbf{vector} with the mechanics following mechanics
 
 \begin{enumerate}
-\item A small amount of memory is reserved for the overhead of an array.
-\item On the first element insert, e.g. $x[n]\ \texttt{+=}\ 1$, a block of memory suitable for storing $|[0, 1, ..., n]|$ integer values are reserved, with the newly updated value of $x[n]$ inserted and uninitialized cells zero-cleared, and a pointer from the overhead to the data is linked.
-\item If a value is inserted at, say, $x[n+1]$, a similar action is dispatched, but deallocating the old block after allocating the new one first.
-\item When the highest indexed cell element is zero-cleared, a allocation action is dispatched for obtaining a smaller block for our array data, while the old, larger block is freed.
+    \item A small amount of memory is reserved for the overhead of an array.
+    \item On the first element insert, e.g. $x[n]\ \texttt{+=}\ 1$, a block of memory suitable for storing $|[0, 1, ..., n]|$ integer values are reserved, with the newly updated value of $x[n]$ inserted and uninitialized cells zero-cleared, and a pointer from the overhead to the data is linked.
+    \item If a value is inserted at, say, $x[n+1]$, a similar action is dispatched, but deallocating the old block after allocating the new one first.
+    \item When the highest indexed cell element is zero-cleared, a allocation action is dispatched for obtaining a smaller block for our array data, while the old, larger block is freed.
 \end{enumerate}
 
 In \rooplpp, we only allow instantiation of empty, dynamic arrays. As shown above, Integer elements are assigned using one of the reversible assignment operators. For class \textbf{vector}s and \textbf{vector} \textbf{vectors}, we assign cell elements a little differently. We make use of the \textbf{new} and \textbf{delete} statements, but instead of specifying which variable should hold the newly created/deleted object or array, we specify which array cell it should be stored in. The mechanisms of these assignments are equal to the example for \textbf{int} \textbf{vector}s; we grow the array on assignments to higher-than-current-max indexes and we shrink on zero-clearing of highest-indexed element.
@@ -225,7 +225,56 @@ The binary subtype relation $c_1 \prec: c_2$ is required for supporting subtype 
     c_1 &\prec: c_3 &&\text{if}\ c_1 \prec: c_2\ \text{and}\ c_2 \prec: c_3\ (transitivity)
 \end{align*}
 
-% TODO: Class defintions
+Furthermore, we formally define object models, in such a way that inherited fields and methods are included, unless overridden by the derived fields. Therefore, we define $\Gamma$ to be the class map of a program $p$, such that $\Gamma$ is a finite map from class identifiers to tuples of methods and fields for the class $p$. Application of a class map $\Gamma$ to some class $cl$ is denoted as $\Gamma(cl)$. Construction of a class map is done through function $gen$, as shown in figure~\ref{fig:class-gen}. Figure~\ref{fig:fields-methods} defines the $fields$ and $methods$ functions to determine these given a class. Set operation $\uplus$ defines method overloading by dropping base class methods if a similarly named method exists in the derived class. The definitions shown in Figure~\ref{fig:class-gen} and~\ref{fig:fields-methods} are graciously borrowed from~\cite{th:roopl}.
+ 
+\begin{figure}[ht]
+    \centering
+    $\text{gen}\Big(\overbrace{cl_1,\ ...,\ cl_n}^p\Big) = \overbrace{\Big[ \alpha(cl_1) \mapsto \beta(cl_1),\ ...,\ \alpha(cl_n) \mapsto \beta(cl_n) \Big]}^\Gamma$\\
+
+    \vskip 2em
+    
+    $\alpha\Big(\textbf{class}\ c\ \cdots\Big) = c$
+    \hskip 2em
+    $\beta(cl) = \Big(\text{fields}(cl),\ \text{methods}(cl) \Big)$
+
+    \caption{Definition $gen$ for constructing the finite class map $\Gamma$ of a given program $p$. From~\cite{th:roopl}}
+    \label{fig:class-gen}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{equation*}
+        \text{fields}(cl) = \begin{cases}
+            \eta(cl)  & \text{if}\ cl \sim [ \textbf{class}\ c\ \cdots ]\\
+            \eta(cl) \cup \text{fields}\Big(\alpha^{-1}(c')\Big) & \text{if}\ cl \sim [ \textbf{class}\ c\ \textbf{inherits}\ c'\ \cdots ]
+        \end{cases}
+    \end{equation*}
+
+    \vskip 1em
+
+    \begin{equation*}
+        \text{methods}(cl) = \begin{cases}
+            \delta(cl) & \text{if}\ cl \sim [ \textbf{class}\ c\ \cdots ]\\
+            \delta(cl) \uplus \text{methods}\Big(\alpha^{-1}(c')\Big) & \text{if}\ cl \sim [\textbf{class}\ c\ \textbf{inherits}\ c'\ \cdots]
+        \end{cases}
+    \end{equation*}
+
+    \vskip 1em
+
+    \begin{equation*}
+        A\ \uplus B\ \overset{def}{=}\ A \cup \bigg\{ m \in B\ \bigg\vert\ \nexists\  m' \Big( \zeta(m') = \zeta(m) \wedge m' \in A \Big) \bigg\}
+    \end{equation*}
+
+    $\zeta\Big( \textbf{method}\ q\ (\cdots)\ s \Big) = q$
+    \hskip 2em
+    $\eta\Big( \textbf{class}\ c\ \cdots\ \overbrace{t_1 f_1\ \cdots\ t_n f_n}^{fs}\ \cdots \Big) = fs$
+
+    \begin{equation*}
+        \delta\Big( \textbf{class}\ c\ \cdots \overbrace{\textbf{method}\ q_1\ (\cdots)\ s_1\ \cdots\ \textbf{method}\ q_n\ (\cdots)\ s_n }^{ms}\ \cdots \Big) = ms
+    \end{equation*}
+    \caption{Definition of fields and methods from~\cite{th:roopl}}
+    \label{fig:fields-methods}
+\end{figure}
 
 \subsection{Expressions}
 \label{subsec:expressions}
@@ -286,7 +335,7 @@ The type judgment
 \end{prooftree} 
 
 defines well-typed statements. The judgment reads as under type environment $\Pi$ within class $c$, statement $s$ is well-typed with class map $\Gamma$.
-
+% TODO: Local block
 \begin{figure}[H]
     \begin{center}
         % Assignment
@@ -442,8 +491,8 @@ For foreign method invocations, typing rule \textsc{T-CallO}. A foreign method i
 The typing rules \textsc{T-UC} and \textsc{T-UCO} defines uncalling of methods in terms of their respective inverse counterparts.
 
 \subsection{Programs}
-\label{subsec:programs}
-As with \textsc{Roopl}, a \rooplpp program is well-typed if all of its classes and their respective methods are well-typed and if there exists a nullary main methods. Figure~\cite{fig:typing-programs} shows the typing rules for class methods, classes and programs.
+\label{subsec:programs} 
+As with \textsc{Roopl}, a \rooplpp program is well-typed if all of its classes and their respective methods are well-typed and if there exists a nullary main methods. Figure~\ref{fig:typing-programs} shows the typing rules for class methods, classes and programs.
 
 \begin{figure}[H]
     \begin{center}
@@ -478,18 +527,324 @@ As with \textsc{Roopl}, a \rooplpp program is well-typed if all of its classes a
     \label{fig:typing-programs}
 \end{figure}
 
-
-
-
-
 \section{Language Semantics}
 \label{sec:language-semantics}
+% TODO:
+blabla
+
+\subsection{Preliminaries}
+\label{subsec:semantics-preliminaries}
+% TODO:
+blabla
+
+\begin{figure}[ht]
+    \begin{alignat*}{2}
+        l      \in\ &\text{Locs}     &&= \mathbb{N}_0\\
+        \gamma \in\ &\text{Envs}     &&= \text{VarIDs} \rightharpoonup \text{Locs}\\
+        \mu    \in\ &\text{Stores}   &&= \text{Locs} \rightharpoonup \text{Values}\\
+        &\text{Objects} &&= \Big\{ \langle c_f,\ \gamma_f \rangle \mid c_f \in \text{ClassIDs}\ \wedge\ \gamma_f \in \text{Envs} \Big\}\\
+        v \in\ &\text{Values} &&= \mathbb{Z} \cup \text{Objects}\ \cup \text{Locs}
+    \end{alignat*}
+    \caption{Semantic values}
+    \label{fig:semantic-values}
+\end{figure}
+
+\subsection{Expressions}
+\label{subsec:semantics-expressions}
+The judgment:
+\begin{prooftree}
+    \AXC{$\langle \gamma, \mu \rangle \vdash_{expr}\ e \Rightarrow v$}
+\end{prooftree}
+defines the meaning of expressions. We say that under environment $\gamma$ and store $\mu$, expression $e$ evaluates to value $v$.
+
+\begin{figure}[ht]
+    \begin{center}
+        \AXC{}
+        \RL{\textsc{Con}}
+        \UIC{$\langle \gamma, \mu \rangle \vdash_{expr}\ n \Rightarrow \bar{n}$}
+        \DP
+        \hskip 1.5em
+        \AXC{}
+        \RL{\textsc{Var}}
+        \UIC{$\langle \gamma, \mu \rangle \vdash_{expr}\ x \Rightarrow \mu\Big( \gamma(x) \Big)$}
+        \DP
+        \hskip 1.5em
+        \AXC{}
+        \RL{\textsc{Nil}}
+        \UIC{$\langle \gamma, \mu \rangle \vdash_{expr}\ \texttt{\textbf{nil}} \Rightarrow 0$}
+        \DP
+
+        \vskip 1.5em
+
+        \AXC{$\langle \gamma, \mu \rangle \vdash_{expr}\ e_1 \Rightarrow v_1 $}
+        \AXC{$\langle \gamma, \mu \rangle \vdash_{expr}\ e_2 \Rightarrow v_2 $}
+        \AXC{$\llbracket \otimes \rrbracket(v_1, v_2) = v$}
+        \RL{\textsc{BinOp}}
+        \TIC{$\langle \gamma, \mu \rangle \vdash_{expr}\ e_1 \otimes e_2 \Rightarrow v$}
+        \DP 
+    \end{center}
+    \caption{Semantic inference rules for expressions}
+    \label{fig:semantics-expr-rules}
+\end{figure}
+
+% TODO: write
+blabla
+
+\begin{figure}[ht]
+    \begin{align*}
+        &\llbracket \texttt{\textbf{+}} \rrbracket (v_1, v_2) &&= v_1 + v_2 &\llbracket \texttt{\textbf{\%}} \rrbracket (v_1, v_2)      &&&= v_1\ \text{mod}\ v_2\\
+        &\llbracket \texttt{\textbf{-}} \rrbracket (v_1, v_2) &&= v_1 - v_2 &\llbracket \texttt{\textbf{\&}} \rrbracket (v_1, v_2)       &&&= v_1 \wedge v_2\\
+        &\llbracket \texttt{\textbf{*}} \rrbracket (v_1, v_2) &&= v_1 \times v_2 &\llbracket \texttt{\textbf{|}} \rrbracket  (v_1, v_2) &&&= v_1 \vee v_2\\
+        &\llbracket \texttt{\textbf{/}} \rrbracket (v_1, v_2) &&= v_1 \div v_2 &\llbracket \texttt{\textbf{\^}} \rrbracket (v_1, v_2)   &&&= v_1 \oplus v_2\\ 
+        &\llbracket\texttt{\textbf{\&\&}}\rrbracket (v_1, v_2) &&= \begin{cases} 
+            0 & \text{if}\ v_1 = 0 \vee v_2 = 0\\ 
+            1 & \text{otherwise}
+        \end{cases}        
+        &\llbracket\texttt{\textbf{<=}}\rrbracket (v_1, v_2) &&&= \begin{cases} 
+            0 & \text{if}\ v_1 \leq v_2\\ 
+            1 & \text{otherwise} 
+        \end{cases}\\
+        &\llbracket\texttt{\textbf{||}}\rrbracket (v_1, v_2) &&= \begin{cases}
+            0 & \text{if}\ v_1 = v_2 = 0\\ 
+            1 & \text{otherwise}
+        \end{cases}
+        &\llbracket\texttt{\textbf{>=}}\rrbracket (v_1, v_2) &&&= \begin{cases}
+            0 & \text{if}\ v_1 \geq v_2\\
+            1 & \text{otherwise}
+        \end{cases}\\
+        &\llbracket\texttt{\textbf{<}}\rrbracket (v_1, v_2) &&= \begin{cases}
+            0 & \text{if}\ v_1 < v_2\\ 
+            1 & \text{otherwise}
+        \end{cases}
+        &\llbracket\texttt{\textbf{=}}\rrbracket (v_1, v_2) &&&= \begin{cases}
+            0 & \text{if}\ v_1 = v_2\\
+            1 & \text{otherwise}
+        \end{cases}\\
+        &\llbracket\texttt{\textbf{>}}\rrbracket (v_1, v_2) &&= \begin{cases}
+            0 & \text{if}\ v_1 > v_2\\ 
+            1 & \text{otherwise}
+        \end{cases}
+        &\llbracket\texttt{\textbf{!=}}\rrbracket (v_1, v_2) &&&= \begin{cases}
+            0 & \text{if}\ v_1 \not= v_2\\
+            1 & \text{otherwise}
+        \end{cases}
+    \end{align*} 
+    \caption{Definition of binary expression operator evaluation}
+\end{figure}
+
+blabla
+
+\subsection{Statements}
+\label{subsec:semantics-statements}
+The judgment
+\begin{prooftree}
+    \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ s : \mu \rightleftharpoons \mu'$}
+\end{prooftree}
+defines the meaning of statements. We say that under environment $\gamma$ and object $l$, statement $s$ with class map $\Gamma$ reversibly transforms store $\mu$ to store $\mu'$. 
+blabla
+
+\begin{figure}[H]
+    \begin{center}
+        % Skip
+        \AXC{}
+        \RL{\textsc{Skip}}
+        \UIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{skip} : \mu \rightleftharpoons \mu'$}
+        \DP
+
+        \vskip 2em
+
+        % Seq
+        \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ s_1 : \mu \rightleftharpoons \mu'$}
+        \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ s_2 : \mu' \rightleftharpoons \mu''$}
+        \RL{\textsc{Seq}}
+        \BIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ s_1\ s_2 : \mu \rightleftharpoons \mu''$}
+        \DP
+
+        \vskip 2em
+
+        % AssVar
+        \AXC{$\langle \gamma, \mu \rangle \vdash^{\Gamma}_{stmt}\ e \Rightarrow v$}
+        \AXC{$\llbracket \odot \rrbracket \Big( \mu \Big( \gamma(x) \Big), v \Big) = v'$}
+        \RL{\textsc{AssVar}}
+        \BIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ x \odot= e\ :\ \mu \rightleftharpoons \mu[\gamma(x) \mapsto v']$}
+        \DP
+
+        \vskip 2em
+
+        % SwpVar
+        \AXC{$\mu \Big( \gamma(x_1) \Big) = v_1$}
+        \AXC{$\mu \Big( \gamma(x_2) \Big) = v_2$}
+        \RL{\textsc{SwpVar}}
+        \BIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ x_1\ \texttt{\textbf{<=>}}\ x_2\ :\ \mu \rightleftharpoons \mu[\gamma(x_1) \mapsto v_2,\ \gamma(x_2) \mapsto v_1]$}
+        \DP
+
+        \vskip 2em
+
+        % Loop Main
+        \AXC{$\langle \gamma, \mu \rangle \vdash^{\Gamma}_{expr}\ e_1 \not\Rightarrow 0$}
+        \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ s_1 : \mu \rightleftharpoons \mu'$}
+        \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{loop}\ (e_1, s_1, s_2, e_2) : \mu' \rightleftharpoons \mu''$}
+        \RL{\textsc{LoopMain}}
+        \TIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{from}\ e_1\ \textbf{do}\ s_1\ \textbf{loop}\ s_2\ \textbf{until}\ e_2\ :\ \mu \rightleftharpoons \mu''$}
+        \DP
+
+        \vskip 2em
+
+        % Loop Base
+        \AXC{$\langle \gamma, \mu \rangle \vdash^{\Gamma}_{expr}\ e_2 \not\Rightarrow 0$}
+        \RL{\textsc{LoopBase}}
+        \UIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{loop}\ (e_1, s_1, s_2, e_2)\ :\ \mu \rightleftharpoons \mu$}
+        \DP
+
+        \vskip 2em
+
+        % Loop Rec
+        \AXC{$\langle \gamma, \mu \rangle \vdash^{\Gamma}_{expr} e_2 \Rightarrow 0$}
+        \DP
+        \hskip 8em
+        \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt} s_2 : \mu \rightleftharpoons \mu'$}
+        \DP
+        \vskip 0.5em
+        \AXC{$\langle \gamma, \mu' \rangle \vdash^{\Gamma}_{expr} e_1 \Rightarrow 0$}
+        \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt} s_1 : \mu' \rightleftharpoons \mu''$}
+        \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{loop} (e_1, s_1, s_2, e_2) : \mu'' \rightleftharpoons \mu'''$}
+        \RL{\textsc{LoopRec}}
+        \TIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{loop}\ (e_1, s_1, s_2, e_2)\ :\ \mu \rightleftharpoons \mu'''$}
+        \DP
+
+        \vskip 2em
+
+        % If True
+        \AXC{$\langle \gamma, \mu \rangle \vdash^{\Gamma}_{expr} e_1 \not\Rightarrow 0$}
+        \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt} s_1 : \mu \rightleftharpoons \mu'$}
+        \AXC{$\langle \gamma, \mu' \rangle \vdash^{\Gamma}_{expr} e_2 \not\Rightarrow 0$}
+        \RL{\textsc{IfTrue}}
+        \TIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{if}\ e_1\ \textbf{then}\ s_1\ \textbf{else}\ s_2\ \textbf{fi}\ e_2\ :\ \mu \rightleftharpoons \mu'$}
+        \DP
+
+        \vskip 2em
+
+        % If False
+        \AXC{$\langle \gamma, \mu \rangle \vdash^{\Gamma}_{expr} e_1 \Rightarrow 0$}
+        \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt} s_1 : \mu \rightleftharpoons \mu'$}
+        \AXC{$\langle \gamma, \mu' \rangle \vdash^{\Gamma}_{expr} e_2 \Rightarrow 0$}
+        \RL{\textsc{IfFalse}}
+        \TIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{if}\ e_1\ \textbf{then}\ s_1\ \textbf{else}\ s_2\ \textbf{fi}\ e_2\ :\ \mu \rightleftharpoons \mu'$}
+        \DP
+
+        \vskip 2em
+
+        % Call
+        \AXC{$\mu(l) = \langle c, \gamma' \rangle $}
+        \DP
+        \AXC{$\Gamma(c) = (fields, methods)$}
+        \DP
+        \AXC{$\Big( \textbf{method}\ q(t_1 y_1,\ ...,\ t_n y_n)\ s \Big) \in methods$}
+        \DP
+        \AXC{$\Big\langle l, \gamma'[y_1 \mapsto \gamma(x_1),\ ...,\ y_n \mapsto \gamma(x_n)] \Big\rangle \vdash^{\Gamma}_{stmt}\ s : \mu \rightleftharpoons \mu'$}
+        \RL{\textsc{Call}}
+        \UIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{call}\ q(x_1,\ ...,\ x_n)\ :\ \mu \rightleftharpoons \mu'$}
+        \DP
+
+        \vskip 2em
+
+        % Uncall
+        \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{call}\ q(x_1,\ ...,\ x_n)\ :\ \mu' \rightleftharpoons \mu$}
+        \RL{\textsc{Uncall}}
+        \UIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{uncall}\ q(x_1,\ ...,\ x_n)\ :\ \mu \rightleftharpoons \mu'$}
+        \DP
+    \end{center}
+    \caption{Semantic inferance rules for statements}
+    \label{fig:semantic-statements}
+\end{figure}
+
+\begin{figure}[H]
+    \begin{center}
+        \AXC{$l' = \mu\Big( \gamma(x_0) \Big) $}
+        \DP
+        \AXC{$\mu(l') = \langle c, \gamma' \rangle $}
+        \DP
+        \AXC{$\Gamma(c) = (fields, methods)$}
+        \DP
+        \AXC{$\Big( \textbf{method}\ q(t_1 y_1,\ ...,\ t_n y_n)\ s \Big) \in methods$}
+        \DP
+        \AXC{$\Big\langle l', \gamma'[y_1 \mapsto \gamma(x_1),\ ...,\ y_n \mapsto \gamma(x_n)] \Big\rangle \vdash^{\Gamma}_{stmt}\ s : \mu \rightleftharpoons \mu'$}
+        \RL{\textsc{CallObj}}
+        \UIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{call}\ x_0::q(x_1,\ ...,\ x_n)\ :\ \mu \rightleftharpoons \mu'$}
+        \DP
+
+        \vskip 2em
+        
+        % Object Uncall
+        \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \text{call}\ x_0::q(x_1,\ ...,\ x_n)\ :\ \mu' \rightleftharpoons \mu$}
+        \RL{\textsc{ObjUncall}}
+        \UIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \text{uncall}\ x_0::q(x_1,\ ...,\ x_n)\ :\ \mu \rightleftharpoons \mu'$}
+        \DP
+
+        \vskip 2em
+
+        % Object block
+        \AXC{$\Gamma(c) = \Big( \overbrace{\{\langle t_1, f_1 \rangle,\ ...,\ \langle t_n, f_n \rangle \}}^{fields}, methods \Big)$}
+        \DP
+        \AXC{$\gamma' = [f_1 \mapsto a_1,\ ...,\ f_n \mapsto a_n]$}
+        \DP
+        \vskip 1em
+        \AXC{$\{ l', r, a_1, ..., a_n \} \cap \text{dom}(\mu) = \emptyset$}
+        \DP
+        \AXC{$|\{ l', r, a_1, ..., a_n \}| = n + 2$}
+        \DP
+        \vskip 1em
+        \AXC{$\mu' = \mu\Big[ a_1 \mapsto 0,\ ...,\ a_n \mapsto 0,\ l' \mapsto \langle c, \gamma' \rangle,\ r \mapsto l' \Big]$}
+        \DP
+        \vskip 1em
+        \AXC{$\langle l, \gamma[x \mapsto r] \rangle \vdash^{\gamma}_{stmt}\ s : \mu' \rightleftharpoons \mu''$}
+        \AXC{$\mu''(a_1) = 0\ \cdots\ \mu''(a_n) = 0$}
+        \RL{\textsc{ObjBlock}}
+        \BIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{construct}\ c\ x \quad s \quad \textbf{destruct}\ x\ :\ \mu \rightleftharpoons \mu'' \upharpoonright_{\text{dom}(\mu)}$}  
+        \DP
+
+        % TODO: ObjNew ObjDlt, Copy Uncopy
+    \end{center}
+    \caption{Semantic inferance rules for statements (cont)}
+    \label{fig:semantic-statements-cont}
+\end{figure}
+% TODO: Explain previous figs
+blalbalba 
+
+
+\subsection{Programs}
+\label{subsec:semantics-programs}
+The judgment
+\begin{prooftree}
+    \AXC{$\vdash_{prog} p \Rightarrow \sigma$}
+\end{prooftree}
+defines the meaning of programs. The class $p$ containing the main method is instantiated and the main function is executed with the partial function $\sigma$ as the result, mapping variable identifiers to values, correlating to the class fields of the main class.
+
+\begin{figure}[ht]
+    \begin{center}
+        
+        \AXC{$\Gamma = \text{gen}(c_1,\ ...,\ c_n)$}
+        \DP
+        \AXC{$\Gamma(c) = \Big( \overbrace{\{ \langle t_1, f_1 \rangle,\ ...,\ \langle t_n, f_n \rangle \}}^{fields},\ methods \Big)$}
+        \DP
+        \AXC{$\Big( \textbf{method main ()}\ s \Big) \in methods$}
+        \DP
+        \AXC{$\gamma = [f_1 \mapsto 1,\ ...,\ f_i \mapsto i]$}
+        \DP
+        \AXC{$\mu = [1 \mapsto 0,\ ...,\ i \mapsto 0,\ i+1 \mapsto \langle c, \gamma \rangle]$}
+        \AXC{$\langle i+1, \gamma \rangle \vdash^{\Gamma}_{stmt}\ s\ :\ \mu \rightleftharpoons \mu'$}
+        \RL{\textsc{Main}}
+        \BIC{$\vdash_{prog}\ c_1\ \cdots\ c_n \Rightarrow (\mu' \circ \gamma)$}
+        \DP
+    \end{center}
+    \caption{Semantic inference rules for programs}
+    \label{fig:semantics-programs}
+\end{figure}
+blabla
+
 
 \section{Program Inversion}
 \label{sec:program-inversion}
-
-
-
 
 \section{Computational Strength}
 \label{sec:computational-strength}
