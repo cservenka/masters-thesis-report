@@ -202,8 +202,7 @@ However, we do allow other, initialized (non-zero-cleared array elements) to be 
 
 \section{Type System}
 \label{sec:type-system}
-% TODO: Cite winskell
-The type system of \rooplpp expands on the type system of \textsc{Roopl} presented by~\citeauthor{th:roopl} in~\cite{th:roopl} and is analogously described by syntax-directed inference typing rules in the style of Winskell. As \rooplpp introduces two new types in form of \textit{references} and \textit{vectors}, a few \textsc{Roopl} typing rules must be modified to accommodate these added types. For completeness all typing rules, including unmodified rules, are included in the following sections.
+The type system of \rooplpp expands on the type system of \textsc{Roopl} presented by~\citeauthor{th:roopl} in~\cite{th:roopl} and is analogously described by syntax-directed inference typing rules in the style of ~\citeauthor{wi:semantics} in~\cite{wi:semantics}. As \rooplpp introduces two new types in form of \textit{references} and \textit{vectors}, a few \textsc{Roopl} typing rules must be modified to accommodate these added types. For completeness all typing rules, including unmodified rules, are included in the following sections. 
 
 \subsection{Preliminaries}
 \label{subsec:preliminaries}
@@ -529,13 +528,13 @@ As with \textsc{Roopl}, a \rooplpp program is well-typed if all of its classes a
 
 \section{Language Semantics}
 \label{sec:language-semantics}
-% TODO:
-blabla
+The following sections contains the operational semantics of \rooplpp, as specified by syntax-directed inference rules.
 
 \subsection{Preliminaries}
 \label{subsec:semantics-preliminaries}
-% TODO:
-blabla
+We define a memory location $l$ to be a single location in program memory, where a memory location is in the set of non-negative integers, $\mathbb{N}_0$. An environment $\gamma$ is a partial function mapping variables to memory locations. A store $\mu$ is a partial function mapping memory locations to values. An object is a tuple of a class name and an environment mapping fields to memory locations. A value is either an integer, an object or a memory location.
+
+Applications of environments $\gamma$ and stores $\mu$ are analogous to the type environment $\Gamma$, defined in section~\ref{subsec:preliminaries}. 
 
 \begin{figure}[ht]
     \begin{alignat*}{2}
@@ -587,8 +586,7 @@ defines the meaning of expressions. We say that under environment $\gamma$ and s
     \label{fig:semantics-expr-rules}
 \end{figure}
 
-% TODO: write
-blabla
+As shown in figure~\ref{fig:semantics-expr-rules}, expression evaluation has no effects on the store. Logical values are represented by \textit{truthy} and \textit{falsy} values of any non-zero value and zero respectively. Evaluation of binary operators is presented in figure~\ref{fig:binary-operator-evaluation}.
 
 \begin{figure}[ht]
     \begin{align*}
@@ -630,9 +628,9 @@ blabla
         \end{cases}
     \end{align*} 
     \caption{Definition of binary expression operator evaluation}
+    \label{fig:binary-operator-evaluation}
 \end{figure}
 
-blabla
 
 \subsection{Statements}
 \label{subsec:semantics-statements}
@@ -640,176 +638,244 @@ The judgment
 \begin{prooftree}
     \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ s : \mu \rightleftharpoons \mu'$}
 \end{prooftree}
-defines the meaning of statements. We say that under environment $\gamma$ and object $l$, statement $s$ with class map $\Gamma$ reversibly transforms store $\mu$ to store $\mu'$. 
-blabla
+defines the meaning of statements. We say that under environment $\gamma$ and object $l$, statement $s$ with class map $\Gamma$ reversibly transforms store $\mu$ to store $\mu'$, where $l$ is the location of the current object in the store. Figure~\ref{fig:semantic-statements},~\ref{fig:semantic-statements-cont} and~\ref{fig:semantic-statements-cont2} defines the operational semantics of \rooplpp.
 
-\begin{figure}[H]
-    \begin{center}
-        % Skip
-        \AXC{}
-        \RL{\textsc{Skip}}
-        \UIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{skip} : \mu \rightleftharpoons \mu'$}
-        \DP
+The inference rule \textsc{Skip} defines the operational semantics of \textbf{skip} statements and has no effects on the store $\mu$.
 
-        \vskip 2em
+Rule \textsc{Seq} defines statement sequences where the store potentially is updated between each statement execution. 
 
-        % Seq
-        \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ s_1 : \mu \rightleftharpoons \mu'$}
-        \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ s_2 : \mu' \rightleftharpoons \mu''$}
-        \RL{\textsc{Seq}}
-        \BIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ s_1\ s_2 : \mu \rightleftharpoons \mu''$}
-        \DP
+Rule \textsc{AssVar} defines reversible assignment in which variable identifier $x$ under environment $\gamma$ is mapped to the value $v'$ resulting in an updated store $\mu'$. For variable swapping \textsc{SwpVar} defines how value mappings between two variables are exchanged in the updated store.
 
-        \vskip 2em
+For loops and conditionals, Rules \textsc{LoopMain}, \textsc{LoopBase} and \textsc{LoopRec} defines the meaning of \text{loop} statements and \text{IfTrue} and \text{IfFalse}, similarly to the operational semantics of Janus, as presented in~\cite{ty:ejanus}. \textsc{LoopMain} is entered if $e_1$ is true and each iteration enters \textsc{LoopRec} until $e_2$ is false, in which \textsc{LoopBase} is executed. Similarly, if $e_1$ and $e_2$ are true, rule \textsc{IfTrue} is entered, executing the then-branch of the conditional. If $e_1$ and $e_2$ are false, the \textsc{IfFalse} rule is executed and the else-branch is executed.
 
-        % AssVar
-        \AXC{$\langle \gamma, \mu \rangle \vdash^{\Gamma}_{stmt}\ e \Rightarrow v$}
-        \AXC{$\llbracket \odot \rrbracket \Big( \mu \Big( \gamma(x) \Big), v \Big) = v'$}
-        \RL{\textsc{AssVar}}
-        \BIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ x \odot= e\ :\ \mu \rightleftharpoons \mu[\gamma(x) \mapsto v']$}
-        \DP
+As presented in the operational semantics for \textsc{Roopl}, rules \textsc{Call}, \textsc{Uncall}, \textsc{CallObj} and \textsc{UncallObj} respectively defines local and non-local method invocations. For local methods, method $q$ in current class $c$ should be of arity $n$ matching the number of arguments. The updated store $\mu'$ is obtained after statement body execution in the object environment. As local uncalling is the inverse of local calling, the direction of execution is simply reversed, and as such the input store a \textbf{call} statement serves as the output store of the \textbf{uncall} statement, similarly to techniques presented in~\cite{ty:janus, ty:ejanus}.
 
-        \vskip 2em
+The statically scoped object blocks are defined in rule \textsc{ObjBlock}. The operation semantics of these blocks are similar to \textbf{local}-blocks from \textsc{Janus}. The new memory locations $l', r$ and $a_1,\ ...,\ a_n$ must be unused in store $\mu$. The updated store $\mu'$ contains location $l'$ mapped to the object tuple $\langle c, \gamma' \rangle$, an object reference $r$ mapped to $l'$ and all object fields mapped to value $0$. The result store $\mu''$ is obtained after executing the body statement $s$ in store $\mu'$ mapping $x$ to object reference $r$, as long as all object fields are zero-cleared in $\mu''$ afterwards. If any of these conditions fail, the object block statement is undefined.
 
-        % SwpVar
-        \AXC{$\mu \Big( \gamma(x_1) \Big) = v_1$}
-        \AXC{$\mu \Big( \gamma(x_2) \Big) = v_2$}
-        \RL{\textsc{SwpVar}}
-        \BIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ x_1\ \texttt{\textbf{<=>}}\ x_2\ :\ \mu \rightleftharpoons \mu[\gamma(x_1) \mapsto v_2,\ \gamma(x_2) \mapsto v_1]$}
-        \DP
+Dynamically scoped object construction and destruction is defined by rules \textsc{ObjNew} and \textsc{ObjDelete}. For construction, location $l', r$ and $a_1,\ ...,\ a_n$ must once again be unused in the store. Analogously to the object block, a new store is obtained by mapping location $l'$ to the object tuple, and $r$ to $l'$ and zero-initializing the object fields. Unlike object blocks, this is the resulting state of the construction statement. For destruction, $x$ must map to a reference $r$ which maps to a location $l'$. A new store $\mu'$ is obtained my resetting mappings of $r$ and $l'$ to be unused (zero-cleared). As with object blocks, it is the program itself responsible for zero-clearing object fields before destruction. If the object fields are not zero-cleared, the \textsc{ObjDelete} statement is undefined.
 
-        \vskip 2em
+Object referencing is defined by rules \textsc{ObjCopy} and \textsc{ObjUncopy}. A references is created and a new store $\mu'$ obtained by mapping $x'$ to the reference $r$ which $x$ current maps to, if the class $c$ matches the class stored in the object tuple mapped to the location $l$. A references is removed and a new store $\mu'$ obtained if $x$ and $x'$ maps to the same reference $r$ and $x'$ then is removed from the store.
 
-        % Loop Main
-        \AXC{$\langle \gamma, \mu \rangle \vdash^{\Gamma}_{expr}\ e_1 \not\Rightarrow 0$}
-        \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ s_1 : \mu \rightleftharpoons \mu'$}
-        \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{loop}\ (e_1, s_1, s_2, e_2) : \mu' \rightleftharpoons \mu''$}
-        \RL{\textsc{LoopMain}}
-        \TIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{from}\ e_1\ \textbf{do}\ s_1\ \textbf{loop}\ s_2\ \textbf{until}\ e_2\ :\ \mu \rightleftharpoons \mu''$}
-        \DP
 
-        \vskip 2em
 
-        % Loop Base
-        \AXC{$\langle \gamma, \mu \rangle \vdash^{\Gamma}_{expr}\ e_2 \not\Rightarrow 0$}
-        \RL{\textsc{LoopBase}}
-        \UIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{loop}\ (e_1, s_1, s_2, e_2)\ :\ \mu \rightleftharpoons \mu$}
-        \DP
+\begin{subfigures}
+    \begin{figure}[H]
+        \begin{center}
+            % Skip
+            \AXC{}
+            \RL{\textsc{Skip}}
+            \UIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{skip} : \mu \rightleftharpoons \mu$}
+            \DP
+    
+            \vskip 2em
+    
+            % Seq
+            \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ s_1 : \mu \rightleftharpoons \mu'$}
+            \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ s_2 : \mu' \rightleftharpoons \mu''$}
+            \RL{\textsc{Seq}}
+            \BIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ s_1\ s_2 : \mu \rightleftharpoons \mu''$}
+            \DP
+    
+            \vskip 2em
+    
+            % AssVar
+            \AXC{$\langle \gamma, \mu \rangle \vdash^{\Gamma}_{stmt}\ e \Rightarrow v$}
+            \AXC{$\llbracket \odot \rrbracket \Big( \mu \Big( \gamma(x) \Big), v \Big) = v'$}
+            \RL{\textsc{AssVar}}
+            \BIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ x \odot= e\ :\ \mu \rightleftharpoons \mu[\gamma(x) \mapsto v']$}
+            \DP
+    
+            \vskip 2em
+    
+            % SwpVar
+            \AXC{$\mu \Big( \gamma(x_1) \Big) = v_1$}
+            \AXC{$\mu \Big( \gamma(x_2) \Big) = v_2$}
+            \RL{\textsc{SwpVar}}
+            \BIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ x_1\ \texttt{\textbf{<=>}}\ x_2\ :\ \mu \rightleftharpoons \mu[\gamma(x_1) \mapsto v_2,\ \gamma(x_2) \mapsto v_1]$}
+            \DP
+    
+            \vskip 2em
+    
+            % Loop Main
+            \AXC{$\langle \gamma, \mu \rangle \vdash^{\Gamma}_{expr}\ e_1 \not\Rightarrow 0$}
+            \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ s_1 : \mu \rightleftharpoons \mu'$}
+            \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{loop}\ (e_1, s_1, s_2, e_2) : \mu' \rightleftharpoons \mu''$}
+            \RL{\textsc{LoopMain}}
+            \TIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{from}\ e_1\ \textbf{do}\ s_1\ \textbf{loop}\ s_2\ \textbf{until}\ e_2\ :\ \mu \rightleftharpoons \mu''$}
+            \DP
+    
+            \vskip 2em
+    
+            % Loop Base
+            \AXC{$\langle \gamma, \mu \rangle \vdash^{\Gamma}_{expr}\ e_2 \not\Rightarrow 0$}
+            \RL{\textsc{LoopBase}}
+            \UIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{loop}\ (e_1, s_1, s_2, e_2)\ :\ \mu \rightleftharpoons \mu$}
+            \DP
+    
+            \vskip 2em
+    
+            % Loop Rec
+            \AXC{$\langle \gamma, \mu \rangle \vdash^{\Gamma}_{expr} e_2 \Rightarrow 0$}
+            \DP
+            \hskip 8em
+            \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt} s_2 : \mu \rightleftharpoons \mu'$}
+            \DP
+            \vskip 0.5em
+            \AXC{$\langle \gamma, \mu' \rangle \vdash^{\Gamma}_{expr} e_1 \Rightarrow 0$}
+            \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt} s_1 : \mu' \rightleftharpoons \mu''$}
+            \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{loop} (e_1, s_1, s_2, e_2) : \mu'' \rightleftharpoons \mu'''$}
+            \RL{\textsc{LoopRec}}
+            \TIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{loop}\ (e_1, s_1, s_2, e_2)\ :\ \mu \rightleftharpoons \mu'''$}
+            \DP
+    
+            \vskip 2em
+    
+            % If True
+            \AXC{$\langle \gamma, \mu \rangle \vdash^{\Gamma}_{expr} e_1 \not\Rightarrow 0$}
+            \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt} s_1 : \mu \rightleftharpoons \mu'$}
+            \AXC{$\langle \gamma, \mu' \rangle \vdash^{\Gamma}_{expr} e_2 \not\Rightarrow 0$}
+            \RL{\textsc{IfTrue}}
+            \TIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{if}\ e_1\ \textbf{then}\ s_1\ \textbf{else}\ s_2\ \textbf{fi}\ e_2\ :\ \mu \rightleftharpoons \mu'$}
+            \DP
+    
+            \vskip 2em
+    
+            % If False
+            \AXC{$\langle \gamma, \mu \rangle \vdash^{\Gamma}_{expr} e_1 \Rightarrow 0$}
+            \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt} s_1 : \mu \rightleftharpoons \mu'$}
+            \AXC{$\langle \gamma, \mu' \rangle \vdash^{\Gamma}_{expr} e_2 \Rightarrow 0$}
+            \RL{\textsc{IfFalse}}
+            \TIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{if}\ e_1\ \textbf{then}\ s_1\ \textbf{else}\ s_2\ \textbf{fi}\ e_2\ :\ \mu \rightleftharpoons \mu'$}
+            \DP
+        \end{center}
+        \caption{Semantic inferance rules for statements}
+        \label{fig:semantic-statements}
+    \end{figure}
+    
+    \begin{figure}[H]
+        \begin{center}           
+            % Call
+            \AXC{$\mu(l) = \langle c, \gamma' \rangle $}
+            \DP
+            \AXC{$\Gamma(c) = (fields, methods)$}
+            \DP
+            \AXC{$\Big( \textbf{method}\ q(t_1 y_1,\ ...,\ t_n y_n)\ s \Big) \in methods$}
+            \DP
+            \AXC{$\Big\langle l, \gamma'[y_1 \mapsto \gamma(x_1),\ ...,\ y_n \mapsto \gamma(x_n)] \Big\rangle \vdash^{\Gamma}_{stmt}\ s : \mu \rightleftharpoons \mu'$}
+            \RL{\textsc{Call}}
+            \UIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{call}\ q(x_1,\ ...,\ x_n)\ :\ \mu \rightleftharpoons \mu'$}
+            \DP
+    
+            \vskip 2em
+    
+            % Uncall
+            \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{call}\ q(x_1,\ ...,\ x_n)\ :\ \mu' \rightleftharpoons \mu$}
+            \RL{\textsc{Uncall}}
+            \UIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{uncall}\ q(x_1,\ ...,\ x_n)\ :\ \mu \rightleftharpoons \mu'$}
+            \DP
 
-        \vskip 2em
+            \vskip 2em
 
-        % Loop Rec
-        \AXC{$\langle \gamma, \mu \rangle \vdash^{\Gamma}_{expr} e_2 \Rightarrow 0$}
-        \DP
-        \hskip 8em
-        \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt} s_2 : \mu \rightleftharpoons \mu'$}
-        \DP
-        \vskip 0.5em
-        \AXC{$\langle \gamma, \mu' \rangle \vdash^{\Gamma}_{expr} e_1 \Rightarrow 0$}
-        \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt} s_1 : \mu' \rightleftharpoons \mu''$}
-        \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{loop} (e_1, s_1, s_2, e_2) : \mu'' \rightleftharpoons \mu'''$}
-        \RL{\textsc{LoopRec}}
-        \TIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{loop}\ (e_1, s_1, s_2, e_2)\ :\ \mu \rightleftharpoons \mu'''$}
-        \DP
+            % Object call
+            \AXC{$l' = \mu\Big( \gamma(x_0) \Big) $}
+            \DP
+            \AXC{$\mu(l') = \langle c, \gamma' \rangle $}
+            \DP
+            \AXC{$\Gamma(c) = (fields, methods)$}
+            \DP
+            \AXC{$\Big( \textbf{method}\ q(t_1 y_1,\ ...,\ t_n y_n)\ s \Big) \in methods$}
+            \DP
+            \AXC{$\Big\langle l', \gamma'[y_1 \mapsto \gamma(x_1),\ ...,\ y_n \mapsto \gamma(x_n)] \Big\rangle \vdash^{\Gamma}_{stmt}\ s : \mu \rightleftharpoons \mu'$}
+            \RL{\textsc{CallObj}}
+            \UIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{call}\ x_0::q(x_1,\ ...,\ x_n)\ :\ \mu \rightleftharpoons \mu'$}
+            \DP
+    
+            \vskip 2em
+            
+            % Object Uncall
+            \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \text{call}\ x_0::q(x_1,\ ...,\ x_n)\ :\ \mu' \rightleftharpoons \mu$}
+            \RL{\textsc{ObjUncall}}
+            \UIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \text{uncall}\ x_0::q(x_1,\ ...,\ x_n)\ :\ \mu \rightleftharpoons \mu'$}
+            \DP
+        \end{center}
+        \caption{Semantic inferance rules for statements (cont)}
+        \label{fig:semantic-statements-cont}
+    \end{figure}
 
-        \vskip 2em
+    \begin{figure}[H]
+        \begin{center}   
+            % Object block
+            \AXC{$\Gamma(c) = \Big( \overbrace{\{\langle t_1, f_1 \rangle,\ ...,\ \langle t_n, f_n \rangle \}}^{fields}, methods \Big)$}
+            \DP
+            \AXC{$\gamma' = [f_1 \mapsto a_1,\ ...,\ f_n \mapsto a_n]$}
+            \DP
+            \vskip 1em
+            \AXC{$\{ l', r, a_1, ..., a_n \} \cap \text{dom}(\mu) = \emptyset$}
+            \DP
+            \AXC{$|\{ l', r, a_1, ..., a_n \}| = n + 2$}
+            \DP
+            \vskip 1em
+            \AXC{$\mu' = \mu\Big[ a_1 \mapsto 0,\ ...,\ a_n \mapsto 0,\ l' \mapsto \langle c, \gamma' \rangle,\ r \mapsto l' \Big]$}
+            \DP
+            \vskip 1em
+            \AXC{$\langle l, \gamma[x \mapsto r] \rangle \vdash^{\Gamma}_{stmt}\ s : \mu' \rightleftharpoons \mu''$}
+            \AXC{$\mu''(a_1) = 0\ \cdots\ \mu''(a_n) = 0$}
+            \RL{\textsc{ObjBlock}}
+            \BIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{construct}\ c\ x \quad s \quad \textbf{destruct}\ x\ :\ \mu \rightleftharpoons \mu'' \upharpoonright_{\text{dom}(\mu)}$}  
+            \DP
+                
+            \vskip 2em
+                
+            % Object New
+            \AXC{$\Gamma(c) = \Big( \overbrace{\{\langle t_1, f_1 \rangle,\ ...,\ \langle t_n, f_n \rangle \}}^{fields}, methods \Big)$}
+            \DP
+            \AXC{$\gamma' = [f_1 \mapsto a_1,\ ...,\ f_n \mapsto a_n]$}
+            \DP
+            \vskip 1em
+            \AXC{$\{ l', r, a_1, ..., a_n \} \cap \text{dom}(\mu) = \emptyset$}
+            \DP
+            \vskip 1em
+            \AXC{$|\{ l', r, a_1, ..., a_n \}| = n + 2$}
+            \AXC{$\mu' = \mu\Big[ a_1 \mapsto 0,\ ...,\ a_n \mapsto 0,\ l' \mapsto \langle c, \gamma' \rangle,\ r \mapsto l' \Big]$}
+            \RL{\textsc{ObjNew}}
+            \BIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{new}\ c\ x\ :\ \mu \rightleftharpoons \mu'[\gamma(x) \mapsto r]$}  
+            \DP
+                
+            \vskip 2em
+                
+            % Object delete
+            \AXC{$\mu\Big( \gamma(x) = r \Big)$}
+            \AXC{$\mu\Big( \gamma(r) = l' \Big)$}
+            \AXC{$\mu' = \mu\Big[l' \mapsto 0,\ r \mapsto 0 \Big]$}
+            \RL{\textsc{ObjDelete}}
+            \TIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{delete}\ c\ x\ :\ \mu \rightleftharpoons \mu' \setminus \{\gamma(x)\}$}
+            \DP
 
-        % If True
-        \AXC{$\langle \gamma, \mu \rangle \vdash^{\Gamma}_{expr} e_1 \not\Rightarrow 0$}
-        \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt} s_1 : \mu \rightleftharpoons \mu'$}
-        \AXC{$\langle \gamma, \mu' \rangle \vdash^{\Gamma}_{expr} e_2 \not\Rightarrow 0$}
-        \RL{\textsc{IfTrue}}
-        \TIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{if}\ e_1\ \textbf{then}\ s_1\ \textbf{else}\ s_2\ \textbf{fi}\ e_2\ :\ \mu \rightleftharpoons \mu'$}
-        \DP
+            \vskip 2em
 
-        \vskip 2em
+            % Copy
+            \AXC{$\mu\Big( \gamma(x) \Big) = r$}
+            \AXC{$\mu\Big( \gamma(r) \Big) = l$}
+            \AXC{$\mu\Big( \gamma(l) \Big) = \langle c, \gamma' \rangle$}
+            \RL{\textsc{ObjCopy}}
+            \TIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{copy}\ c\ x\ x'\ :\ \mu\leftrightharpoons \mu[x' \mapsto r]$} 
+            \DP
 
-        % If False
-        \AXC{$\langle \gamma, \mu \rangle \vdash^{\Gamma}_{expr} e_1 \Rightarrow 0$}
-        \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt} s_1 : \mu \rightleftharpoons \mu'$}
-        \AXC{$\langle \gamma, \mu' \rangle \vdash^{\Gamma}_{expr} e_2 \Rightarrow 0$}
-        \RL{\textsc{IfFalse}}
-        \TIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{if}\ e_1\ \textbf{then}\ s_1\ \textbf{else}\ s_2\ \textbf{fi}\ e_2\ :\ \mu \rightleftharpoons \mu'$}
-        \DP
+            \vskip 2em
+            
+            % Uncopy
+            \AXC{$\mu\Big( \gamma(x) \Big) = r$}
+            \AXC{$\mu\Big( \gamma(x') \Big) = r$}
+            \RL{\textsc{ObjUncopy}}
+            \BIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{uncopy}\ c\ x\ x'\ :\ \mu \setminus \{ \gamma(x')\}$}
+            \DP
 
-        \vskip 2em
-
-        % Call
-        \AXC{$\mu(l) = \langle c, \gamma' \rangle $}
-        \DP
-        \AXC{$\Gamma(c) = (fields, methods)$}
-        \DP
-        \AXC{$\Big( \textbf{method}\ q(t_1 y_1,\ ...,\ t_n y_n)\ s \Big) \in methods$}
-        \DP
-        \AXC{$\Big\langle l, \gamma'[y_1 \mapsto \gamma(x_1),\ ...,\ y_n \mapsto \gamma(x_n)] \Big\rangle \vdash^{\Gamma}_{stmt}\ s : \mu \rightleftharpoons \mu'$}
-        \RL{\textsc{Call}}
-        \UIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{call}\ q(x_1,\ ...,\ x_n)\ :\ \mu \rightleftharpoons \mu'$}
-        \DP
-
-        \vskip 2em
-
-        % Uncall
-        \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{call}\ q(x_1,\ ...,\ x_n)\ :\ \mu' \rightleftharpoons \mu$}
-        \RL{\textsc{Uncall}}
-        \UIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{uncall}\ q(x_1,\ ...,\ x_n)\ :\ \mu \rightleftharpoons \mu'$}
-        \DP
-    \end{center}
-    \caption{Semantic inferance rules for statements}
-    \label{fig:semantic-statements}
-\end{figure}
-
-\begin{figure}[H]
-    \begin{center}
-        \AXC{$l' = \mu\Big( \gamma(x_0) \Big) $}
-        \DP
-        \AXC{$\mu(l') = \langle c, \gamma' \rangle $}
-        \DP
-        \AXC{$\Gamma(c) = (fields, methods)$}
-        \DP
-        \AXC{$\Big( \textbf{method}\ q(t_1 y_1,\ ...,\ t_n y_n)\ s \Big) \in methods$}
-        \DP
-        \AXC{$\Big\langle l', \gamma'[y_1 \mapsto \gamma(x_1),\ ...,\ y_n \mapsto \gamma(x_n)] \Big\rangle \vdash^{\Gamma}_{stmt}\ s : \mu \rightleftharpoons \mu'$}
-        \RL{\textsc{CallObj}}
-        \UIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{call}\ x_0::q(x_1,\ ...,\ x_n)\ :\ \mu \rightleftharpoons \mu'$}
-        \DP
-
-        \vskip 2em
-        
-        % Object Uncall
-        \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \text{call}\ x_0::q(x_1,\ ...,\ x_n)\ :\ \mu' \rightleftharpoons \mu$}
-        \RL{\textsc{ObjUncall}}
-        \UIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \text{uncall}\ x_0::q(x_1,\ ...,\ x_n)\ :\ \mu \rightleftharpoons \mu'$}
-        \DP
-
-        \vskip 2em
-
-        % Object block
-        \AXC{$\Gamma(c) = \Big( \overbrace{\{\langle t_1, f_1 \rangle,\ ...,\ \langle t_n, f_n \rangle \}}^{fields}, methods \Big)$}
-        \DP
-        \AXC{$\gamma' = [f_1 \mapsto a_1,\ ...,\ f_n \mapsto a_n]$}
-        \DP
-        \vskip 1em
-        \AXC{$\{ l', r, a_1, ..., a_n \} \cap \text{dom}(\mu) = \emptyset$}
-        \DP
-        \AXC{$|\{ l', r, a_1, ..., a_n \}| = n + 2$}
-        \DP
-        \vskip 1em
-        \AXC{$\mu' = \mu\Big[ a_1 \mapsto 0,\ ...,\ a_n \mapsto 0,\ l' \mapsto \langle c, \gamma' \rangle,\ r \mapsto l' \Big]$}
-        \DP
-        \vskip 1em
-        \AXC{$\langle l, \gamma[x \mapsto r] \rangle \vdash^{\gamma}_{stmt}\ s : \mu' \rightleftharpoons \mu''$}
-        \AXC{$\mu''(a_1) = 0\ \cdots\ \mu''(a_n) = 0$}
-        \RL{\textsc{ObjBlock}}
-        \BIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{construct}\ c\ x \quad s \quad \textbf{destruct}\ x\ :\ \mu \rightleftharpoons \mu'' \upharpoonright_{\text{dom}(\mu)}$}  
-        \DP
-
-        % TODO: ObjNew ObjDlt, Copy Uncopy
-    \end{center}
-    \caption{Semantic inferance rules for statements (cont)}
-    \label{fig:semantic-statements-cont}
-\end{figure}
-% TODO: Explain previous figs
-blalbalba 
+            % Local blocks
+        \end{center}
+        \caption{Semantic inferance rules for statements (cont)}
+        \label{fig:semantic-statements-cont2}
+    \end{figure}
+\end{subfigures}
 
 
 \subsection{Programs}
@@ -840,17 +906,36 @@ defines the meaning of programs. The class $p$ containing the main method is ins
     \caption{Semantic inference rules for programs}
     \label{fig:semantics-programs}
 \end{figure}
-blabla
+
+As with \textsc{Roopl} programs, the fields of the main method in the main class $c$ are bound in a new environment, starting at memory address $1$, as $0$ is reserved for \textbf{nil}. The fields are zero-initialized in the new store $\mu$ and address $i + 1$ which maps to the new instance of $c$. After body execution, store $\mu'$ is obtained. The function $\mu' \circ \gamma$ maps class fields to their respective final values and serves as output of program $p$.
 
 
 \section{Program Inversion}
 \label{sec:program-inversion}
+% TODO: 
+\begin{figure}[ht]
+    \begin{align*}
+        &\mathcal{I}\llbracket \textbf{skip} \rrbracket = \textbf{skip} &&\mathcal{I}\llbracket s_1\ s_2 \rrbracket = \mathcal{I}\llbracket s_2 \rrbracket\ \mathcal{I}\llbracket s_1 \rrbracket\\
+        &\mathcal{I}\llbracket x\ \texttt{\textbf{+=}}\ e \rrbracket = x\ \texttt{\textbf{-=}}\ e &&\mathcal{I}\llbracket x\ \texttt{\textbf{-=}}\ e \rrbracket = x\ \texttt{\textbf{+=}}\ e\\
+        &\mathcal{I}\llbracket x\ \texttt{\textbf{\textasciicircum=}}\ e \rrbracket = x\ \texttt{\textbf{\textasciicircum=}}\ e &&\mathcal{I}\llbracket x\ \texttt{\textbf{<=>}}\ e \rrbracket = x\ \texttt{\textbf{<=>}}\ e\\
+        &\mathcal{I} \llbracket \textbf{new}\ c\ x\rrbracket\ = \textbf{delete}\ c\ x  &&\mathcal{I} \llbracket \textbf{copy}\ c\ x\ x' \rrbracket\ = \textbf{uncopy}\ c\ x\ x'\\
+        &\mathcal{I} \llbracket \textbf{delete}\ c\ x \rrbracket\ = \textbf{new}\ c\ x  &&\mathcal{I} \llbracket \textbf{uncopy}\ c\ x\ x' \rrbracket\ = \textbf{copy}\ c\ x\ x'\\
+        &\mathcal{I} \llbracket \textbf{call}\ q(\dots) \rrbracket\ = \textbf{uncall}\ q(\dots) &&\mathcal{I} \llbracket \textbf{call}\ x::q(\dots) \rrbracket\ = \textbf{uncall}\ x::q(\dots)\\
+        &\mathcal{I} \llbracket \textbf{uncall}\ q(\dots) \rrbracket\ = \textbf{call}\ q(\dots) &&\mathcal{I} \llbracket \textbf{uncall}\ x::q(\dots) \rrbracket\ = \textbf{call}\ x::q(\dots)\\
+        &\mathcal{I} \llbracket \textbf{if}\ e_1\ \textbf{then}\ s_1\ \textbf{else}\ s_2\ \textbf{fi}\ e_2 \rrbracket &&= \textbf{if}\ e_1\ \textbf{then}\ \mathcal{I}\llbracket s_1 \rrbracket\ \textbf{else}\ \mathcal{I}\llbracket s_2 \rrbracket\ \textbf{fi}\ e_2\\
+        &\mathcal{I} \llbracket \textbf{from}\ e_1\ \textbf{do}\ s_1\ \textbf{loop}\ s_2\ \textbf{until}\ e_2 \rrbracket\ &&=\ \textbf{from}\ e_1\ \textbf{do}\ \mathcal{I}\llbracket s_1 \rrbracket\ \textbf{loop}\ \mathcal{I}\llbracket s_2 \rrbracket\ \textbf{until}\ e_2\\
+        &\mathcal{I} \llbracket\textbf{construct}\ c\ x\quad s\quad \textbf{destruct}\ x\rrbracket\ &&=\ \textbf{construct}\ c\ x\quad\mathcal{I}\llbracket s \rrbracket\quad\textbf{destruct}\ x\\
+        &\mathcal{I} \llbracket\textbf{local}\ t\ x\ = e\ \quad s\quad \textbf{delocal}\ t\ x\ = e\rrbracket\ &&=\ \textbf{local}\ t\ x = e \quad\mathcal{I}\llbracket s \rrbracket\quad\textbf{delocal}\ t\ x\ = e
+    \end{align*}
+    \caption{\rooplpp statement inverter}
+    \label{fig:statement-inverter}
+\end{figure}
 
 \section{Computational Strength}
 \label{sec:computational-strength}
 Traditional, non-reversible programming languages have their computational strength measured in terms of their abilities to simulate the Turing machine (TM). If any arbitrary Turing machine can be implemented in some programming language, the language is said to be computationally universal or Turing-complete. In essence, Turing-completeness marks when a language can compute all computable functions. Reversible programming languages, like \textsc{Janus}, \textsc{Roopl} and \rooplpp, are not Turing-complete as they only are capable of computing injective, computable functions.
 
-For determining computing strength of reversible programming languages,~\citeauthor{ty:ejanus} suggests that the reversible Turing machine (RTM) could serve as the baseline criterion~\cite{ty:ejanus}. As such, if a reversible programming language is reversibly universal or r-Turing complete if it is able to simulate a reversible Turing machine cleanly, i.e. without generating garbage data. If garbage was left on the tape, the function simulated by the machine would not be an injective function and as such, no garbage should be left after termination of the simulation.
+For determining computing strength of reversible programming languages,~\citeauthor{ty:ejanus} suggests that the reversible Turing machine (RTM) could serve as the baseline criterion~\cite{ty:ejanus}. As such, if a reversible programming language is reversibly universal or r-Turing complete if it is able to simulate a reversible Turing machine cleanly, i.e. without generating garbage data. If garbage was on the tape, the function simulated by the machine would not be an injective function and as such, no garbage should be left after termination of the simulation.
 
 \subsection{Reversible Turing Machines}
 \label{subsec:reversible-turing-machine}
