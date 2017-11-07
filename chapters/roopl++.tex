@@ -974,9 +974,9 @@ Before we show that \rooplpp in fact is r-Turing complete, we present the formal
 \subsection{Tape Representation}
 \label{subsec:tape-representation}
 As with regular Turing machines, the tape of the machine is of infinite length. Therefore, we must simulate tape growth in either direction.
-\citeauthor{ty:ejanus} represented the tape using two stack primitives in the Janus RTM interpreter and \citeauthor{th:roopl} used list of objects. In \rooplpp, we could implement a stack, as objects are not statically scoped as in \textsc{Roopl}. However, in terms of easy of use, a linked-list implementation, of simple objects containing a \textit{value} and \textit{next} field, is more intuitive.
+\citeauthor{ty:ejanus} represented the tape using two stack primitives in the Janus RTM interpreter and \citeauthor{th:roopl} used list of objects. In \rooplpp, we could implement a stack, as objects are not statically scoped as in \textsc{Roopl}. However, in terms of easy of use, a doubly linked-list implementation, of simple objects containing a \textit{value} and \textit{left} and \textit{right} field, is more intuitive.
 
-As such, the cell index which the tape head currently hovers over is represented by an integer variable, which simply is the index into the linked list of tape cells. At the end of each simulated step of the RTM, the position of the tape head variable is bounds-checked to determine if the tape head has moved off the current tape length to either the left or the right. In either case, a new cell is allocated and prepended to the linked list, if the tape head moved off the tape to the left and appended to the linked list, if the tape head moved off the tape to the right. Thus allowing the tape to grow unboundedly in either direction.
+As such, the tape head hovers a tape cell by inspecting a specific element of the doubly linked-list tape representation. If the tape head needs in a direction, but the current cell has no neighbours in said direction, we simply allocate a new cell object and attach as the neighbour. Checking if a cell object is either end of the list is simply checking if its \textit{left} or \textit{right} fields are uninitialized, resulting in the \textbf{nil} value for objects.  
 
 \subsection{Reversible Turing Machine Simulation}
 \label{subsec:rtm-simulation}
@@ -986,7 +986,7 @@ Figure~\ref{fig:rtm-instruction-method} shows the modified method \textit{inst} 
     % TODO: Fix referencing
     \centering
     \begin{lstlisting}[style = basic, language = roopl]
-    method inst(int state, int symbol, int q1[], int s1[], int s2[], int q2[], int pc)
+    method inst(int state, int symbol, int q1[], int s1[], int s2[], int q2[], int pc, Cell tape, Cell left, Cell right)
         if (state = q1[pc]) && (symbol = s1[pc]) then   // Symbol rule:
             state += q2[pc]-q1[pc]                      // set state to q2[pc]
             symbol += s2[pc]-s1[pc]                     // set symbol to s2[pc]
@@ -994,10 +994,10 @@ Figure~\ref{fig:rtm-instruction-method} shows the modified method \textit{inst} 
         if (state = q1[pc]) && (s1[pc] = SLASH) then    // Move rule:
             state += q2[pc]-q1[pc]                      // set state to q2[pc]
             if s2[pc] = RIGHT then
-                pos += 1                                // Move tape head right
+                call move_Tape(tape, left, right, 1)    // Move tape head right
             fi s2[pc] = RIGHT
             if s2[pc] = LEFT then
-                pos -= 1                                // Move tape head left
+            call move_Tape(tape, left, right -1)        // Move tape head left
             fi s2[pc] = LEFT
         fi (state = q2[pc]) && (s1[pc] = SLASH)
     \end{lstlisting}
@@ -1005,52 +1005,70 @@ Figure~\ref{fig:rtm-instruction-method} shows the modified method \textit{inst} 
     \label{fig:rtm-instruction-method}
 \end{figure}
 
+
+
+\begin{figure}[ht]
+    % TODO: Fix referencing
+    \centering
+    \begin{lstlisting}[style = basic, language = roopl]
+    method move_tape(Cell tape, Cell left, Cell right, int direction)
+        if (direction = 1) then                 // Right direction
+            local Cell tmp = nil
+                if (right = nil) then           // expand tape
+                    new Cell cell               // Create new cell. This reference is not used again
+                    copy Cell cell r1           // create reference to new cell
+                    copy Cell cell r2           // create reference to new cell
+                    uncall tape::getRight(r1)   // Set right cell reference
+                    right <=> r2                // set right = r, r = nil
+                fi (right != nil)         
+
+                call tape::getLeft(tmp)         // Fetch original Left object
+                if (tmp != nil) then  
+                    left ^= tmp                 // Destroy reference to left (note: impossible currently)
+                fi (tmp != nil)   
+                uncall tape::getLeft(tmp)       // Put original left object back
+                tape <=> left                   // left = tape, tape = nil 
+                left <=> right                  // tape = right, right = nil
+
+                call tape::getRight(tmp)        // Fetch right object of tape head cell
+                if (tmp != nil) then  
+                    copy Cell right_new tmp     // Create reference to new right
+                    right <=> right_new         // set right to point at new right neighbour
+                fi (tmp != nil)   
+                uncall tape:getRight(tmp)       // Put object back
+            delocal Cell tmp = nil
+        fi (direction = 1)
+
+        if (direction = -1) then                // Left direction
+            ...                                 // Similar to above, with all left and rights swapped
+        fi (direction = -1)
+    \end{lstlisting}
+    \caption{Method for moving the tape head in the RTM simulation}
+    \label{fig:rtm-move-tape-head-method}
+\end{figure}
+
 Figure~\ref{fig:rtm-simulation-method} shows the simulate method which is the main method responsible for running the RTM simulation. The tape is extended in either direction when needed and the program counter it incremented.
 
 Unlike the \textsc{Roopl} simulation, \rooplpp is not limited by stack allocated, statically-scoped objects. Due to this limitation, the \textsc{Roopl} RTM simulator cannot finish with the TM tape as its program output when the RTM halts, as the call stack of the simulation must unwind before termination. As \rooplpp has dynamically-scoped objects, this limitation is lifted and as such, the TM tape will exist as the program out when the RTM halts.
 
+The main object initializes a Cell which is the initial tape. References to the neighbours of the cell which currently is right under the tape head is passed along with the transition rule variable. Initially the neighbour references are \textbf{nil}. The tape head is moved by the method shown in figure~\ref{fig:rtm-move-tape-head-method}. The method takes the current cell under the tape head, its neighbours and a direction. From here, it then begins moves the tape head by updating references to the neighbours and the current cell. If a neighbour in the direction we want to move in is \textbf{nil}, a new cell is created and references to it created. 
+
 \begin{figure}[ht]
     \centering
     \begin{lstlisting}[style = basic, language = roopl]
-    method simulate(Cell tape, int pos, int state, int q1[], 
+    method simulate(Cell tape, Cell left, Cell right int pos, int state, int q1[], 
                     int s1[], int s2[], int q2[], int pc)
-        local int len = 0
-        call tape::length(len)                                  //Calculate length of tape
-
-        if pos > len then                                       //Append new tape cell
-            new Cell cell(BLANK, empty)
-            call tape::insert(pos, len, cell)
-            call simulate(                                      //Continue simulation
-            Cell tape, int pos, int state, int q1[], 
-            int s1[], int s2[], int q2[], int pc) 
-        else
-            if pos < 0 then                                     //Prepend new tape cell
-                new Cell cell(BLANK, tape)
-                tape <=> cell
-                pos += 1
-                call simulate(                                  //Continue simulation
-                    Cell tape, int pos, int state, int q1[], 
-                    int s1[], int s2[], int q2[], int pc)         
-            else
-                call incrementPc(pc, PC_MAX)                    //Increment pc
-                local int symbol = 0
-                call tape::lookup(pos, symbol)                  //Fetch current symbol
-                call inst(state, symbol, q1, s1, s2, q2, pc)
-                uncall tape::lookup(pos, symbol)                //Zero-clear symbol    
-                delocal symbol = 0
-                             
-                if state = Qf then                              //If RTM simulation is finished
-                    call tape::get(result)                      //Copy result of simulation
-                else
-                    call simulate(                              //Continue simulation
-                        Cell tape, int pos, int state, int q1[], 
-                        int s1[], int s2[], int q2[], int pc)     
-                fi state = Qf
-            fi pos < 0
-        fi pos > len
-
-        uncall tape::length(len)                                //Clear length of tape
-        delocal len = 0
+        from state = Qs do 
+            pc += 1                                         // Increment pc
+            local int symbol = 0
+            call tape::lookup(pos, symbol)                  //Fetch current symbol
+            call inst(state, symbol, q1, s1, s2, q2, pc, tape, left, right)
+            uncall tape::lookup(pos, symbol)                //Zero-clear symbol    
+            delocal symbol = 0
+            if pc = PC_MAX then                             // Reset pc
+                pc ^= PC_MAX
+            fi pc = 0
+        until state = Qf
     \end{lstlisting}
     \caption{Main RTM simulation method}
     \label{fig:rtm-simulation-method}
