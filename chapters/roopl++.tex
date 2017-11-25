@@ -134,7 +134,7 @@ It should be noted, that from a language design perspective, it is the programme
 
 \section{Vector Model}
 \label{sec:vector-model}
-Besides asymmetric object lifetimes, \rooplpp also introduces reversible, dynamic arrays in form of the \textbf{vector} type. While \textsc{Roopl} on featured integers and custom data types in form of classes, one of its main inspirations, \textsc{Janus}, implemented static, reversible arrays~\cite{ty:janus}.
+Besides asymmetric object lifetimes, \rooplpp also introduces reversible, dynamic arrays in form of the \textbf{vector} type. While \textsc{Roopl} on featured integers and custom data types in form of classes, one of its main inspirations, \textsc{Janus}, implemented static, reversible arrays~\cite{ty:janus}. 
 
 While \textsc{Roopl} by design did not include any data storage language constructs, as they are not especially noteworthy nor interesting from an OOP perspective, they do generally improve the expressiveness of the language. For \rooplpp these were decided to be part of the core language as array, especially multi-dimensional, dynamic arrays become interesting from a memory management perspective.
 
@@ -199,6 +199,302 @@ However, we do allow other, initialized (non-zero-cleared array elements) to be 
 \label{sec:local-blocks}
 %TODO: Alias for construct/destruct block for objects
 
+
+\section{\rooplpp Expressiveness}
+\label{sec:rooplpp-expressiveness}
+By introducing dynamic lifetime objects and by allowing objects to be referenced multiple times, we can express non-trivial programs in the reversible setting. To demonstrate the capacities, expressiveness and possibilities of \rooplpp, the following section presents reversible data structures written in \rooplpp.
+
+\subsection{Linked List}
+\label{subsec:linked-list}
+\citeauthor{th:roopl} presented a Linked List implemented in \textsc{Roopl}. The implementation featured a \textit{ListBuilder} and a \textit{Sum} class, required to determine and retain the sum of a constructed linked list as \textsc{Roopl}'s statically scoped object blocks would deallocate automatically after building the full list. In \rooplpp we do not face the same challenges and the implementation becomes much more forward. Figure~\ref{fig:linked-list-class} implemented a \textit{LinkedList} class, simply has the head of the list and the list of length as its internal fields. For demonstration, the class allows extension of the list by either appending or prepending cell elements to the list. In either case, we first check if the \textit{head} field is initialized. If not, the cell we are either appending or prepending simply becomes the new head of the list. If we are appending a cell the Cell-class \textit{append} method is called on the \textit{head} cell with the new cell as its only argument. When prepending, the existing head is simply appended to the new cell and the new cell is set as head of the linked list.
+
+Figure~\ref{fig:linked-list-cell-class} shows the \textit{Cell} class of the linked list which has a \textit{next} and a \textit{data} field, a constructor and the \textit{append} method. The append method works by recursively looking through the linked cell nodes until we reach the end of the free list, where the \textit{next} field has not been initialized yet. When we find such a cell, we simply swap the contents of the \textit{next} and \textit{cell} variables, s.t. the cell becomes the new end of the linked list. 
+
+An interesting observation, is that the \textit{append} method is called an additional time \textit{after} setting the cell as the new end of the linked list. In a non-reversible programming language, we would simply call append in the else-branch of the first conditional. In the reversible setting, this is not an option, as the append call would modify the value of the \textit{next} and \textit{cell} variables and as such, corrupt the control flow as the exit condition would be true after executing both the then- and else-branch of the conditional.
+This "wasted" additional call with a \textbf{nil} value \textit{cell} is a recurring technique in the following presented reversible data structure implementations. 
+
+\begin{figure}[ht!]
+    \centering
+    \begin{lstlisting}[style = basic, language = roopl]                
+    class LinkedList
+        Cell head
+        int listLength
+    
+        method insertHead(Cell cell)
+            if head = nil & cell != nil then
+                head <=> cell               // Set cell as head of list if list is empty
+            else skip
+            fi head != nil & cell = nil
+    
+        method appendCell(Cell cell)
+            call insertHead(cell)           // Insert as head if empty list
+    
+            if head != nil then
+                call head::append(cell)     // Iterate until we hit end of list
+            else skip
+            fi head != nil
+    
+            listLength += 1                 // Increment length
+    
+        method prependCell(Cell cell)
+            call insertHead(cell)           // Insert as head if empty list
+    
+            if cell != nil & head != nil then
+                call cell::append(head)     // Set cell.next = head. head = nil after execution
+            else skip
+            fi cell != nil & head = nil
+    
+            if cell != nil & head = nil then
+                cell <=> head               // Set head = cell. Cell is nil after execution
+            else skip
+            fi cell = nil & head != nil
+    
+            listLength += 1                 // Increment length
+    
+        method length(int result)
+            result ^= listLength  
+    \end{lstlisting}
+    \caption{Linked List class}
+    \label{fig:linked-list-class}
+\end{figure}
+
+\begin{figure}[ht!]
+    \centering
+    \begin{lstlisting}[style = basic, language = roopl] 
+    class Cell
+        Cell next
+        int data
+    
+        method constructor(int value)
+            data ^= value     
+    
+        method append(Cell cell)
+            if next = nil & cell != nil then
+                next <=> cell           // Store as next cell if current cell is end of list
+            else skip
+            fi next != nil & cell = nil
+    
+            if next != nil then
+                call next::append(cell) // Recursively search until we reach end of list
+            else skip
+            fi next != nil
+    \end{lstlisting}
+    \caption{Linked List cell class}
+    \label{fig:linked-list-cell-class}
+\end{figure}
+
+\subsection{Binary Tree}
+\label{subsec:binary-tree}
+Figures~\ref{fig:binary-tree-class},~\ref{fig:binary-tree-node-class} and~\ref{fig:binary-tree-node-class-cont} shows the implementation of a binary tree in form of a  rooted, unbalanced, min-heap. The \textit{Tree} class shown in figure~\ref{fig:binary-tree-class} has a single root node field and the three methods \textit{insertNode, sum} and \textit{mirror}. For insertion, the \textit{insertNode} method is called from the \textit{root}, if it is initialized and if not, the passed node parameter is simply set as the new root of the tree. The \textit{insertNode} method implemented in the \textit{Node} class shown in figure~\ref{fig:binary-tree-node-class} first determines if we need to insert left or right but checking the passed value against the value of the current node. This is done recursively, until an uninitialized node in the correct subtree has been found. Note that the value of node we wish to insert must be passed separately in the method call as we otherwise cannot zero-clear it after swapping the node we are inserting with either the right or left child of the current cell.
+
+Summing and mirroring the tree works in a similar fashion by recursively iterating each node of the tree. For summing we simply add the value of the node to the sum and for mirroring we swap the children of the node and then recursively swap the children of the left and right node, if initialized. The sum and mirror methods are implemented in figure~\ref{fig:binary-tree-node-class-cont}.
+
+\begin{figure}[ht!]
+    \centering
+    \begin{lstlisting}[style = basic, language = roopl] 
+    class Tree
+        Node root
+        
+        method insertNode(Node node, int value)
+            if root = nil & node != nil then
+                root <=> node
+            else skip
+            fi root != nil & node = nil
+    
+            if root != nil then
+                call root::insertNode(node, value)
+            else skip
+            fi root != nil
+    
+        method sum(int result)
+            if root != nil then
+                call root::getSum(result)
+            else skip
+            fi root != nil
+    
+        method mirror()
+            if root != nil then
+                call root::mirror()
+            else skip
+            fi root != nil
+    \end{lstlisting}
+    \caption{Binary Tree class}
+    \label{fig:binary-tree-class}
+\end{figure}
+
+\begin{figure}[ht!]
+    \centering
+    \begin{lstlisting}[style = basic, language = roopl] 
+    class Node
+        Node left
+        Node right
+        int value
+    
+        method setValue(int newValue)
+            value ^= newValue 
+    
+        method insertNode(Node node, int nodeValue)
+            // Determine if we insert left or right
+            if nodeValue < value then
+                if left = nil & node != nil then
+                    // If open left node, store here
+                    left <=> node
+                else skip
+                fi left != nil & node = nil
+    
+                if left != nil then
+                    // If current node has left, continue iterating
+                    call left::insertNode(node, nodeValue)
+                else skip
+                fi left != nil
+            else
+                if right = nil & node != nil then
+                    // If open right node spot, store here
+                    right <=> node
+                else skip
+                fi right != nil & node = nil
+    
+                if right != nil then
+                    // If current node has, continue searching
+                    call right::insertNode(node, nodeValue)
+                else skip
+                fi right != nil
+            fi nodeValue < value
+    \end{lstlisting}
+    \caption{Binary Tree node class}
+    \label{fig:binary-tree-node-class}
+\end{figure}
+
+\begin{figure}[ht!]
+    \centering
+    \begin{lstlisting}[style = basic, language = roopl] 
+    method getSum(int result)
+        result += value                  // Add the value of this node to the sum   
+
+        if left != nil then
+            call left::getSum(result)   // If we have a left child, follow that path
+        else skip                       // Else, skip
+        fi left != nil
+
+        if right != nil then
+            call right::getSum(result)  // If we have a right child, follow that path
+        else skip                       // Else, skip
+         fi right != nil
+
+    method mirror()
+        left <=> right                  // Swap left and right children
+
+        if left = nil then skip
+        else call left::mirror()        // Recursively swap children if left != nil
+        fi left = nil
+
+        if right = nil then skip
+        else call right::mirror()       // Recursively swap children if right != nil
+        fi right = nil 
+    \end{lstlisting}
+    \caption{Binary Tree node class (cont)}
+    \label{fig:binary-tree-node-class-cont}
+\end{figure}
+
+
+\subsection{Doubly Linked List}
+\label{subsec:doubly-linked-list}
+Finally, we present the reversible doubly linked list, shown in figures~\ref{fig:doubly-linked-list-class}-\ref{fig:doubly-linked-list-cell-class-cont}. A \textit{cell} in a doubly linked list contains a reference to itself named \textit{self}, a reference to its left and right neighbours, a data and an index field. As with the linked list and binary tree implementation the \textit{DoubleLinkedList} class has a a field referencing the head of the list and its \textit{appendCell} method is identical to the one of the linked list. 
+
+When we append a cell to the list, we first search recursively through the list until we are at the end. The new cell is then set as \textit{right} of the current cell. A reference to the current self is created using the \textbf{copy} statement, and set as \textit{left} of the new end of the list, thus resulting on the new cell being linked to list and now acting as end of the list.
+
+\begin{figure}[ht!]
+    \centering
+    \begin{lstlisting}[style = basic, language = roopl] 
+    class DoublyLinkedList
+        Cell head
+        int length
+    
+        method appendCell(Cell cell)
+            if head = nil & cell != nil then
+                head <=> cell
+            else skip
+            fi head != nil & cell = nil
+    
+            if head != nil then 
+                call head::append(cell)
+            else skip
+            fi head != nil
+    
+            length += 1
+    \end{lstlisting}
+    \caption{Doubly Linked List class}
+    \label{fig:doubly-linked-list-class}
+\end{figure}
+
+\begin{figure}[ht!]
+    \centering
+    \begin{lstlisting}[style = basic, language = roopl] 
+        class Cell
+        int data
+        int index
+        Cell left
+        Cell right
+        Cell self
+    
+        method setData(int value)
+            data ^= value
+    
+        method setIndex(int i)
+            index ^= i    
+    
+        method setLeft(Cell cell)
+            left <=> cell
+    
+        method setRight(Cell cell)
+            right <=> cell
+    
+        method setSelf(Cell cell)
+            self <=> cell
+    \end{lstlisting}
+    \caption{Doubly Linked List Cell class}
+    \label{fig:doubly-linked-list-cell-class}
+\end{figure}
+
+\begin{figure}[ht!]
+    \centering
+    \begin{lstlisting}[style = basic, language = roopl]
+    method append(Cell cell)
+        if right = nil & cell != nil then   // If current cell does not have a right neighbour
+            right <=> cell                  // Set new cell as right neighbour of current cell
+        
+            local Cell selfCopy = nil      
+            copy Cell self selfCopy         // Copy reference to current cell
+            call right::setLeft(selfCopy)   // Set current as left of  right neighbour
+            delocal Cell selfCopy = nil
+
+            local int cellIndex = index + 1
+            call right::setIndex(cellIndex) // Set index in right neighbour of current
+            delocal int cellIndex = index + 1
+        else skip
+        fi right != nil & cell = nil
+
+        if right != nil then
+            call right::append(cell)        // Keep searching for empty right neighbour
+        else skip
+        fi right != nil 
+    \end{lstlisting}
+    \caption{Doubly Linked List Cell class (cont)}
+    \label{fig:doubly-linked-list-cell-class-cont}
+\end{figure}
+
+\clearpage
+\newpage
+\pagebreak
+\clearpage
+\newpage
+\pagebreak
+\clearpage
+\newpage
+\pagebreak 
+\clearpage
+\newpage
+\pagebreak
 
 \section{Type System}
 \label{sec:type-system}
@@ -986,7 +1282,8 @@ Figure~\ref{fig:rtm-instruction-method} shows the modified method \textit{inst} 
     % TODO: Fix referencing
     \centering
     \begin{lstlisting}[style = basic, language = roopl]
-    method inst(int state, int symbol, int q1[], int s1[], int s2[], int q2[], int pc, Cell tape, Cell left, Cell right)
+    method inst(int state, int symbol, int q1[], int s1[], int s2[], 
+                int q2[], int pc, Cell tape, Cell left, Cell right)
         if (state = q1[pc]) && (symbol = s1[pc]) then   // Symbol rule:
             state += q2[pc]-q1[pc]                      // set state to q2[pc]
             symbol += s2[pc]-s1[pc]                     // set symbol to s2[pc]
@@ -994,10 +1291,10 @@ Figure~\ref{fig:rtm-instruction-method} shows the modified method \textit{inst} 
         if (state = q1[pc]) && (s1[pc] = SLASH) then    // Move rule:
             state += q2[pc]-q1[pc]                      // set state to q2[pc]
             if s2[pc] = RIGHT then
-                call move_Tape(tape, left, right, 1)    // Move tape head right
+                call move_tape(tape, left, right, 1)    // Move tape head right
             fi s2[pc] = RIGHT
             if s2[pc] = LEFT then
-            call move_Tape(tape, left, right -1)        // Move tape head left
+            call move_tape(tape, left, right -1)        // Move tape head left
             fi s2[pc] = LEFT
         fi (state = q2[pc]) && (s1[pc] = SLASH)
     \end{lstlisting}
@@ -1008,7 +1305,6 @@ Figure~\ref{fig:rtm-instruction-method} shows the modified method \textit{inst} 
 
 
 \begin{figure}[ht]
-    % TODO: Fix referencing
     \centering
     \begin{lstlisting}[style = basic, language = roopl]
     method move_tape(Cell tape, Cell left, Cell right, int direction)
