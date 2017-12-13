@@ -1,11 +1,11 @@
 \chapter{Compilation}
 \label{chp:compilation}
-% TODO: PISA cite
 %TODO: Revise chapter intro
 The following chapter will present the considerations and designs for the reversible heap manager and the schemes used in the process of translating \rooplpp to the reversible low-level machine language \textsc{PISA}.
 
 \section{The \textsc{Roopl} to \textsc{Pisa} compiler}
 \label{sec:roopl-to-pisa-compiler}
+% TODO: Write section
 
 \section{\rooplpp Memory Layout}
 \label{sec:rooplpp-memory-layout}
@@ -360,16 +360,56 @@ As mentioned, the \texttt{malloc(1)} is executed recursively, scanning through f
     \label{fig:malloc1-pisa} 
     \end{figure}
 
-\newpage    
+\newpage
 
-\section{Vectors}
-TBD
+\section{Arrays}
+\label{sec:arrays}
+% TODO: Write section
+
+\subsection{Construction and destruction}
+\label{subsec:construction-destruction}
+%TODO: Write subsection
+
+\subsection{Array Element Access}
+\label{subsec:array-element-access}
+% TODO: Write subsection
+
+\section{Referencing}
+\label{sec:referencing}
+% TODO: Write section
 
 \section{Error Handling}
-TBD
+\label{sec:error-handling}
+
+While a program written in \rooplpp might be syntactically valid and well-typed, it is not a guarantee that it compiles successfully. A number of conditions exists, which cannot be determined at compile time, which results in erroneous compiled code. \citeauthor{th:roopl} describes the following conditions:
+
+\begin{itemize}
+    \item If the entry expression of a conditional is \textbf{true}, then the exit assertion should also be \textbf{true} after executing the then-branch.
+    \item If the entry expression of a conditional is \textbf{false}, then the exit assertion should also be \textbf{false} after executing the else-branch.
+    \item The entry expression of a loop should initially be \textbf{true}.
+    \item If the exit assertion of a loop is \textbf{false}, then the entry expression should also be \textbf{false} after executing the loop-statement.
+    \item All instance variables should be zero-cleared within an object block, before the object is deallocated.
+    \item The value of a local variable should always match the value of the delocal-expression after the block statement has executed.
+\end{itemize}
+
+The extensions made to \textsc{Roopl} in \rooplpp brings forth a number of additional conditions:
+
+\begin{itemize}
+    \item All fields of an object instance should be zero-cleared before the object is deallocated using the \textbf{delete} statement.
+    \item All cells of an an instance should be zero-cleared before the array is deallocated using the \textbf{delete} statement.
+    \item Local object blocks should have their fields zero-cleared after the execution of the block statement.
+    \item Local array blocks should have their cells zero-cleared after the execution of the block statement.
+    \item If a local object variable's value is exchanged during its block statement and the new value is an object reference, this object must have its fields zero-cleared after the execution of the block statement.
+    \item If a local array variable's value is exchanged during its block statement and the new value is an array reference, this array must have its cell zero-cleared after the execution of the block statement.
+    \item The variable in the \textbf{new} statement must be zero-cleared beforehand.
+    \item The variable in the \textbf{copy} statement must be zero-cleared beforehand.
+    \item The variable in the \textbf{copy} statement must be zero-cleared beforehand.    \item The variable in the \textbf{new} statement must be zero-cleared beforehand.
+\end{itemize}
+
+It is the programmer's responsibility to meet these conditions are met. As these conditions, in general, cannot be determined at compile time, undefined program behaviour will occur as the termination will continue silently, resulting in erroneous program state.
+
+% TODO: Finish section
 
 \section{Implementation}
-
-
-
-\texttt{TBD} 
+\label{sec:implementation}
+% TODO: Write section

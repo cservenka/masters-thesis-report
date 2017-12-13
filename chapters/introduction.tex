@@ -1,29 +1,48 @@
 \chapter{Introduction}
 \label{chp:introduction}
+In recent years, technologies such as cloud-based services, cryptocurrency mining and other services requiring large computational power and availability has been on the rise. These services are hosted on massive server parks, consuming immense amounts of electricity in order to power the machines and the cooling architectures as heat dissipates from the hardware. A recent study showed that the Bitcoin network including its mining processes' currently stands at 0.13\% of the total global electricity consumption, rivaling the usage of a small country like Denmark's~\cite{digiconomist:bitcoin}. With the recent years focus on climate and particularly energy consumption, companies have started to attempt to reduce their power usage in these massive server farms. As an example, Facebook built new server park in the arctic circle in 2013, in an attempt to take advantage of the natural surroundings in the cooling architecture to reduce its power consumption~\cite{bloomberg:facebook}. 
 
-\section{Object-Oriented Programming}
-\label{sec:object-oriented-programming}
-Object-oriented programming (OOP) has for many years been the most widely used programming paradigm as reflected in the popular usage of object-oriented programming languages, such as the \texttt{C}-family languages, \texttt{Java}, \texttt{PHP} and in recent years \texttt{Javascript} and \texttt{Python}. Using the OOP core concepts such as \textit{inheritance}, \textit{encapsulation} and \textit{polymorphism} allows complex systems to be modeled by breaking the system into smaller parts in form of abstract objects. 
+Reversible computing presents a possible solution the problematic power consumption issues revolving around computations. Traditional, irreversible computations dissipates heat during their computation. Landauer's principle states that deletion of information in a system always results by an increase in energy consumption. In reversible computing, all information is preserved throughout the execution, and as such, the energy consumption theoretically should be smaller~\cite{rl:irreversibility}.
+
+Currently, reversible computing is not commercially appealing, as it is an area which still is being actively researched. However, several steps has been taken in the direction of a fully reversible system, which some day might be applicable in a large setting. Reversible machine architectures have been presented such as the Pendulum architecture and its instruction set Pendulum ISA (\textsc{Pisa})~\cite{cv:pendulum} and the \textsc{BobISA} architecture and instruction set~\cite{mt:bob} and high level languages \textsc{Janus}~\cite{cl:janus, ty:janus, ty:ejanus} and \textsc{R}~\cite{mf:r} exists. 
+
 
 \section{Reversible Computing}
 \label{sec:reversible-computing}
-% TODO
+Reversible computing is a two-directional computational model in which all processes are time-invertible. This means, that at any time during execution, the computation can return to a former state. In order to maintain \textit{reversibility}, the reversible computational modal cannot compute \textit{many-to-one} functions, as the models requires an exact inverse $f^{-1}$ of a function $f$ in order to support backwards determinism. Therefore, reversible programs must only consist on \textit{one-to-one} functions, also known as \textit{injective} functions, which results in a garbage-free computations.
+
+As each step of a reversible program is locally invertible, meaning each of its component has exactly one inverse component, a reversible program can be inverted simply by computing the inverse of each of its components, without any knowledge about the overall program's functionality or requirements. This property immediately yields interesting consequences in terms of software development, as an encryption or compression algorithm implemented in a reversible language immediately yields the decryption or decompression algorithm.
+
+The reversibility is however not free at comes at the cost of strictness when writing programs. Almost every popular, irreversible programming language features a conditional component in form of \textbf{if}-\textbf{else}-statements. In these languages, we only define the \textit{entry}-condition in the condition, that is, the condition that determines which branch of the component we continue execution in. In reversible languages, we must also specify an \textit{exit}-condition, such that we can determine which branch we should follow, we we are executing the program in reverse. In theory, this sounds trivial, but in practice it turns to add a new layer of complexity when writing programs.
+
+
+\section{Object-Oriented Programming}
+\label{sec:object-oriented-programming}
+Object-oriented programming (OOP) has for many years been the most widely used programming paradigm as reflected in the popular usage of object-oriented programming languages, such as the \textsc{C}-family languages, \textsc{Java}, \textsc{PHP} and in recent years \textsc{Javascript} and \textsc{Python}. Using the OOP core concepts such as \textit{inheritance}, \textit{encapsulation} and \textit{polymorphism} allows complex systems to be modeled by breaking the system into smaller parts in form of abstract objects. 
+
 
 \section{Reversible Object-Oriented Programming}
-% TODO: Introduce and cite PISA here
 \label{sec:reversible-object-oriented-programming}
-The high-level reversible language \textsc{Roopl} (Reversible Object-Oriented Programming Language) was introduced in late 2016 and is, to our knowledge, the first of its kind~\cite{th:roopl}. The language extends the design of previously existing reversible imperative languages with object-oriented programming language features such as user-defined data types, class inheritance and subtype-polymorphism. As a first, \textsc{Roopl} successfully integrates the object-oriented programming (OOP) paradigms into the reversible computation setting using a static memory manager to maintain garbage-free computation, but at cost of "programmer usability" as objects only lives within \texttt{construct} / \texttt{deconstruct} blocks, which needs to be predefined, as the program call stacks is required to be reset before program termination.
+The high-level reversible language \textsc{Roopl} (Reversible Object-Oriented Programming Language) was introduced in late 2016~\cite{th:roopl, th:roopl2}. The language extends the design of previously existing reversible imperative languages with object-oriented programming language features such as user-defined data types, class inheritance and subtype-polymorphism. As a first, \textsc{Roopl} successfully integrates the object-oriented programming (OOP) paradigms into the reversible computation setting using a static memory manager to maintain garbage-free computation, but at cost of "programmer usability" as objects only lives within \textbf{construct} / \textbf{deconstruct} blocks, which needs to be predefined, as the program call stacks is required to be reset before program termination.
+ 
 
 \section{Motivation}
 \label{sec:motivation}
 \textsc{Roopl}'s block defined objects and lack of references are problematic when write complex, reversible programs using OOP methodologies. It has therefore been proposed to extend and partially redesign the language with dynamic memory management in mind, such that these shortcomings can be addressed, ultimately increasing the usability of reversible OOP. Work within the field of reversible computing related to heap manipulation~\cite{ha:heap}, reference counting~\cite{tm:refcounting} and garbage collection~\cite{tm:garbage} suggests that a \textsc{Roopl} extension is feasible.
 
 
-
 \section{Thesis Statement}
 \label{sec:thesis-statement}
-\texttt{TBD}
+An extension of the reversible object-oriented programming language with dynamic memory management is possible and effective. The resulting expressiveness allows non-trivial reversible programming previously unseen, such as reversible data structures.
 
 \section{Outline}
 \label{sec:outline}
-\texttt{TBC}
+This Master's thesis consists of four chapters, besides the introductory chapter. The following summary describes the following chapters
+\begin{itemize}
+    \item \textbf{Chapter 2} formally defines the \textsc{Roopl} extension in form of the new language \rooplpp, a superset of \textsc{Roopl}.
+    \item \textbf{Chapter 3} serves as a brief description of dynamic memory management along with a discussion of various reversible, dynamic memory management layouts.
+    \item \textbf{Chapter 4} presents the translation techniques utilized in the compiling a \rooplpp program to \textsc{Pisa} instructions.
+    \item \textbf{Chapter 5} presents the conclusions of the thesis and future work proposals.
+\end{itemize}
+
+Besides the five chapters, a number of appendices is supplied, containing the source code of the \rooplpp to \textsc{Pisa} compiler, the \rooplpp source code for the example programs and their translated \textsc{Pisa} versions.
