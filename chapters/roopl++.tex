@@ -1,4 +1,4 @@
-\chapter{The \textsc{Roolp\texttt{++}} Language}
+\chapter{The \textsc{Roopl\texttt{++}} Language}
 \label{chp:rooplpp}
 With the design and implementation of the \textsc{Reversible Object-Oriented Programming Language} (\textsc{Roopl}), the first steps into the uncharted lands of Object-Oriented Programming (OOP) and reversibility was taken. In this chapter, we will present \rooplpp, the natural successor of \textsc{Roopl}, improving the language's object instantiation by letting objects live outside \texttt{construct / deconstruct} blocks, allowing complex, reversible programs to be written using OOP methodologies. As with its predecessor, \rooplpp is purely reversible and each component of a program written in \rooplpp is locally invertible. This ensures no computation history is required nor added program size for backwards direction program execution.
 
@@ -1389,7 +1389,8 @@ As with \textsc{Roopl} programs, the fields of the main method in the main class
 
 \section{Program Inversion}
 \label{sec:program-inversion}
-% TODO: 
+In order to truly show that \rooplpp in fact is a reversible language, we must demonstrate and prove local inversion of statements is possible, such that any program written in \rooplpp, regardless of context, can be executed in reverse. \citeauthor{th:roopl} presented a statement inverter for \textsc{Roopl} in~\cite{th:roopl}, which maps statement to their inverse counterparts. Figure~\ref{fig:statement-inverter} shows the statement inverter, extended with the new \rooplpp statements for construction/destruction and referencing copying/copy removal.
+
 \begin{figure}[ht]
     \begin{align*}
         &\mathcal{I}\llbracket \textbf{skip} \rrbracket = \textbf{skip} &&\mathcal{I}\llbracket s_1\ s_2 \rrbracket = \mathcal{I}\llbracket s_2 \rrbracket\ \mathcal{I}\llbracket s_1 \rrbracket\\
@@ -1407,6 +1408,184 @@ As with \textsc{Roopl} programs, the fields of the main method in the main class
     \caption{\rooplpp statement inverter}
     \label{fig:statement-inverter}
 \end{figure}
+
+Program inversion is conducted by recursive descent over components and statements. A proposed extension to the statement inverted for whole-program inversion, is retained in the \rooplpp statement inverter. The extension covers the case, which reveals itself during method calling. As a method call is equivalent to an uncall with the inverse method and we simply change calls to uncalls during inversion, the inversion of the method body cancels out. The proposed extension, presented by~\citeauthor{th:roopl} in~\cite{th:roopl}, simply avoids inversion of calls and uncalls, as shown in figure~\ref{fig:inverter-extension}.
+
+\begin{figure}[ht]    
+    \centering
+    \begin{align*}
+        &\mathcal{I}' \llbracket \textbf{call}\ q(\dots) \rrbracket\ = \textbf{call}\ q(\dots) &&\mathcal{I}' \llbracket \textbf{call}\ x::q(\dots) \rrbracket\ = \textbf{call}\ x::q(\dots)\\
+        &\mathcal{I}' \llbracket \textbf{uncall}\ q(\dots) \rrbracket\ = \textbf{uncall}\ q(\dots) &&\mathcal{I}' \llbracket \textbf{uncall}\ x::q(\dots) \rrbracket\ = \textbf{uncall}\ x::q(\dots)\\ 
+        &&\mathcal{I}' \llbracket s \rrbracket = \mathcal{I} \llbracket s \rrbracket
+    \end{align*}
+    \caption{Modified statement inverter for statements, originally from~\cite{th:roopl}}
+    \label{fig:inverter-extension} 
+\end{figure}
+
+\subsection{Invertability of Statements}
+\label{subsec:invertability-of-statements}
+While the invertibility of statements remains untouched by the extensions made in \rooplpp, the following proof, originally presented in~\cite{th:roopl}, has been included for completeness.
+
+If execution of a statement $s$ in store $\mu$ yields $\mu'$, then execution of the inverse statement, $\mathcal{I} \llbracket s \rrbracket$ in store $\mu'$ should yield $\mu$. Theorem~\ref{thm:invertibility-of-statements} shows that $\mathcal{I}$ is a statement inverter.\\
+
+\begin{theorem}\label{thm:invertibility-of-statements}(Invertibility of statements, originally from~\cite{th:roopl})
+    \begin{equation*}
+        \overbrace{\langle l, \gamma \rangle\ \vdash_{stmt}^\Gamma\ s\ :\ \mu \rightleftharpoons \mu'}^{\mathcal{S}}\ \Longleftrightarrow\ \overbrace{\langle l, \gamma \rangle\ \vdash_{stmt}^\Gamma\ \mathcal{I}\llbracket s\rrbracket\ :\ \mu' \rightleftharpoons \mu}^{\mathcal{S}'}
+    \end{equation*}
+\end{theorem}
+
+\begin{proof}\let\qed\relax
+    By structural induction on the semantic derivation of $\mathcal{S}$ (omitted). It suffices to show that $\mathcal{S} \implies \mathcal{S}'$, as this can serve as proof of $\mathcal{S}' \implies \mathcal{S}$, as $\mathcal{I}$ is an involution.
+\end{proof}    
+
+\subsection{Type-Safe Statement Inversion}
+\label{subsec:type-safe-statement-inversion}
+Given a well-typed statement, the statement inverter $\mathcal{I}$ should always produce a well-typed, inverse statement in order to correctly support backwards determinism of injective functions. Theorem~\ref{thm:type-inversion} describes this.
+
+\begin{theorem}\label{thm:type-inversion}(Inversion of well-typed statements, originally from~\cite{th:roopl})
+    \begin{equation*}
+        \overbrace{\langle \Pi,\ c\rangle\ \vdash_{stmt}^\Gamma\ s}^{\mathcal{T}}\ \implies\ \overbrace{\langle \Pi,\ c\rangle\ \vdash_{stmt}^\Gamma\ \mathcal{I}\llbracket s\rrbracket}^{\mathcal{T}'}
+    \end{equation*}
+\end{theorem}
+
+\begin{proof}\let\qed\relax
+    By structural induction on $\mathcal{T}$. Unmodified \textsc{Roopl} statements retained in \rooplpp has been omitted.
+    \newpage
+    \begin{itemize}
+        \item Case $\mathcal{T} =$\vskip 1em
+            \AXC{$\overbrace{x \in \text{IntegerArrayIDs}}^{\mathcal{C}_1}$}
+            \AXC{$\overbrace{\Pi \vdash_{expr} e_1\ :\ \textbf{int}}^{\mathcal{E}_1}$}
+            \AXC{$\overbrace{x[e_1] \not\in \text{vars}(e_2)}^{\mathcal{C}_2}$}
+            \AXC{$\overbrace{\Pi \vdash_{expr}\ e_2 : \textbf{int}}^{\mathcal{E}_2}$}
+            \RL{\textsc{T-ArrElemAss}}
+            \QIC{$\langle \Pi, c \rangle \vdash^{\Gamma}_{stmt}\ x[e_1] \odot= e_2$}
+            \DP\\
+            \vskip 1em
+            In this case, we have $\mathcal{I}\llbracket x\ \odot=\ e \rrbracket = x\ \odot'=\ e$, for some $\odot'$. Therefore, $\mathcal{T}'$ will also be a derivation of rule \textsc{T-ArrElemAss}, and as such, we can simply reuse the conditions $\mathcal{C}_1, \mathcal{C}_2$ and the expressions $\mathcal{E}_1. \mathcal{E}_2$ in construction of $\mathcal{T}'$
+            \begin{equation*}
+                \mathcal{T}' =
+                \AXC{$\overbrace{x \in \text{IntegerArrayIDs}}^{\mathcal{C}_1}$}
+                \AXC{$\overbrace{\Pi \vdash_{expr} e_1\ :\ \textbf{int}}^{\mathcal{E}_1}$}
+                \AXC{$\overbrace{x[e_1] \not\in \text{vars}(e_2)}^{\mathcal{C}_2}$}
+                \AXC{$\overbrace{\Pi \vdash_{expr}\ e_2 : \textbf{int}}^{\mathcal{E}_2}$}
+                \QIC{$\langle \Pi, c \rangle \vdash^{\Gamma}_{stmt}\ x[e_1] \odot'= e_2$}
+                \DP
+            \end{equation*}
+
+        \item Case $\mathcal{T} =$
+            \AXC{$\overbrace{\Pi(x) = \textbf{nil}}^{\mathcal{C}_1}$}
+            \RL{\textsc{T-ObjNew}}
+            \UIC{$\langle \Pi, c \rangle  \vdash^{\Gamma}_{stmt}\ \textbf{new}\ c'\ x$} 
+            \DP\\
+            \vskip 1em
+            In this case we have $\mathcal{I} \llbracket \textbf{new}\ c\ x\rrbracket\ = \textbf{delete}\ c\ x$, meaning $\mathcal{T}'$ must be of the form:
+            \begin{equation*}
+                \mathcal{T}' = \AXC{$\overbrace{\Pi(x) = c'}^{\mathcal{C}_2}$}          
+                \UIC{$\langle \Pi, c \rangle  \vdash^{\Gamma}_{stmt}\ \textbf{delete}\ c'\ x$} 
+                \DP
+            \end{equation*} 
+
+        \item Case $\mathcal{T} =$ 
+            \AXC{$\overbrace{\Pi(x) = c'}^{\mathcal{C}_1}$}
+            \RL{\textsc{T-ObjDlt}}            
+            \UIC{$\langle \Pi, c \rangle  \vdash^{\Gamma}_{stmt}\ \textbf{delete}\ c'\ x$} 
+            \DP\\
+            \vskip 1em
+            Inverse of the previous case, we now have $\mathcal{I} \llbracket \textbf{delete}\ c\ x\rrbracket\ = \textbf{new}\ c\ x$, meaning $\mathcal{T}'$ must be of the form: 
+            \begin{equation*}
+                \mathcal{T}' =  \AXC{$\overbrace{\Pi(x) = \textbf{nil}}^{\mathcal{C}_2}$}
+                \UIC{$\langle \Pi, c \rangle  \vdash^{\Gamma}_{stmt}\ \textbf{new}\ c'\ x$} 
+                \DP
+            \end{equation*}
+
+        \item Case $\mathcal{T} =$ 
+            \AXC{$\overbrace{\text{arrayType}(a) \in \Big\{ \text{classIDs}, \textbf{int} \Big\}}^{\mathcal{C}_1}$}
+            \AXC{$\overbrace{\Pi \vdash_{expr}\ e = \textbf{int}}^{\mathcal{E}}$}
+            \AXC{$\overbrace{\Pi(x) = \textbf{nil}}^{\mathcal{C}_2}$}
+            \RL{\textsc{T-ArrNew}}
+            \TIC{$\langle \Pi, c \rangle  \vdash^{\Gamma}_{stmt}\ \textbf{new}\ a[e]\ x$} 
+            \DP\\
+            \vskip 1em
+            In this case we still have $\mathcal{I} \llbracket \textbf{new}\ c\ x\rrbracket\ = \textbf{delete}\ c\ x$. Using $\mathcal{C}_1$ and $\mathcal{E}$, $\mathcal{T}'$ must be of the form:
+            \begin{equation*}
+                \mathcal{T}' = \AXC{$\overbrace{\text{arrayType}(a) \in \Big\{ \text{classIDs}, \textbf{int} \Big\}}^{\mathcal{C}_1}$}
+                \AXC{$\overbrace{\Pi \vdash_{expr}\ e = \textbf{int}}^{\mathcal{E}}$}
+                \AXC{$\overbrace{\Pi(x) = a}^{\mathcal{C}_3}$}
+                \TIC{$\langle \Pi, c \rangle  \vdash^{\Gamma}_{stmt}\ \textbf{delete}\ a[e]\ x$}
+                \DP
+            \end{equation*}
+
+         \item Case $\mathcal{T} =$
+            \AXC{$\overbrace{\text{arrayType}(a) \in \Big\{ \text{classIDs}, \textbf{int} \Big\}}^{\mathcal{C}_1}$}
+            \AXC{$\overbrace{\Pi \vdash_{expr}\ e = \textbf{int}}^{\mathcal{E}}$}
+            \AXC{$\overbrace{\Pi(x) = a}^{\mathcal{C}_2}$}
+            \RL{\textsc{T-ArrDlt}}
+            \TIC{$\langle \Pi, c \rangle  \vdash^{\Gamma}_{stmt}\ \textbf{delete}\ a[e]\ x$}
+            \DP\\
+            \vskip 1em
+            Similar to the object deletion case, we still have $\mathcal{I} \llbracket \textbf{delete}\ c\ x\rrbracket\ = \textbf{new}\ c\ x$. Using $\mathcal{C}_1$ and $\mathcal{E}$, $\mathcal{T}'$ must be of the form:
+            \begin{equation*}
+                \mathcal{T}' = \AXC{$\overbrace{\text{arrayType}(a) \in \Big\{ \text{classIDs}, \textbf{int} \Big\}}^{\mathcal{C}_1}$}
+                \AXC{$\overbrace{\Pi \vdash_{expr}\ e = \textbf{int}}^{\mathcal{E}}$}
+                \AXC{$\overbrace{\Pi(x) = \textbf{nil}}^{\mathcal{C}_3}$}
+                \TIC{$\langle \Pi, c \rangle  \vdash^{\Gamma}_{stmt}\ \textbf{new}\ a[e]\ x$} 
+                \DP
+            \end{equation*}
+
+         \item Case $\mathcal{T} =$ 
+            \AXC{$\overbrace{\Pi(x) = c'}^{\mathcal{C}_1}$}
+            \AXC{$\overbrace{\Pi(x') = \textbf{nil}}^{\mathcal{C}_2}$}
+            \RL{\textsc{T-Cp}}
+            \BIC{$\langle \Pi, c \rangle  \vdash^{\Gamma}_{stmt}   \ \textbf{copy}\ c'\ x\ x'$} 
+            \DP\\
+            \vskip 1em
+            We have $\mathcal{I} \llbracket \textbf{copy}\ c\ x\ x' \rrbracket\ = \textbf{uncopy}\ c\ x\ x'$. Using $\mathcal{C}_1$, $\mathcal{T}'$ must as such be of the form
+            \begin{equation*}
+                \mathcal{T}' = \AXC{$\overbrace{\Pi(x) = c'}^{\mathcal{C}_1}$}
+                \AXC{$\overbrace{\Pi(x') = c'}^{\mathcal{C}_3}$}
+                \BIC{$\langle \Pi, c \rangle  \vdash^{\Gamma}_{stmt}\ \textbf{uncopy}\ c'\ x\ x'$}
+                \DP
+            \end{equation*}
+
+        \item Case $\mathcal{T} =$
+            \AXC{$\overbrace{\Pi(x) = c'}^{\mathcal{C}_1}$}
+            \AXC{$\overbrace{\Pi(x') = c'}^{\mathcal{C}_2}$}
+            \RL{\textsc{T-Ucp}}
+            \BIC{$\langle \Pi, c \rangle  \vdash^{\Gamma}_{stmt}\ \textbf{uncopy}\ c'\ x\ x'$}
+            \DP\\
+            \vskip 1em
+            We have $\mathcal{I} \llbracket \textbf{uncopy}\ c\ x\ x' \rrbracket\ = \textbf{copy}\ c\ x\ x'$. Using $\mathcal{C}_1$, $\mathcal{T}'$ must as such be of the form
+            \begin{equation*}
+                \mathcal{T}' = \AXC{$\overbrace{\Pi(x) = c'}^{\mathcal{C}_1}$}
+                \AXC{$\overbrace{\Pi(x') = \textbf{nil}}^{\mathcal{C}_3}$}
+                \BIC{$\langle \Pi, c \rangle  \vdash^{\Gamma}_{stmt}   \ \textbf{copy}\ c'\ x\ x'$} 
+                \DP
+            \end{equation*}
+            
+        \item Case $\mathcal{T} =$ 
+            \AXC{$\overbrace{\langle \Pi, c \rangle \vdash_{expr}^{\Gamma}\ e_1}^{\mathcal{E}_1}$}
+            \AXC{$\overbrace{\langle \Pi[x \mapsto c'], c \rangle \vdash^{\Gamma}_{stmt}\ s}^{\mathcal{S}}$}
+            \AXC{$\overbrace{\langle \Pi, c \rangle \vdash_{expr}^{\Gamma}\ e_2}^{\mathcal{E}_2}$}
+            \RL{\textsc{T-LocalBlock}}
+            \TIC{$\langle \Pi, c \rangle \vdash^{\Gamma}_{stmt}\ \textbf{local}\ c'\ x = e_1\quad s\quad \textbf{delocal}\ c'\ x = e_2$} 
+            \DP\\
+            \vskip 1em
+            We have $\mathcal{I} \llbracket\textbf{local}\ t\ x\ = e\ \quad s\quad \textbf{delocal}\ t\ x\ = e\rrbracket\ =\ \textbf{local}\ t\ x = e \quad\mathcal{I}\llbracket s \rrbracket\quad\textbf{delocal}\ t\ x\ = e$.
+
+            By the induction hypothesis on $\mathcal{S}$, we obtain $\mathcal{S'}$ of $\langle \Pi[x \mapsto c'], c \rangle \vdash^{\Gamma}_{stmt}\ \mathcal{I} \llbracket s \rrbracket$. Using $\mathcal{E}_1$, $\mathcal{S'}$ and $\mathcal{E}_2$ we construct $\mathcal{T}'$
+            \begin{equation*}
+                \mathcal{T}' = \AXC{$\overbrace{\langle \Pi, c \rangle \vdash_{expr}^{\Gamma}\ e_1}^{\mathcal{E}_1}$}
+                \AXC{$\overbrace{\langle \Pi[x \mapsto c'], c \rangle \vdash^{\Gamma}_{stmt}\ \mathcal{I} \llbracket s \rrbracket}^{\mathcal{S'}}$}
+                \AXC{$\overbrace{\langle \Pi, c \rangle \vdash_{expr}^{\Gamma}\ e_2}^{\mathcal{E}_2}$}
+                \TIC{$\langle \Pi, c \rangle \vdash^{\Gamma}_{stmt}\ \textbf{local}\ c'\ x = e_1\quad \mathcal{I} \llbracket s \rrbracket\quad \textbf{delocal}\ c'\ x = e_2$} 
+                \DP
+            \end{equation*}
+    \end{itemize}
+\end{proof}
+
+Using these added cases to the original proof provided in~\cite{th:roopl}, Theorem~\ref{thm:type-inversion} shows that well-typedness is preserved over inversion of \rooplpp methods. As methods are well-typed if their body statement is well-typed, inversion of classes and programs also preserve well-typedness, as classes consists of methods and programs of classes, by using the class inverter presented in figure~\ref{fig:inverter-extension}.  
+
+
 
 \section{Computational Strength}
 \label{sec:computational-strength}
@@ -1522,7 +1701,7 @@ Figure~\ref{fig:rtm-instruction-method} shows the modified method \textit{inst} 
     \end{lstlisting}
     \caption{Method for moving the tape head in the RTM simulation}
     \label{fig:rtm-move-tape-head-method}
-\end{figure}
+\end{figure} 
 
 Figure~\ref{fig:rtm-simulation-method} shows the simulate method which is the main method responsible for running the RTM simulation. The tape is extended in either direction when needed and the program counter it incremented.
 
