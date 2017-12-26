@@ -1,239 +1,312 @@
 \chapter{Dynamic Memory Management}
 \label{chp:dynamic-memory-management}
-Native support of complex data structures is a non-trivial matter to implement in a reversible computing environment. Variable-sized records and frames need to be stored efficiently in a structured heap, while avoiding garbage build-up to maintain reversibility. A reversible heap manager layout has been proposed for a simplified version of the reversible functional language \textsc{RFun} and later expanded to allow references to avoid deep copying values~\cite{ha:heap, ty:rfun, tm:refcounting}.
+In order to allow objects to live outside of static scopes, we need to utilize a different memory management technique, such that objects are not allocated on the stack. Dynamic memory management presents a method of storing objects in different memory structures, most commonly, a memory heap. Most irreversibly, modern programming languages uses dynamic memory management in one some form for allocating space for objects in memory. 
 
-The following section presents a discussion of various heap manager layouts along with their advantages and disadvantages in terms of implementation difficulty, garbage build-up and the OOP domain. 
+However, reversible, native support of complex data structures is a non-trivial matter to implement. Variable-sized records and frames need to be stored efficiently in a structured heap, while avoiding garbage build-up to maintain reversibility. A reversible heap manager layout has been proposed for a simplified version of the reversible functional language \textsc{RFun} and later expanded to allow references to avoid deep copying values~\cite{ha:heap, ty:rfun, tm:refcounting}.
+
+This chapter presents a brief introduction to fragmentation, garbage and linearity and how these respectively are handled reversibly, and a discussion of various heap manager layouts considered for \rooplpp, along with their advantages and disadvantages in terms of implementation difficulty, garbage build-up and the OOP domain. 
+
 
 \section{Fragmentation}
 \label{sec:fragmentation}
-An important matter to consider when designing a heap layout for dynamic memory allocation is efficient memory usage. In a stack allocating memory layout, the stack discipline is in effect, meaning only the most recently allocated data can be freed. This is not the case with heap allocation, where data can be freed regardless of allocation order. This feature comes with the consequence of potential memory fragmentation, as blocks are being freed in any order~\cite{tm:languages}.
-
-We distinguish different types of fragmentation as internal or external fragmentation.
+Efficient memory usage is an important matter to consider when designing a heap layout for a dynamic memory manager. In a stack allocating memory layout, the stack discipline is in effect, meaning only the most recently allocated data can be freed. This is not the case with heap allocation, where data can be freed regardless of allocation order. A potential side effect of this freedom, comes as a consequence of memory fragmentation. We distinguish different types of fragmentation as internal or external fragmentation. Internal fragmentation refers to unused space inside a memory block used to store an object, if, say, the object is smaller than the block it has been allocated to. External fragmentation occurs as blocks freed throughout execution are spread across the memory heap, resulting in \textit{fragmented} free space~\cite{tm:languages}. 
 
 \subsection{Internal Fragmentation}
-Internal fragmentation occurs in the memory heap when part of an allocated memory block is unused. This type of fragmentation can arise from a number of different scenarios, but mostly it originates from \textit{over-allocating}. 
+\label{subsec:internal-fragmentation}
+Internal fragmentation occurs in the memory heap when part of an allocated memory block is unused. This type of fragmentation can arise from a number of different scenarios, but mostly it originates from cases of \textit{over-allocation}, which occurs when the memory manager delegates memory larger than required to fit an object, due to e.g. fixed-block sizing. 
 
-An example of \textit{over-allocating} would be a scenario where we are allocating memory for an object of size $m$ onto a simple, fixed-sized block heap, where the fixed block size is $n$ and $m \neq n$. If $n > m$, internal fragmentation would occur of size $n-m$ for every object of size $m$ allocated in said heap. If $n < m$, numerous blocks would be required for allocation to fit our object. In this case the internal fragmentation would be of size $n - m\ mod\ n$ per allocated object of size $m$. 
+For an example, consider a scenario, in which we are allocating memory for an object of size $m$ onto a simple, fixed-sized block heap. The fixed block size is $n$ and $m \neq n$. If $n > m$, internal fragmentation would occur of size $n-m$ for every object of size $m$ allocated in said heap. If $n < m$, numerous blocks would be required for allocation to fit our object. In this case the internal fragmentation would be of size $n - m\ mod\ n$ per allocated object of size $m$.
+
+\begin{subfigures}
+  \begin{figure}[ht]
+    \centering
+    \begin{tikzpicture}
+      % Background
+      \fill[fill = grey] (0, 0) rectangle (2, 1) node[midway] {};
+  
+      % Frame
+      \draw (0,0) rectangle (3,1);
+      \draw (3,0) rectangle (6,1);
+      \draw[dashed] (2, 0) -- (2, 1); 
+      
+      \draw (1, 0.5) node{Object};
+      \draw (4.5, 0.5) node{Free space};
+  
+      %braces
+      \draw[decoration={brace,mirror,raise=5pt},decorate] (0,0) -- node[below=6pt] {$n$} (3,0);
+      \draw[decoration={brace,raise=5pt},decorate] (0,1) -- node[above=6pt] {$m$} (2,1);
+      \draw[decoration={brace,raise=5pt},decorate] (2,1) -- node[above=6pt] {$n-m$} (3,1); 
+    \end{tikzpicture}
+    \caption{Creation of internal fragmentation of size $n-m$ due to \textit{over-allocation}}
+    \label{fig:internal-frag-example}
+  \end{figure}
+
+  \begin{figure}[ht]
+    \centering
+    \begin{tikzpicture}
+      % Background
+      \fill[fill = grey] (0, 0) rectangle (4, 1) node[midway] {};
+  
+      % Frame
+      \draw (0,0) rectangle (6,1);
+      \draw (6,0) rectangle (9,1);
+      \draw[dashed] (4, 0) -- (4, 1);
+      
+      \draw (2.1, 0.5) node{Object};
+      \draw (7.5, 0.5) node{Free space};
+  
+      %braces
+      \draw[decoration={brace,mirror,raise=5pt},decorate] (0,0) -- node[below=6pt] {$n$} (3,0);
+      \draw[decoration={brace,raise=5pt},decorate] (0,1) -- node[above=6pt] {$m$} (4,1);
+      \draw[decoration={brace,mirror,raise=5pt},decorate] (4,0) -- node[below=6pt] {$n-m\ mod\ n$} (6,0); 
+    \end{tikzpicture}
+    \caption{Creation of internal fragmentation of size $n-m\ mod\ n$ due to \textit{over-allocation}}
+    \label{fig:internal-frag-example-cont}
+  \end{figure}
+\end{subfigures}
+
+Figure~\ref{fig:internal-frag-example} and~\ref{fig:internal-frag-example-cont} visualizes the examples of internal fragmentation build-up from \textit{over-allocating} memory. 
+
+It is difficult for the memory manager to reclaim wasted memory caused by internal fragmentation, as it usually originates from a design choice.
+Intuitively, internal fragmentation can best be prevented by ensuring that the size of the block(s) being used for allocating space for an object of size $m$ either match or sums to this exact size, when designing the layout. 
+
+\subsection{External Fragmentation}
+\label{subsec:external-fragmentation}
+External fragmentation materializes in the memory heap when a freed block becomes partly or completely unusable for future allocation if it, say, is surrounded by allocated blocks but the size of the freed block is too small to contain objects on its own.
+
+This type of fragmentation is generally a more substantial cause of problems than internal fragmentation, as the amount of wasted memory typically is larger and less predictable in external fragmentation blocks than in internal fragmentation blocks. Depending on the heap implementation, i.e. a layout using variable-sized blocks of, say, size $2^n$, the internal fragment size becomes considerable for large $n$s. 
+
+Non-allocatable external fragments become a problem when it is impossible to allocate space for a large object as a result of too many non-consecutive blocks scattered around the heap, caused by the external fragmentation. Physically, there is enough space to store the object, but not in the current heap state. In this scenario we would need to relocate blocks in such a manner that the fragmentation disperses, which is not possible to do reversibly.
+
+Allocation and deallocation order is important in order to combat external fragmentation. For example, if we have a class $A$, which fit on one memory block of size $n$, and we have a class $B$, which fit on two memory blocks of size $n$ and limited memory space, we can easily reach a situation, where we cannot fit more $B$ objects due to external fragmentation.
 
 \begin{figure}[ht]
   \centering
   \begin{subfigure}{.4\textwidth}
     \centering
     \begin{tikzpicture}
-      % Background
-      \fill[fill = grey] (0, 0) rectangle (3, 3) node[midway] {};
-  
       % Frame
-      \draw (0, 0) -- (3, 0);
-      \draw (0, 0) -- (0, 3);
-      \draw (3, 3) -- (0, 3);
-      \draw (3, 3) -- (3, 0); 
-  
-      % Grid
-      \draw (1, 0) -- (1, 3);
-      \draw (2, 0) -- (2, 3);
-      \draw (0, 0.5) -- (3, 0.5);
-      \draw (0, 1) -- (3, 1);
-      \draw (0, 1.5) -- (3, 1.5);
-      \draw (0, 2) -- (3, 2);
-      \draw (0, 2.5) -- (3, 2.5);
+      \draw (0, 0) rectangle (1, 1);
+      \draw (1, 0) rectangle (2, 1);
+      \draw (2, 0) rectangle (3, 1);
+      \draw (3, 0) rectangle (4, 1);
+
+      % Brace
+      \draw[decoration={brace,raise=5pt},decorate] (0,1) -- node[above=6pt] {$n$} (1,1);
     \end{tikzpicture}
+    \caption{\footnotesize Free memory of size $4n$}
   \end{subfigure}
   \begin{subfigure}{.4\textwidth}
     \centering
     \begin{tikzpicture}
       % Background
-      \fill[fill = grey] (0, 0) rectangle (3, 3) node[midway] {};
+      \fill[fill = grey] (0, 0) rectangle (3, 1) node[midway] {};
   
       % Frame
-      \draw (0, 0) -- (3, 0);
-      \draw (0, 0) -- (0, 3);
-      \draw (3, 3) -- (0, 3);
-      \draw (3, 3) -- (3, 0); 
-  
-      % Grid
-      \draw (1, 0) -- (1, 3);
-      \draw (2, 0) -- (2, 3);
-      \draw (0, 0.5) -- (3, 0.5);
-      \draw (0, 1) -- (3, 1);
-      \draw (0, 1.5) -- (3, 1.5);
-      \draw (0, 2) -- (3, 2);
-      \draw (0, 2.5) -- (3, 2.5);
+      \draw (0, 0) rectangle (1, 1) node[pos=.5] {$A$};
+      \draw (1, 0) rectangle (3, 1) node[pos=.5] {$B$};
+      \draw (3, 0) rectangle (4, 1);
+
+      % Braces
+      \draw[decoration={brace,raise=5pt},decorate] (0,1) -- node[above=6pt] {$n$} (1,1);
+      \draw[decoration={brace,raise=5pt},decorate] (1,1) -- node[above=6pt] {$2n$} (3,1);
     \end{tikzpicture}
+    \caption{\footnotesize Allocate $A$ and $B$}
   \end{subfigure}
-  \begin{subfigure}{.4\textwidth}
+  \vskip 1em
+  \begin{subfigure}{.6\textwidth}
     \centering
     \begin{tikzpicture}
       % Background
-      \fill[fill = grey] (0, 0) rectangle (3, 3) node[midway] {};
+      \fill[fill = grey] (1, 0) rectangle (3, 1) node[midway] {};
   
       % Frame
-      \draw (0, 0) -- (3, 0);
-      \draw (0, 0) -- (0, 3);
-      \draw (3, 3) -- (0, 3);
-      \draw (3, 3) -- (3, 0); 
-  
-      % Grid
-      \draw (1, 0) -- (1, 3);
-      \draw (2, 0) -- (2, 3);
-      \draw (0, 0.5) -- (3, 0.5);
-      \draw (0, 1) -- (3, 1);
-      \draw (0, 1.5) -- (3, 1.5);
-      \draw (0, 2) -- (3, 2);
-      \draw (0, 2.5) -- (3, 2.5);
+      \draw (0, 0) rectangle (1, 1);
+      \draw (1, 0) rectangle (3, 1) node[pos=.5] {$B$};
+      \draw (3, 0) rectangle (4, 1);
     \end{tikzpicture}
+    \caption{\footnotesize Free $A$. Cannot fit another $B$ due to external fragmentation}
   \end{subfigure}
-  \caption{Example of internal fragmentation due to \textit{over-allocation} (Work in progress)}
-  \label{fig:internal-frag-example}
+  \caption{Example of external fragmentation caused for allocation and deallocation order}
+  \label{fig:external-frag-example}
 \end{figure}  
 
-% \begin{figure}
-%   \centering
-%   \begin{subfigure}{.5\textwidth}
-%     \centering
-%     \texttt{jaja}
-%     \caption{A subfigure}
-%     \label{fig:sub1}
-%   \end{subfigure}%
-%   \begin{subfigure}{.5\textwidth}
-%     \centering
-%     \texttt{jaja}
-%     \caption{A subfigure} 
-%     \label{fig:sub2}
-%   \end{subfigure}
-%   \caption{Example of internal fragmentation due to \textit{over-allocation}}
-%   \label{fig:internal-frag-example}
-% \end{figure}
-  
-
-Figure~\ref{fig:internal-frag-example} visualizes the examples of internal fragmentation build-up from \textit{over-allocating} memory. 
-
-Intuitively, internal fragmentation can be prevented by ensuring that the size of the block(s) being used for allocating space for an object of size $m$ either match or sums to this exact size.
-
-\subsection{External Fragmentation}
-External fragmentation materializes in the memory heap when a freed block becomes partly or completely unusable for future allocation if it, say, is surrounded by allocated blocks but the size of the freed block is too small to contain objects on its own.
-
-This type of fragmentation is generally a more substantial cause of problems than internal fragmentation, as the amount of wasted memory typically is larger and less predictable in external fragmentation blocks than in internal fragmentation blocks. Depending on the heap implementation, i.e. a layout using variable-sized blocks of, say, size $2^n$, the internal fragment size becomes considerable for large $n$s. 
-
-Non-allocatable external fragments become a problem when there it is impossible to allocate space for a large object as a result of too many non-consecutive blocks scattered around the heap, caused by the external fragmentation. Physically, there is enough space to store the object, but not in the current heap state. In this scenario we would need to relocate blocks in such a manner that the fragmentation disperses.
+Figure~\ref{fig:external-frag-example} shows this example, where the allocation and deallocation order causes a situation, in which we cannot allocate any more $B$ objects, even though we physically have the required amount of free space in memory. 
 
 \begin{figure}[ht]
-\centering
-\texttt{TODO}
-\caption{Example of external fragmentation}
-\label{fig:external-frag-example}
-\end{figure}
+  \centering
+  \begin{subfigure}{.4\textwidth}
+    \centering
+    \begin{tikzpicture}
+      % Frame
+      \draw (0, 0) rectangle (1, 1);
+      \draw (1, 0) rectangle (2, 1);
+      \draw (2, 0) rectangle (3, 1);
+      \draw (3, 0) rectangle (4, 1);
+
+      % Brace
+      \draw[decoration={brace,raise=5pt},decorate] (0,1) -- node[above=6pt] {$n$} (1,1);
+    \end{tikzpicture}
+    \caption{\footnotesize Free memory of size $4n$}
+  \end{subfigure}
+  \begin{subfigure}{.4\textwidth}
+    \centering
+    \begin{tikzpicture}
+      % Background
+      \fill[fill = grey] (0, 0) rectangle (3, 1) node[midway] {};
+  
+      % Frame
+      \draw (0, 0) rectangle (2, 1) node[pos=.5] {$B$};
+      \draw (2, 0) rectangle (3, 1) node[pos=.5] {$A$};
+      \draw (3, 0) rectangle (4, 1);
+
+      % Braces
+      \draw[decoration={brace,raise=5pt},decorate] (0,1) -- node[above=6pt] {$2n$} (2,1);
+      \draw[decoration={brace,raise=5pt},decorate] (2,1) -- node[above=6pt] {$n$} (3,1);
+    \end{tikzpicture}
+    \caption{\footnotesize Allocate $B$ and $A$}
+  \end{subfigure}
+  \vskip 1em
+  \begin{subfigure}{.4\textwidth}
+    \centering
+    \begin{tikzpicture}
+      % Background
+      \fill[fill = grey] (0, 0) rectangle (2, 1) node[midway] {};
+  
+      % Frame
+      \draw (0, 0) rectangle (2, 1) node[pos=.5] {$B$};
+      \draw (2, 0) rectangle (3, 1);
+      \draw (3, 0) rectangle (4, 1);
+    \end{tikzpicture}
+    \caption{\footnotesize Free $A$}
+  \end{subfigure}
+  \begin{subfigure}{.4\textwidth}
+    \centering
+    \begin{tikzpicture}
+      % Background
+      \fill[fill = grey] (0, 0) rectangle (4, 1) node[midway] {};
+  
+      % Frame
+      \draw (0, 0) rectangle (2, 1) node[pos=.5] {$B$};
+      \draw (2, 0) rectangle (4, 1) node[pos=.5] {$B$};
+    \end{tikzpicture}
+    \caption{\footnotesize Allocate another $B$}
+  \end{subfigure}
+  \caption{Example of avoiding external fragmentation using allocation and deallocation order}
+  \label{fig:external-frag-example-cont}
+\end{figure}  
+
+Figure~\ref{fig:external-frag-example-cont} shows how changing allocation and deallocation order can combat external fragmentation.
 
 
 \section{Memory Garbage}
 \label{sec:memory-garbage}
-In the reversible setting it should be our goal to return the memory to its original state after program termination.
+A reversible computation should be garbage-free and as such it should be our goal to return the memory to its original state after program termination.
 
-Traditionally, in non-reversible programming languages, freed memory blocks are simply re-added to the free-list during deallocation and no modification of the actual data stored in the block is done. In the reversible setting we must return the memory block to its original state after the block has been freed (e.g. zero-cleared), to uphold the time-invertible and two-directional computational model. 
+Traditionally, in non-reversible programming languages, freed memory blocks are simply re-added to the free-list during deallocation and no modification of the actual data stored in the block is performed, as it simply is overwritten when the block is used later on. In the reversible setting we must return the memory block to its original state after the block has been freed (e.g. zero-cleared), to uphold the time-invertible and two-directional computational model. Figure~\ref{fig:injective-garbage-in-out} illustrates how the output data (or garbage) of an injective function $f$ is the input to its inverse function $f'$.
 
-In heap allocation, we maintain one or more free-lists to keep track of free blocks during program execution, which are stored in memory, besides the heap representation itself. These free-lists can essentially be considered garbage and as such, they must also be returned to their original state after execution. Furthermore, the if the heap grows during execution, it should be returned to its original size.
-
-Returning the free-list(s) to their original states is a non-trivial matter, which is highly dependent on the heap layout and free-list design.~\citeauthor{ha:heap} introduced a dynamic memory manager which allowed heap allocation and deallocation, but without restoring the free-list to its original state in~\cite{ha:heap}.~\citeauthor{ha:heap} argue that an unrestored free-list is to be considered harmless garbage in the sense that the free-list left after termination is equivalent to a restored free-list, as it contains the same blocks, but linked in a different order, depending on the order of allocation and deallocation operations performed during program execution.
-
-This intuitively leads to the question of garbage classification. In the reversible setting all functions are injective. Thus, given some $input_f$, the injective function $f$ produces some $output_f$ and some $garbage_f$ (e.g. garbage in form of storing data in the heap, so the free list changes, the heap grows, etc.). Its inverse function $f^{-1}$ must thus take $f$'s $output_f$ and $garbage_f$ as $input_{f^{-1}}$ to produce its output $output_{f^{-1}}$ which is $f$'s $input_f$. However, in the context of reversible heaps, we must consider all free-lists as of "equivalent garbage class" and thus freely substitutable with each other, as injective functions still can drastically change the block layout, free-list order, etc. during its execution in either direction. Figure~\ref{fig:equivalent-free-lists} shows how any free-list can be passed between a function $f$ and its inverse $f^{-1}$.
+In heap allocation layouts, we maintain one or more free-lists to keep track of free blocks during program execution, which are stored in memory, besides the heap representation itself. These free-lists can essentially be considered garbage and as such, they must also be returned to their original state after execution. Furthermore, the heap itself can also be considered garbage and if it grows during execution, it should also be returned to its original size.
 
 \begin{figure}[ht]
-\centering
-% \includegraphics[width=0.7\textwidth]{garbage-classes}
-\caption{All free-lists are considered equivalent in terms of injective functions (Temporary photo)}
-\label{fig:equivalent-free-lists}
+  \centering
+    \begin{tikzpicture}
+      % lines
+      \draw[-] (-1,1.75) node[left]{$in$} -- (9,1.75) node[right] {$in$};
+      \draw[-] (2,1.25) -- (6,1.25);
+      \draw[-] (2,0.75) -- (6,0.75);
+      \draw[-] (2,0.25) -- (6,0.25);
+      \draw[-] (-1,-0.5) node[left]{$out$} -- (9,-0.5) node[right] {$out$};
+      \draw[-] (4,0.24) node[circle,fill,inner sep=1pt] {} -- (4,-0.5) node[circle,fill,inner sep=1pt] {};
+      
+      % boxes
+      \draw[fill = white] (0, 0) rectangle (2, 2) node[pos=0.5] {\Large $f$};
+      \draw[fill = white] (6, 0) rectangle (8, 2) node[pos=0.5] {\Large $f'$};
+      \node[diamond, fill=white, draw] at (4,1.25) {\scriptsize $garbage$};
+    \end{tikzpicture}
+    \caption{The "garbage" output of an injective function $f$ is the input to its inverse function $f'$}
+    \label{fig:injective-garbage-in-out}
 \end{figure}
 
-\section{Linearity and reference counting}
+Returning the free-list(s) to their original states is a non-trivial matter, which is highly dependent on the heap layout and free-list design.~\citeauthor{ha:heap} introduced a dynamic memory manager which allowed heap allocation and deallocation, but without restoring the free-list to its original state in~\cite{ha:heap}.~\citeauthor{ha:heap} argue that an unrestored free-list can be considered harmless garbage in the sense that the free-list residing in memory after termination is equivalent to a restored free-list, as it contains the same blocks, but linked in a different order, depending on the order of allocation and deallocation operations performed during program execution. Figure~\ref{fig:equivalent-free-lists} illustrates how an inverse, injective function $f'$, whose non-inverse function $f$ computes something which modifies a given free lists, does not require the \textit{exact} output free list of $f$, but \textit{any} free list of same layout as input for the inverse function $f'$. The output free list of $f'$ will naturally be a further modified free list.
+
+\begin{figure}[ht]
+  \centering
+  % \includegraphics[width=0.7\textwidth]{garbage-classes}
+  \begin{tikzpicture}
+    % lines
+    \draw[-] (-1,1.75) node[left]{$free\ list$} -- (2,1.75);
+    \draw[-] (-1,0.25) node[left]{$in$} -- node[below] {$out$} (10,0.25) node[right] {$in$};
+    \draw (7,1.75) .. controls (6,1.75) and (6,1.75) .. (6,2.75) node[above] {$\forall\ free\ lists$};
+    \draw (2,1.75) .. controls (3,1.75) and (3,1.75) .. (3,2.75) node[above] {$free\ list'$};
+    \draw[-] (9,1.75) -- (10,1.75) node[right]{$free\ list''$};
+    
+    % boxes
+    \draw[fill = white] (0, 0) rectangle (2, 2) node[pos=0.5] {\Large $f$};
+    \draw[fill = white] (7, 0) rectangle (9, 2) node[pos=0.5] {\Large $f'$};
+  \end{tikzpicture}
+  \caption{All free-lists are considered equivalent "garbage" in terms of injective functions}
+  \label{fig:equivalent-free-lists}
+\end{figure}
+
+This intuitively leads to the question of garbage classification. In the reversible setting all functions are injective. Thus, given some $input_f$, in a reversible computation using heap allocation, the injective function $f$ produces some $output_f$ and some $garbage_f$ (e.g. garbage in form of storing data in the heap, so the free list changes, the heap grows, etc.). Its inverse function $f^{-1}$ must thus take $f$'s $output_f$ and $garbage_f$ as $input_{f^{-1}}$ to produce its output $output_{f^{-1}}$ which is $f$'s $input_f$. However, in the context of reversible heaps, we must consider all free-lists as of "equivalent garbage class" and thus freely substitutable with each other, as injective functions still can drastically change the block layout, free-list order, etc. during its execution in either direction. Figure~\ref{fig:equivalent-free-lists} shows how any free-list can be passed between a function $f$ and its inverse $f^{-1}$.
+
+
+\section{Linearity and Reference Counting}
 \label{sec:referencing}
-Reversible programming languages such as \textsc{Janus} and \textsc{Roopl} are linear in the sense that object and variable pointers cannot be copied and are only deleted during deallocation. Pointer copying greatly increases the flexibility of programming, especially in a reversible settings where zero-clearing is critical. For variables, pointer copying is not particular interesting, nor would it add much flexibility as the values of a variable simply can be copied into statically-scoped local blocks. For objects however, tedious amounts of boilerplate work must be done if object $A$ and $B$ need to work on the same object $C$ and only one reference to each object is allowed.
+% cite: http://home.pipeline.com/~hbaker1/Use1Var.html
+Programming languages uses different approaches for storing and synchronizing variables and objects in memory. Typing \textit{linearity} is a distinction, which can reduce storage management and synchronization costs. %TODO: Cite here.
+
+Reversible programming languages such as \textsc{Janus} and \textsc{Roopl} are linear in the sense that object and variable pointers cannot be copied and are only deleted during deallocation. Pointer copying greatly increases the flexibility of programming, especially in a reversible settings where zero-clearing is critical, at the cost of increased management in form of reference counting for e.g. objects. For variables, pointer copying is not particular interesting, nor would it add much flexibility as the values of a variable simply can be copied into statically-scoped local blocks. For objects however, tedious amounts of boilerplate work must be done if object $A$ and $B$ need to work on the same object $C$ and only one reference to each object is allowed.
 
  \citeauthor{tm:refcounting} presented the reversible functional language \textsc{Rcfun} which used reference counting to allow multiple pointers to the same memory nodes as well as a translation from \textsc{Rcfun} into \textsc{Janus}. In \textsc{Rcfun}, reference counting is used to manage and trace the number of pointer copies made by respectively incrementing and decrementing a \textit{reference count} stored in the memory node, whenever the original node pointer is copied or a copy pointer is deleted. For the presented heap manage, deletion of object nodes was only allowed when no references to a node remained.
 
 In non-reversible languages, reference counting is also used in garbage collection by automatically deallocating unreachable objects and variables which contains no referencing. 
 
 
-\section{Heap manager layouts}
+\section{Heap Manager Layouts}
 \label{sec:heap-manager-layout}
-Heap managers can be implemented in numerous ways. Different layouts yield advantages when allocating memory, finding a free block or when collecting garbage. As our goal is to construct a garbage-free heap manager, our finalized design should emphasize and reflect this objective in particular. Furthermore, we should attempt to allocate and deallocate memory as efficiently as possible, as merging and splitting of blocks is a non-trivial problem in a reversible setting.
+Heap managers can be implemented in numerous ways. Different layouts yield advantages when allocating memory, finding a free block or when collecting garbage. As our goal is to construct a garbage-free heap manager, our finalized design should emphasize and reflect this objective in particular. Furthermore, we should attempt to allocate and deallocate memory as efficiently as possible, as merging and splitting of blocks is a non-trivial problem in a reversible setting and to avoid problematic fragmentation.
 
-For the sake of simplicity, we will not consider the the issue of retrieving memory pages reversibly. A reversible operating system is a long-term dream of the reversible programmer and as reversible programming language designers, we assume that \rooplpp will be running in an environment, in which the operating system will be supplying memory pages and their mappings. As such, the following heap memory designs reflect this preliminary assumption, that we always can query the operating system for more memory. 
+For the sake of simplicity, we will not consider the the issue of retrieving memory pages reversibly. A reversible operating system is a long-term dream of the reversible researcher and as reversible programming language designers, we assume that \rooplpp will be running in an environment, in which an operating system will be supplying memory pages and their mappings. As such, the following heap memory designs reflect this preliminary assumption, that we always can query the operating system for more memory. 
 
-Historically, most object-oriented programming languages utilize a dynamic memory manager during program execution. In older, lower-level languages such as \textsc{C}, memory allocation had to be stated explicitly and with the requested size through the \texttt{malloc} statement and deallocated using the \texttt{free} statement. Modern languages, such as \textsc{C\texttt{++}}, \textsc{Java} and \textsc{Python}, \textit{automagically} allocates and frees space for objects and variable-sized arrays by utilizing their dynamic memory manager to dispatch \texttt{malloc}- and \texttt{free}-like operations to the operating system and managing the obtained memory blocks in private heap(s)~\cite{wh:cpp_memory, bv:jvm, py:memory}. The heap layout of these managers vary from language to language and compiler to compiler.
+Historically, most object-oriented programming languages utilize a dynamic memory manager during program execution. In older, lower-level languages such as \textsc{C}, memory management is manual and allocation has to be stated explicitly and with the requested size through the \texttt{malloc} statement and deallocated using the \textbf{free} statement. Modern languages, such as \textsc{C\texttt{++}}, \textsc{Java} and \textsc{Python}, \textit{automagically} allocates and frees space for objects and variable-sized arrays by utilizing their dynamic memory manager and garbage collector to dispatch \textbf{malloc}- and \textbf{free}-like operations to the operating system and managing the obtained memory blocks in private heap(s)~\cite{wh:cpp_memory, bv:jvm, py:memory}. The heap layout of these managers vary from language to language and compiler to compiler.
 
-% Reversible Heaps
 Previous work on reversible heap manipulation has been done for reversible functional languages in~\cite{ha:heap, jsk:translation, tm:garbage}.
 
-% TODO: Something about Cons/Nil heap from ~\cite{ha:heap}
+\citeauthor{ha:heap} presented a static heap structure consisting of \textsc{Lisp}-inspired constructor cells of fixed size and a single free list for the reversible function language \textsc{Rfun} in~\cite{ha:heap}. \citeauthor{tm:refcounting} presented an implementation in \textsc{Janus} of reversible reference counting under the assumption of \citeauthor{ha:heap}'s heap manager in~\cite{tm:refcounting}. Building on the previous work, \citeauthor{tm:garbage} later presented a reversible intermediate language \textsc{Ril} and an implementation in \textsc{Ril} of a reversible heap manager, which uses reference counting and hash-consing to achieve garbage collection in~\cite{tm:garbage}.
 
-% TODO: Something about ref count extension~\cite{tm:refcounting}
-
-
-For the sake of simplicity in the following heap layout pseudo-code outlines, we assume access to the following subroutines (with parameter passing), inspired by the body of \citeauthor{ha:heap}'s \texttt{get\_free} subroutine.
-
-In order to reversibly allocate a block, we assume access to the subroutine \texttt{allocate\_block} which, given the register $r_{cell}$ where we want the address of the allocated block stored and the register $r_{flp}$ containing the free-list pointer, effectively pops the head of the free-list to  $r_{cell}$. Listing~\ref{lst:allocate-block-sub} shows the subroutine.
-
-\begin{lstlisting}[caption={\texttt{allocate\_block} subroutine}, language=janus, style=basic,label={lst:allocate-block-sub}]
-procedure allocate_block($r_{cell}$, $r_{flp}$)
-	EXCH $r_{cell}$ $r_{flp}$
-	SWAP $r_{cell}$ $r_{flp}$
-\end{lstlisting}
-
-% In order to grow the heap, we assume access to the subroutine \texttt{grow\_heap} which, given the register $r_{hp}$ containing the heap pointer and a number $n$ specifying how much the heap should grow, increments the heap pointer by $n$. Listing~\ref{lst:grow-heap-sub} shows the subroutine.
-
-% \begin{lstlisting}[caption={\texttt{grow\_heap} subroutine}, language=janus, style=basic,label={lst:grow-heap-sub}]
-% procedure grow_heap($r_{hp}$, $n$)
-% 	ADDI $r_{hp}$ $n$
-% \end{lstlisting}
-
-% Finally, in order to move the heap, we assume access to the subroutine \texttt{move\_heap} which, given the register $r_{hbp}$ containing a pointer to the \textit{bottom of a heap}\footnote{assuming it exists} and the register $r_{hp}$ containing the heap pointer and a number $n$ representing the amount the heap should be moved, iterates every memory address in the heap, starting at the top, and moves the memory block $n$ spaces. This is down using a top-down approach to avoid overwriting data. 
-
-% \begin{lstlisting}[caption={\texttt{move\_heap} subroutine}, language=janus, style=basic,label={lst:move-heap-sub}]
-% procedure move_heap($r_{hbp}$, $r_{hp}$, $n$, $m$)
-% 	from  i = $r_{hp}$
-%     do
-%         SWAP $r_i$ $r_{i+n}$
-%         i -= 1 				; 1 word (?)
-%     until i = r_{hbp} - n
-% \end{lstlisting}
-
+We do not consider reference counting or garbage collection in the layouts presented in the following sections, but we later show how the selected layout for \rooplpp is extended with reference counting in~\ref{sec:referencing-compilation}.
 
 \subsection{Memory Pools}
-Perhaps the simplest layout for a heap manager would be memory pooling. In this design, memory is allocated from "pools" of fixed-size blocks regardless of the actual size of the record. The advantages of a heap layout following this approach would lie in the simplicity of its implementation, as a simple linked list of identical-sized free cells would need to be maintained. 
+\label{subsec:memory-pools}
+The simplest heap layout we can design simple uses fixed-sized blocks. This design is also known as memory pools, as memory is allocated from "pools" of fixed-sized blocks regardless of the record size.
+To model these pools of fixed-sized blocks, we simply use a linked-list of identically sized free block cells, which we maintain over execution.
+While the fixed-block layout is simple and relatively easy in terms of implementation it is also largely uninteresting as it provides little to no options, besides sizing of the fixed-blocks, to combat fragmentation.
 
-If we assume a our fixed-sized blocks are of size $n$ machine words, the following \texttt{get\_free} subroutine allocates and deallocates memory cells for a record of size $m$.
+This layout comes with a few options in terms of the actual heap layout. If we only allow allocation of consecutive, adjacent free blocks, we should keep the free list sorted. If the free list is not sorted, and we have to allocate an object which requires $n$ blocks, we have to iterate the free list $n^2$ times in the worst case to find a chain of consecutive blocks large enough to fit the object. The sorting part itself is non-trivial matter. Furthermore, we need some overhead storage inside the object to contains the references of the blocks occupied by the object, or some other structure which can be used when deallocating the object and returning all the blocks to the free list. If we allow allocation of non-consecutive blocks, larger amounts of bookkeeping is required as we need to store knowledge of when and where the object is split.
 
-\begin{lstlisting}[mathescape=true, caption={Allocating and deallocating records of size $m$ using block of a fixed size $n$. Code modified from~\cite{ha:heap}}, language=janus, style=basic,label={lst:memory-pool}]
-// Check if we have enough free blocks to hold the object 
-if (sizeof $r_{flp}$ >= m + (n - (m % n))) 
-then
-    call allocate_block($r_{cell}$, $r_{flp}$)
-    // Code for clearing m + (n - (m % n)) - n next blocks 
-else 
-	// Code for growing heap
-fi ($r_{cell}$ != 0)
-\end{lstlisting}
+Figures~\ref{fig:external-frag-example} and~\ref{fig:external-frag-example} from earlier in this chapter, in section~\ref{subsec:external-fragmentation} on page~\pageref{fig:external-frag-example} illustrates examples with consecutive, fixed-sized block allocation. 
 
-Listing~\ref{lst:memory-pool} shows the modified \texttt{get\_free} subroutine for allocating and deallocating memory blocks in a memory pool layout. If the free-list has enough blocks available to hold the record of size $m$, the first $m + (n - (m \% n))$ ($m$ rounded up to nearest number dividable by $n$) blocks will be removed from the free list. If the free list is empty, the heap needs to be expended through some subroutine (Code not provided). The rounding of $m$ to nearest number dividable by $n$ could be computed at compile time.
-
-A huge disadvantage to using fixed-sized memory blocks is the external fragmentation that occurs when freeing blocks, if the program's objects are not of the same size. When freeing a number of blocks in the middle of a section of allocated blocks, external fragmentation occurs, which becomes a problem if we need to allocate space for a large record but only have small sections of fixed-blocks available, scattered throughout the heap. A garbage collector could solve this issue, but is a non-trivial matter to implement.
-
-% TODO: Graphics
-
-% TODO: Present various layout using fixed-size blocks - Trees, continuous?
+% TODO: Tree example
 
 \subsection{One Heap Per Record Type}
-This layout uses multiple heaps, one per record type in the program. During compilation, classes would be analyzed and a heap for each class would be created. 
+\label{subsec:one-heap-per-record-type}
+Instead of allocating space for objects from a single free list and heap, we could design an approach which uses one heap per record type. The respective classes and their sizes are easily identified during compile time from which the amount of heaps and free list will be initialized. This means the layout is very dynamic and potentially can change drastically in terms of the amount of heaps utilized depending on the input program. 
 
-The advantage of this approach would be less fragmentation, as each allocation is tailored as closely as possible to the size of the record obtained from a static analysis during compilation.
+The advantage of this approach would be effective elimination of internal and external fragmentation, as each heap fits their targeted record perfectly, making each allocation and deallocation tailored to the size of the record obtained from a static analysis during compilation, resulting in no over-allocation and no unusable chunks of freed memory appearing during varying deallocation order.
 
-The obvious disadvantage is the amount of book-keeping and workload associated with growing and shrinking a heap and its neighbours, in case the program requests additional memory from the operating system. In real world object-oriented programming, most classes features a small number of fields, very rarely more than 16. As such, multiple heaps of same record size would exist, which intuitively seems inefficient. Additional, small helper classes would spawn additional heaps and additional book-work, making the encapsulation concept of OOP rather unattractive, for the optimization-oriented reversible programmer.
+The obvious disadvantage is the amount of book-keeping and workload associated with growing and shrinking a heap and its neighbours, in case the program requests additional memory from the operating system. In real world object-oriented programming, most classes features a small number of fields, very rarely more than 16. As such, multiple heaps of same record size would exist, which intuitively seems inefficient. 
+
+Additional, small helper classes would spawn additional heaps and additional book-work, making the encapsulation concept of OOP rather unattractive, for the optimization-oriented reversible programmer. 
+
+Finally, while internal and external fragmentation is effectively eliminated, we are left with additional and considerable amounts of garbage in forms of all the heaps and free lists initialized in memory. Each heap intuitively needs to be initialized with a chunk of memory from the underlying operating system such that objects can be allocated on their respective heaps, regardless of the number of times the heap is used during program execution. This is an obvious space requirement increase over the previously presented layout, and on average, the amount of required memory for a program compiled using this approach would probably be larger, than some of the following layouts, due to unoptimized heap utilization and sharing.
 
 % TODO: Sketch algorithm
 % TODO: Graphics
 
 
 \subsection{One Heap Per Power-Of-Two}
+\label{subsec:one-heap-per-power-of-two}
 % TODO: Revise
 A different approach as to having one heap per record type, would be having one heap per power-of-two until some arbitrary size. Using this approach, records would be stored in the heap which has a block size of a power-of-two closes matching to the record's size. This layout is a distinction from the "one heap per record type" as it still retains the size-optimized storing idiom but allows the heaps to contain records of mixed types. For programs with a large amount of small, simple classes needed to model some system, where each class is roughly the same size, the amount of heaps constructed would be substantially smaller than using one heap per record type, as many records will fit within the same heap. Implementation wise, the number of heaps can be determined at compile time. Furthermore, to ensure we do not end up with heaps of very large memory blocks, an arbitrary power-of-two size limit could be set at, say, 1 kb . If any record exceeds said limit, it could be split into $\sqrt{n}$ size chunks and stored in their respective heaps.\\
 This approach does, however, also suffer from large amount of book-keeping and fiddling when shrinking and growing adjacent heaps.
@@ -243,6 +316,7 @@ This approach does, however, also suffer from large amount of book-keeping and f
 \texttt{TODO: Graphics}
 
 \subsection{Shared Heap, Record Type-Specific Free Lists}
+\label{subsec:shared-heap}
 A natural proposal, considering the disadvantages of the previously presented design, would be using a shared heap instead of record-specific heaps. 
 This way, we ensure minimal fragmentation when allocating and freeing as the different free lists ensures that allocation of an object wastes as little memory as possible. By only keeping one heap, we eliminate the growth/shrinking issues of the multiple heap layout. 
 
@@ -252,7 +326,7 @@ There is, however, still a considerable amount of book-keeping involved in maint
 % TODO: Graphics
 
 \subsection{Buddy Memory}
-\label{sec:buddy-memory}
+\label{subsec:buddy-memory}
 The Buddy Memory layout utilizes blocks of variable-sizes of the power-of-two, typically with one free list per power-of-two using a shared heap. When allocating an object of size $m$, we simply check the free lists for a free block of size $n$, where $n \geq m$. Is such a block found and if $n > m$, we split the block into two halves recursively, until we obtain the smallest block capable of storing $m$. When deallocating a block of size $m$, do the action described above in reverse, thus merging the blocks again, where possible.
 
 This layout is somewhat of a middle ground between the previous three designs, addressing a number of problems found in these. The Buddy Memory layout uses a single heap for all record-types, thus eliminating the problems related to moving adjacent heaps reversibly in a multi-heap layout. To prevent multiple, identical free-lists (e.g. free-lists pointing to same size blocks) occurring from having one free-list per record-type, we instead maintain free-lists per power-of-two.
@@ -272,7 +346,7 @@ The body of the allocation function is executed recursively until a free block l
 
 \begin{figure}[H]
   \centering
-  % \includegraphics[width=0.7\textwidth]{heap-designs}
+  \includegraphics[width=0.7\textwidth]{heap-designs}
   \caption{Heap memory layouts (Draft)}
 \end{figure}
 
