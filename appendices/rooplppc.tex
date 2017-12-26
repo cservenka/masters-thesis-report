@@ -1,9 +1,13 @@
-\newcommand{\source}[1]
-{\inputminted[
-    frame = leftline,
-    framesep = 2mm,
-    fontsize = \scriptsize,
-    linenos, breaklines]{haskell}{#1}}
+\newcommand{\source}[1]{
+    \lstinputlisting[style = basic, language = haskell]{#1}
+}
+\lstset{
+    inputpath = {./},
+    mathescape=false, 
+    texcl=false,
+    inputencoding=latin1,
+    breaklines=true
+}
 
 \chapter{\textsc{Rooplppc} Source Code}
 \label{app:rooplc-source}
