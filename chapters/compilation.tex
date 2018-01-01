@@ -1,15 +1,40 @@
 \chapter{Compilation}
 \label{chp:compilation}
-%TODO: Revise chapter intro
-The following chapter will present the considerations and designs for the reversible heap manager and the schemes used in the process of translating \rooplpp to the reversible low-level machine language \textsc{PISA}.
+The following chapter presents the considerations and translation schemas used in the process of translating \rooplpp to the reversible low-level machine language \textsc{Pisa}. As \rooplpp is a continuation of \textsc{Roopl}, many techniques are carried directly over and have a such been left out.
 
 \section{The \textsc{Roopl} to \textsc{Pisa} compiler}
 \label{sec:roopl-to-pisa-compiler}
-% TODO: Write section
+\citeauthor{th:roopl} presented a proof-of-concept compiler along with the design for \textsc{Roopl}. The compiler translates well-typed \textsc{Roopl} programs into the reversible machine language \textsc{Pisa}.
+
+Figure~\ref{fig:roopl-memory-layout} shows the memory layout of a compiled \textsc{Roopl} program. The layout consists of a static storage segment, the program segment and the stack. 
+\begin{figure}[ht]
+    \centering
+    \begin{tikzpicture}
+        \fill[fill = grey] (6, 0) rectangle (8, 3) node[midway] {Stack};
+        \draw (6, 0) -- (12, 0);
+        \draw (6, 3) -- (12, 3);
+        \draw (12, 0) -- (12, 3);
+        \draw[dashed] (8, 0) -- (8, 3);
+    
+        \filldraw[fill = grey, draw = black] (0, 0) rectangle (2.5, 3) node[midway] {Static Data};
+        \filldraw[fill = darkgrey, draw = black] (2.5, 0) rectangle (6, 3) node[midway] {Program};
+        
+        \node at (10, 2.5) {(unused memory)};
+        \node at (0, -.3) {$0$};
+        \node at (6, -.3) {$p$};
+        \node at (8, -.3) {$sp$};
+        \node at (12, -.3) {$2^{31} - 1$};
+        \node at (6, -1) {$\longleftarrow$ Address Space $\longrightarrow$};
+        \draw[arrow, dashed] (8, 1.5) -- (10, 1.5);
+        \node at (8.9, 1.2) {\scriptsize{\textit{stack grows}}};
+    \end{tikzpicture}
+    \caption{Memory layout of a \textsc{Roopl} program}
+    \label{fig:roopl-memory-layout}
+\end{figure}
 
 \section{\rooplpp Memory Layout}
 \label{sec:rooplpp-memory-layout}
-\rooplpp builds upon its predecessor's memory layout with dynamic memory management. The reversible Buddy Memory heap layout presented in section~\ref{sec:buddy-memory} is utilized in \rooplpp as it is an interesting layout, naturally translates into a reversible setting with one simple restriction (i.e only blocks which are heads of their respectable free lists are allocatable) and since its only drawback is dismissible in most real world scenarios.
+\rooplpp builds upon its predecessor's memory layout with dynamic memory management. The reversible Buddy Memory heap layout presented in section~\ref{subsec:buddy-memory} is utilized in \rooplpp as it is an interesting layout, naturally translates into a reversible setting with one simple restriction (i.e only blocks which are heads of their respectable free lists are allocatable) and since its only drawback is dismissible in most real world scenarios.
 
 Figure~\ref{fig:memory-layout} shows the full layout of a \rooplpp program stored in memory.
 
@@ -25,13 +50,12 @@ Figure~\ref{fig:memory-layout} shows the full layout of a \rooplpp program store
     \item Unlike in \textsc{Roopl}, where the stack grows upwards, the \rooplpp stack grows downwards and is begins at address $p$. The stack remains a LIFO structure, analogously to \textsc{Roopl}.
 \end{itemize}
 
-As denoted in the previous section, we assume an underlying reversible operating system providing us with additional memory when needed. With no real way of simulating this, the \rooplpp compiler places the stack at a fixed address $p$ and sets one free block in the largest $2^n$ free list initially. The number of free lists and the address $p$ is configurable in the source code, but is defaulted to $10$ free lists, meaning initially one block of size $1024$ is available and the stack is placed at address $2048$.
+As denoted in the previous chapter, we assume an underlying reversible operating system providing us with additional memory when needed. With no real way of simulating this, the \rooplpp compiler places the stack at a fixed address $p$ and sets one free block in the largest $2^n$ free list initially. The number of free lists and the address $p$ is configurable in the source code, but is defaulted to $10$ free lists, meaning initially one block of size $1024$ is available and the stack is placed at address $2048$.
 
 In traditional compilers, the heap pointer usually points to the end of the heap. For reasons stated above, we never grow the heap as we start with a heap of fixed size. As such, the heap pointer simply points to the beginning of the heap.
 
 \begin{figure}[ht]
     \centering
-    
     \begin{tikzpicture}
         \fill[fill = grey] (0, 0) rectangle (2.5, 3) node[midway] {Static Data};
         \fill[fill = darkgrey] (2.5, 0) rectangle (5, 3) node[midway] {Program};
@@ -65,12 +89,12 @@ In traditional compilers, the heap pointer usually points to the end of the heap
         \draw[arrow, dashed] (12.5, 1.5) -- (10.9, 1.5); 
         \node at (11.6, 1.2) {\scriptsize{\textit{stack grows}}};
     \end{tikzpicture}
-    
     \caption{Memory layout of a \rooplpp program}
     \label{fig:memory-layout}
 \end{figure}
 
 \section{Inherited \textsc{Roopl} features}
+\label{sec:inherited-features}
 As mentioned, a number of features from \textsc{Roopl} carries over in \rooplpp.
 
 The dynamic dispatching mechanism presented in~\cite{th:roopl} is inherited. As such, the invocation of a method implementation is based on the type of the object at run time. Virtual function tables are still the implementation strategy used in the dynamic dispatching implementation.
@@ -163,46 +187,45 @@ The object layout remains unchanged (\textit{for now, until reference counting i
 The program structure of a translated \rooplpp is analogous to the program structure of a \textsc{Roopl} program with the addition of free lists and heap initialization. The full structure is shown in figure~\ref{fig:pisa-program-layout}. 
 
 \begin{figure}[h]
-\centering
+    \centering
 
-\resizebox{.8\linewidth}{!}{
-\begin{minipage}{\linewidth}
-\begin{alignat*}{6}
-&\textbf{(1)}\quad&& &&\cdots\cdots && && &&\text{; Static data declarations}\\
-&\textbf{(2)}\quad&& &&\cdots\cdots && && &&\text{; Code for program class methods}\\
-&\textbf{(3)}\quad&&start\ \texttt{:}\quad&&\inst{start}\quad&& && &&\text{; Program starting point}\\
-&\textbf{(4)}\quad&& &&\inst{addi}\quad &&r_{flps}\quad &&p&&\text{; Initialize free lists pointer}\\
-&\textbf{(5)}\quad&& &&\inst{xor}\quad &&r_{hp}\quad &&r_{flps}\qquad &&\text{; Initialize heap pointer}\\
-&\textbf{(6)}\quad&& &&\inst{addi}\quad &&r_{hp}\quad &&size_{fls}&&\text{; Initialize heap pointer}\\
-&\textbf{(7)}\quad&& &&\inst{xor}\quad &&r_{b}\quad &&r_{hp}\qquad &&\text{; Store address of initial free memory block in $r_b$}\\
-&\textbf{(8)}\quad&& &&\inst{ADDI}\quad &&r_{flps}\quad &&size_{fls}\quad &&\text{; Index to end of free lists}\\
-&\textbf{(9)}\quad&& &&\inst{SUBI}\quad &&r_{flps}\quad && 1\quad &&\text{; Index to last element of free lists}\\
-&\textbf{(10)}\quad&& &&\inst{EXCH}\quad &&rb\quad &&r_{flps}\quad &&\text{; Store address of first block in last element of free lists}\\
-&\textbf{(11)}\quad&& &&\inst{ADDI}\quad &&r_{flps}\quad && 1\quad &&\text{; Index to end of free lists}\\
-&\textbf{(12)}\quad&& &&\inst{SUBI}\quad &&r_{flps}\quad &&s\quad &&\text{; Index to beginning of free lists}\\
-&\textbf{(13)}\quad&& &&\inst{addi}\quad &&r_{sp}\quad &&offset_{stack}&&\text{; Initialize stack pointer}\\
-&\textbf{(14)}\quad&& &&\inst{xor}\quad &&r_m\quad &&r_{sp}\qquad &&\text{; Store address of main object in $r_m$}\\
-&\textbf{(15)}\quad&& &&\inst{xori}\quad &&r_v\quad &&label_{vt}\qquad &&\text{; Store address of vtable in $r_v$}\\
-&\textbf{(16)}\quad&& &&\inst{exch}\quad &&r_v\quad &&r_{sp}\qquad &&\text{; Push address of vtable onto stack}\\
-&\textbf{(17)}\quad&& &&\inst{subi}\quad &&r_{sp}\quad &&size_m\qquad &&\text{; Allocate space for main object}\\
-&\textbf{(18)}\quad&& &&\inst{push}\quad &&r_m\quad && &&\text{; Push '\textit{this}' onto stack}\\
-&\textbf{(19)}\quad&& &&\inst{bra}\quad &&label_m \span\omit\span \qquad&&\text{; Call main procedure}\\
-&\textbf{(20)}\quad&& &&\inst{pop}\quad &&r_m\quad && &&\text{; Pop '\textit{this}' from stack}\\
-&\textbf{(21)}\quad&& &&\inst{subi}\quad &&r_{sp}\quad &&size_m\qquad &&\text{; Deallocate space of main object}\\
-&\textbf{(22)}\quad&& &&\inst{exch}\quad &&r_v\quad &&r_{sp}\qquad &&\text{; Pop vtable address into $r_v$}\\
-&\textbf{(23)}\quad&& &&\inst{xori}\quad &&r_v\quad &&label_{vt}\qquad &&\text{; Clear $r_v$}\\
-&\textbf{(24)}\quad&& &&\inst{xor}\quad &&r_m\quad &&r_{sp}\qquad &&\text{; Clear $r_m$}\\
-&\textbf{(25)}\quad&& &&\inst{subi}\quad &&r_{sp}\quad &&offset_{stack} &&\text{; Clear stack pointer}\\
-&\textbf{(26)}\quad&& &&\inst{subi}\quad &&r_{hp}\quad &&size_{fls} &&\text{; Clear heap pointer}\\
-&\textbf{(27)}\quad&& &&\inst{xor}\quad &&r_{hp}\quad &&r_{flsp} &&\text{; Clear heap pointer}\\
-&\textbf{(28)}\quad&& &&\inst{subi}\quad &&r_{flps}\quad &&p &&\text{; Clear free lists pointer}\\
-&\textbf{(29)}\quad&&finish\ \texttt{:}\quad&&\inst{finish}\quad && && &&\text{; Program exit point}
-\end{alignat*}
-\end{minipage}
-}
-
-\caption{Overall layout of a translated \rooplpp program}
-\label{fig:pisa-program-layout}
+    \resizebox{.8\linewidth}{!}{
+    \begin{minipage}{\linewidth}
+    \begin{alignat*}{6}
+    &\textbf{(1)}\quad&& &&\cdots\cdots && && &&\text{; Static data declarations}\\
+    &\textbf{(2)}\quad&& &&\cdots\cdots && && &&\text{; Code for program class methods}\\
+    &\textbf{(3)}\quad&&start\ \texttt{:}\quad&&\inst{start}\quad&& && &&\text{; Program starting point}\\
+    &\textbf{(4)}\quad&& &&\inst{addi}\quad &&r_{flps}\quad &&p&&\text{; Initialize free lists pointer}\\
+    &\textbf{(5)}\quad&& &&\inst{xor}\quad &&r_{hp}\quad &&r_{flps}\qquad &&\text{; Initialize heap pointer}\\
+    &\textbf{(6)}\quad&& &&\inst{addi}\quad &&r_{hp}\quad &&size_{fls}&&\text{; Initialize heap pointer}\\
+    &\textbf{(7)}\quad&& &&\inst{xor}\quad &&r_{b}\quad &&r_{hp}\qquad &&\text{; Store address of initial free  memory block in $r_b$}\\
+    &\textbf{(8)}\quad&& &&\inst{ADDI}\quad &&r_{flps}\quad &&size_{fls}\quad &&\text{; Index to end of free    lists}\\
+    &\textbf{(9)}\quad&& &&\inst{SUBI}\quad &&r_{flps}\quad && 1\quad &&\text{; Index to last element of free   lists}\\
+    &\textbf{(10)}\quad&& &&\inst{EXCH}\quad &&rb\quad &&r_{flps}\quad &&\text{; Store address of first block in    last element of free lists}\\
+    &\textbf{(11)}\quad&& &&\inst{ADDI}\quad &&r_{flps}\quad && 1\quad &&\text{; Index to end of free lists}\\
+    &\textbf{(12)}\quad&& &&\inst{SUBI}\quad &&r_{flps}\quad &&s\quad &&\text{; Index to beginning of free lists}   \\
+    &\textbf{(13)}\quad&& &&\inst{addi}\quad &&r_{sp}\quad &&offset_{stack}&&\text{; Initialize stack pointer}\\
+    &\textbf{(14)}\quad&& &&\inst{xor}\quad &&r_m\quad &&r_{sp}\qquad &&\text{; Store address of main object in     $r_m$}\\
+    &\textbf{(15)}\quad&& &&\inst{xori}\quad &&r_v\quad &&label_{vt}\qquad &&\text{; Store address of vtable in     $r_v$}\\
+    &\textbf{(16)}\quad&& &&\inst{exch}\quad &&r_v\quad &&r_{sp}\qquad &&\text{; Push address of vtable onto    stack}\\
+    &\textbf{(17)}\quad&& &&\inst{subi}\quad &&r_{sp}\quad &&size_m\qquad &&\text{; Allocate space for main     object}\\
+    &\textbf{(18)}\quad&& &&\inst{push}\quad &&r_m\quad && &&\text{; Push '\textit{this}' onto stack}\\
+    &\textbf{(19)}\quad&& &&\inst{bra}\quad &&label_m \span\omit\span \qquad&&\text{; Call main procedure}\\
+    &\textbf{(20)}\quad&& &&\inst{pop}\quad &&r_m\quad && &&\text{; Pop '\textit{this}' from stack}\\
+    &\textbf{(21)}\quad&& &&\inst{subi}\quad &&r_{sp}\quad &&size_m\qquad &&\text{; Deallocate space of main    object}\\
+    &\textbf{(22)}\quad&& &&\inst{exch}\quad &&r_v\quad &&r_{sp}\qquad &&\text{; Pop vtable address into $r_v$}\\
+    &\textbf{(23)}\quad&& &&\inst{xori}\quad &&r_v\quad &&label_{vt}\qquad &&\text{; Clear $r_v$}\\
+    &\textbf{(24)}\quad&& &&\inst{xor}\quad &&r_m\quad &&r_{sp}\qquad &&\text{; Clear $r_m$}\\
+    &\textbf{(25)}\quad&& &&\inst{subi}\quad &&r_{sp}\quad &&offset_{stack} &&\text{; Clear stack pointer}\\
+    &\textbf{(26)}\quad&& &&\inst{subi}\quad &&r_{hp}\quad &&size_{fls} &&\text{; Clear heap pointer}\\
+    &\textbf{(27)}\quad&& &&\inst{xor}\quad &&r_{hp}\quad &&r_{flsp} &&\text{; Clear heap pointer}\\
+    &\textbf{(28)}\quad&& &&\inst{subi}\quad &&r_{flps}\quad &&p &&\text{; Clear free lists pointer}\\
+    &\textbf{(29)}\quad&&finish\ \texttt{:}\quad&&\inst{finish}\quad && && &&\text{; Program exit point}
+    \end{alignat*}
+    \end{minipage}
+    }
+    \caption{Overall layout of a translated \rooplpp program}
+    \label{fig:pisa-program-layout}
 \end{figure}
 
 This PISA code block initializes the free lists pointer, the heap pointer, the stack pointer, allocates the main object on the stack, calls the main method, deallocates the main object and finally clears the free lists, heap and stack pointers.
@@ -279,7 +302,7 @@ In the translated \texttt{malloc1} function, the \inst{swapbr} functions as entr
     
     \caption{PISA translation of heap allocation and deallocation for objects}
     \label{fig:pisa-allocation-deallocation}
-    \end{figure}
+\end{figure}
 
 As mentioned, the \texttt{malloc(1)} is executed recursively, scanning through free blocks in free lists holding blocks of equal or greater size of the $size_c$ we want to allocate. Once such a block has been found, it is recursively split, if its size isn't equal to $size_c$. Before each recursive call (or rather branching in PISA), we must push a number of temporary register values to the stack, to ensure we can re-obtain theres values once the next recursive call returns. These temporary values includes the address of the current free list and the address of its first block, the expression evaluation results needed for the 2 conditional statements along with a temporary register, holding different date depending on where the algorithm branches from. As can be seen in~\ref{fig:malloc1-pisa}, the register pressure is quite high for the heap allocation and deallocation translations. In fact, 11 free registers besides the 4 registers initiated in the code generation for $new$ and $free$ are needed for the translation to succeed. This number of register should obviously be optimized to reduce the register pressure, as taking up 15 registers for allocating or deallocating an object, would only leave 10 free registers available in the current scope, as the free lists, heap and stack pointer further take up 3 registers, the return offset register $r_{ro}$ and register 0 takes up an additional 2. This effectively means that no more than 10 objects can be heap allocation in the same scope, as of writing. The main register hogging part of the translation scheme is the expression evaluation required for the two conditionals (Line 16, 23, 39 and 40 in listing~\ref{lst:buddy-memory}) as the composite expressions such as \texttt{free\_lists[counter] = 0 || p - csize != free\_lists[counter]} currently requires 3 temporary registers for evaluating \texttt{free\_lists[counter] = 0}, \texttt{p - csize != free\_lists[counter]} and finally \texttt{free\_lists[counter] = 0 || p - csize != free\_lists[counter]} separately.  
 
@@ -358,7 +381,7 @@ As mentioned, the \texttt{malloc(1)} is executed recursively, scanning through f
     
     \caption{The core of the reversible buddy memory algorithm translated into PISA. For deallocation the inverse of this block is generated during compile-time.}
     \label{fig:malloc1-pisa} 
-    \end{figure}
+\end{figure}
 
 \newpage
 
@@ -375,7 +398,7 @@ As mentioned, the \texttt{malloc(1)} is executed recursively, scanning through f
 % TODO: Write subsection
 
 \section{Referencing}
-\label{sec:referencing}
+\label{sec:referencing-compilation}
 % TODO: Write section
 
 \section{Error Handling}

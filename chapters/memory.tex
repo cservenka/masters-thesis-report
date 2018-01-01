@@ -342,7 +342,7 @@ The advantage of this approach would be effective elimination of internal and ex
 
 Listing~\ref{lst:one-heap-per-record-size} outlines the allocation algorithm for this layout written in extended \textsc{Janus} from~\cite{ty:ejanus}. We assume that the heads of the free lists are stored in a single array primitive, such that the free list for records of size $n$ are indexed at $n-2$ and $n > 2$ (as every record needs some overhead) and that we have heaps for continuous size range with no gaps. To maintain reversibility we only allow allocation from the head of the free list.
 
-The algorithm consists of an entry point named \textbf{malloc} and a recursion body named \textbf{malloc1}. Given a zero-cleared pointer \texttt{p}, the size of the object we are allocating \texttt{osize} and the freelists array primitive, the recursion body is called after initializing a \texttt{counter}, which is an index into the free lists array and a counter size, \texttt{csize}, which is the block size of the current free list the \texttt{counter} is indexed in. The recursion body first updates the free list index until we find a free list greater or equal to the size of the object we are allocating. Once found, we enter the next conditional, which searches for a free lists with a free block that is greater or equal to the size of our object. Once such a free list has been found, the head of the free list is simply popped and the next block is set as the new head.
+The algorithm consists of an entry point named \textbf{malloc} and a recursion body named \textbf{malloc1}. Given a zero-cleared pointer \texttt{p}, the size of the object we are allocating \texttt{osize} and the freelists array primitive, the recursion body is called after initializing a \texttt{counter}, which is an index into the free lists array and a counter size, \texttt{csize}, which is the block size of the current free list the \texttt{counter} is indexed in. The recursion body first updates the free list index until we find a free list greater or equal to the size of the object we are allocating. Once found, we enter the next conditional, which searches for a free lists with a free block that is greater or equal to the size of our object. Once such a free list has been found, the head of the free list is simply popped and the next block is set as the new head.\\
 
 \begin{lstlisting}[caption={Allocation algorithm for one heap per record size implemented in extended Janus.}, language=janus, style=basic, label={lst:one-heap-per-record-size}]
   procedure malloc(int p, int osize, int freelists[])
@@ -677,10 +677,10 @@ This layout is somewhat of a middle ground between the previous three designs, a
 
 The only drawback from this layout is the amount of internal fragmentation. As we only allocate blocks of a power-of-two size, substantial internal fragmentation follows when allocating large records, i.e. a allocating a block of size 128 for a record of size 65. However, as most real world programs uses much smaller sized records, we do not consider this a very frequent scenario. As discussed in section~\ref{subsec:one-heap-per-power-of-two}, we would split large records into chunks of $\sqrt{n}$ at the cost of additional book-keeping.
 
-Implementation-wise, this design would require doubling and halving of numbers related to the power-of-two. This action translates well into the reversible setting, as a simply bit-shifting directly gives us the desired result.
+Implementation-wise, this design would require doubling and halving of numbers related to the power-of-two. This action translates well into the reversible setting, as a simply bit-shifting directly gives us the desired result.\\
 
 \begin{lstlisting}[caption={The Buddy Memory algorithm implemented in extended Janus.}, language=janus, style=basic, label={lst:buddy-memory}]
-  procedure malloc1(int p, int osize, int freelists[], int counter, int csize, int next_block[])
+  procedure malloc1(int p, int osize, int freelists[], int counter, int csize)
     if (csize < osize) then
         counter += 1
         call double(csize)
