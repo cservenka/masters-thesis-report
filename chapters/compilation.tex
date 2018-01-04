@@ -1013,7 +1013,7 @@ Figure~\ref{fig:array-allocation-deallocation} shows the translation schemes use
 
 \subsection{Array Element Access}
 \label{subsec:array-element-access}
-% TODO: Write subsection
+Array elements are simply passed as any other variable to methods or statements. Based on the variable type, compilation of various statements individually determine whether the address or the value of the passed variable should be used for the compiling the statement. For arrays, this is no different. If an integer array element is passed, it is treated just liked a regular integer variable. For an object array element, it is treated just like a regular object variable. 
 
 
 \section{Error Handling}
@@ -1047,14 +1047,21 @@ The extensions made to \textsc{Roopl} in \rooplpp brings forth a number of addit
 \end{itemize}
 
 It is the programmer's responsibility to meet these conditions are met. As these conditions, in general, cannot be determined at compile time, undefined program behaviour will occur as the termination will continue silently, resulting in erroneous program state. We can insert run time error checks in the generated instructions such that the program is terminated if one of the conditions does not hold. The run time error checks can be added as dynamic error checks using error routines defined at labels, such as $label_{uninitialized\_object}$ which the program can jump to, if such a condition is unmet. \citeauthor{th:roopl} presented an example for dynamic error checking for local blocks in~\cite{th:roopl}. \textsc{Pisa} and its simulator PendVM is, however, limited and does not support exit codes natively. To fully support dynamic error checking, PendVM could be extended to read from a value from a designated register to supply a more meaningful message for the programmer in the case of a run time exit.
-
+ 
 \section{Implementation}
 \label{sec:implementation}
-% TODO: Cite pendvm
-The \rooplpp compiler (\textsc{Rooplppc}) was implemented using techniques and translation schemes presented in this chapters, expanding upon the work of the original \textsc{Roopl} compiler (\textsc{Rooplc}). The compiler serves as a proof-of-concept and simply performs one-to-one translations of \rooplpp code to \textsc{Pisa} code without any optimizations along the way. The compiler is written in \textsc{Haskell} 7.10 and the translated output was tested on the Pendulum simulator, PendVM.
+The \rooplpp compiler (\textsc{Rooplppc}) was implemented using techniques and translation schemes presented in this chapters, expanding upon the work of the original \textsc{Roopl} compiler (\textsc{Rooplc}). The compiler serves as a proof-of-concept and simply performs one-to-one translations of \rooplpp code to \textsc{Pisa} code without any optimizations along the way. The compiler is written in \textsc{Haskell} 7.10 and the translated output was tested on the Pendulum simulator, PendVM~\cite{cr:pendvm}. 
 
-% TODO: Describe phses
-% TODO: Describe size
-% TODO: link to github
+As with the \textsc{Roopl} compiler, the \rooplpp compiler is structured around the same six separate compilation phases.
+\begin{enumerate}
+    \item \textbf{Parsing} consists of constructing an abstract syntax tree from the input program text using parser combinators from the \textsc{Parsec} library in \textsc{Haskell}.
+    \item \textbf{Class Analysis} verifies inheritance cycles, duplicated method names or fields and base classes. In this phase, we also compute the allocation size of each class
+    \item \textbf{Scope Analysis} constructs the virtual and symbol tables and maps every identifier to a unique variable or method.
+    \item \textbf{Type Checking} verifies that the parsed program is well-typed.
+    \item \textbf{Code Generation} translates the abstract syntax tree to blocks of \textsc{Pisa} code in a recursive descent.
+    \item \textbf{Macro Expansion} expands macros left by the code generator for i.e. configuration variables, etc.
+\end{enumerate}
 
+Compiled \textsc{Roopl} programs had a size increase by a factor of 10 to 15 in terms of the lines of code. For \rooplpp the size increase is much larger, partially due to the increase of static code included in form of the memory manager using the buddy layout described in this chapter and partially because heap allocations are most more costly than stack allocations in terms of lines of code.
 
+The entire compiler source code as well as example programs and their compiled versions are provided in the appendices and in the supplied zip archive. It is also hosted on Github as open source software under the MIT license at \url{https://github.com/cservenka/ROOPLPPC}.
