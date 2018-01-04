@@ -1,0 +1,8 @@
+procedure malloc(int p, int osize, 
+                 int freelists[])
+    local int counter = 0
+    local int csize = 2
+    call malloc1(p, osize, freelists, 
+                 counter, csize)
+    delocal int csize = 2
+    delocal int counter = 0

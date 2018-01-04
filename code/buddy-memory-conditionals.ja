@@ -1,0 +1,10 @@
+if (csize < osize) then
+    // outer if-then
+else
+    if freelists[counter] != 0 then
+        // inner if-then
+    else
+        // inner else
+    fi (freelists[counter] = 0 || 
+        p - csize != freelists[counter])
+fi csize < osize 

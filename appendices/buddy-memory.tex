@@ -1,0 +1,72 @@
+\chapter{Pisa Translated Buddy Memory}
+\label{app:pisa-translated-buddy-memory}
+\allowdisplaybreaks
+{\tiny
+\begin{alignat*}{7}
+    &\textbf{(1)}\quad&&malloc1_{top}\ \texttt{:}\quad  &&\inst{bra}\quad &&malloc1_{bot} \span\omit\span\quad \span\omit\span\quad &&\text{; Receive jump}\\ 
+    &\textbf{(2)}\quad&& &&\inst{pop}\quad&&r_{ro}&& && &&\text{; Pop return offset from the stack}\\
+    &\textbf{(3)}\quad&& &&\cdots\cdots && && && &&\text{; Inverse of \textbf{(7)}}\\
+    &\textbf{(4)}\quad&&malloc1_{entry}\ \texttt{:}\quad&&\inst{swapbr}\quad &&r_{ro} && && &&\text{; Malloc1 entry and exit point}\\
+    &\textbf{(5)}\quad&& &&\inst{neg}\quad &&r_{ro} && && &&\text{; Negate return offset}\\        
+    &\textbf{(6)}\quad&& &&\inst{push}\quad &&r_{ro} && && &&\text{; Store return offset on stack}\\  
+    &\textbf{(7)}\quad&& &&\cdots\cdots && && && &&\text{; Code for $r_{fl}\ \leftarrow\ addr(freelists[counter])$}\\
+    &\textbf{(8)}\quad&& &&\cdots\cdots && && && &&\text{; Code for $r_{block}\ \leftarrow\ \llbracket freelists[counter] \rrbracket$}\\
+    &\textbf{(9)}\quad&& &&\cdots\cdots && && && &&\text{; Code for $r_{e1_o}\ \leftarrow\ \llbracket c_{size} < object_{size} \rrbracket$}\\
+    &\textbf{(10)}\quad&& &&\inst{xor}\quad &&r_t && r_{e1_o} && &&\text{; Copy value of $c_{size} < object_{size}$ into $r_t$}\\        
+    &\textbf{(11)}\quad&& &&\cdots\cdots && && && &&\text{; Inverse of \textbf{(9)}}\\ 
+    &\textbf{(12)}\quad&&o_{test}\ \texttt{:}\quad &&\inst{beq} &&r_t && r_0 && o_{test_f} && \text{; Receive jump}\\
+    &\textbf{(13)}\quad&& &&\inst{xori} &&r_t && 1 && && \text{; Clear $r_t$}\\
+    &\textbf{(14)}\quad&& &&\inst{addi} &&r_{c} && 1 && && \text{; $Counter\texttt{++}$}\\
+    &\textbf{(15)}\quad&& &&\inst{rl} &&r_{sc}\ && 1 && && \text{; Call $double(c_{size}$)}\\
+    &\textbf{(16)}\quad&& &&\cdots\cdots && && && &&\text{; Inverse of \textbf{(7)}}\\
+    &\textbf{(17)}\quad&& &&\cdots\cdots && && && &&\text{; Code for pushing temp reg values to stack}\\
+    &\textbf{(18)}\quad&& &&\inst{bra}\quad &&malloc1_{entry} \span\omit\span\quad \span\omit\span\quad && \text{; Call $malloc1()$)}\\
+    &\textbf{(19)}\quad&& &&\cdots\cdots && && && &&\text{; Inverse of \textbf{(17)}}\\
+    &\textbf{(20)}\quad&& &&\inst{rr} &&r_{sc}\ && 1 && && \text{; Inverse of \textbf{(15)}}\\
+    &\textbf{(21)}\quad&& &&\inst{subi} &&r_{c} && 1 && && \text{; Inverse of \textbf{(14)}}\\
+    &\textbf{(22)}\quad&& &&\inst{xori} &&r_t && 1 && && \text{; Set $r_t = 1$}\\
+    &\textbf{(23)}\quad&&o_{assert_t}\ \texttt{:}\quad &&\inst{bra} &&o_{assert} \span\omit\span\quad \span\omit\span\quad && \text{; Jump}\\
+    &\textbf{(24)}\quad&&o_{test_f}\ \texttt{:}\quad &&\inst{bra} &&o_{test} \span\omit\span\quad \span\omit\span\quad && \text{; Receive jump}\\
+    &\textbf{(25)}\quad&& &&\cdots\cdots && && && &&\text{; Code for $r_{e1_i}\ \leftarrow\ \llbracket addr(freelists[counter]) \neq 0 \rrbracket$}\\
+    &\textbf{(26)}\quad&& &&\inst{xor}\quad &&r_{t2} && r_{e1_i} && &&\text{; Copy value of $r_{e1_i}$ into $r_{t2}$}\\        
+    &\textbf{(27)}\quad&& &&\cdots\cdots && && && &&\text{; Inverse of \textbf{(25)}}\\
+    &\textbf{(28)}\quad&&i_{test}\ \texttt{:}\quad &&\inst{beq} &&r_{t2} && r_0 && i_{test_f} && \text{; Receive jump}\\
+    &\textbf{(29)}\quad&& &&\inst{xori} &&r_{t2} && 1 && && \text{; Clear $r_{t2}$}\\
+    &\textbf{(30)}\quad&& &&\inst{add} &&r_{p} && r_{block} && && \text{; Copy address of the current block to p}\\
+    &\textbf{(31)}\quad&& &&\inst{sub} &&r_{block}\ && r_{p} && && \text{; Clear $r_{block}$}\\
+    &\textbf{(32)}\quad&& &&\inst{exch} &&r_{tmp} && r_{p} && && \text{; Load address of next block}\\
+    &\textbf{(33)}\quad&& &&\inst{exch} &&r_{tmp} && r_{fl} && && \text{; Set address of next block as new head of free list}\\
+    &\textbf{(34)}\quad&& &&\inst{xor} &&r_{tmp} && r_{p} && && \text{; Clear address of next block}\\
+    &\textbf{(35)}\quad&& &&\inst{xori} &&r_{t2} && 1 && && \text{; Set $r_{t2} = 1$}\\
+    &\textbf{(36)}\quad&&i_{assert_t}\ \texttt{:}\quad &&\inst{bra} &&i_{assert} \span\omit\span\quad \span\omit\span\quad && \text{; Jump}\\
+    &\textbf{(37)}\quad&&i_{test_f}\ \texttt{:}\quad &&\inst{bra} &&i_{test} \span\omit\span\quad \span\omit\span\quad && \text{; Receive jump}\\
+    &\textbf{(38)}\quad&& &&\inst{addi} &&r_{c} && 1 && && \text{; $Counter\texttt{++}$}\\
+    &\textbf{(39)}\quad&& &&\inst{rl} &&r_{sc}\ && 1 && && \text{; Call $double(c_{size}$)}\\
+    &\textbf{(40)}\quad&& &&\cdots\cdots && && && &&\text{; Code for pushing temp reg values to stack}\\
+    &\textbf{(41)}\quad&& &&\inst{bra}\quad &&malloc1_{entry} \span\omit\span\quad \span\omit\span\quad && \text{; Call $malloc1()$)}\\
+    &\textbf{(42)}\quad&& &&\cdots\cdots && && && &&\text{; Inverse of \textbf{(40)}}\\
+    &\textbf{(43)}\quad&& &&\inst{rr} &&r_{sc}\ && 1 && && \text{; Inverse of \textbf{(39)}}\\
+    &\textbf{(44)}\quad&& &&\inst{subi} &&r_{c} && 1 && && \text{; Inverse of \textbf{(38)}}\\
+    &\textbf{(45)}\quad&& &&\inst{xor} &&r_{tmp} && r_p && && \text{; Copy current address of p}\\
+    &\textbf{(46)}\quad&& &&\inst{exch} &&r_{tmp} && r_{fl} && && \text{; Store current address of p in current free list}\\
+    &\textbf{(47)}\quad&& &&\inst{add} &&r_{p} && r_{cs} && && \text{; Split block by setting p to second half of current block}\\
+    &\textbf{(48)}\quad&&i_{assert}\ \texttt{:}\quad &&\inst{bne} &&r_{t2} && r_0 && i_{assert_t} && \text{; Receive jump}\\
+    &\textbf{(49)}\quad&& &&\inst{exch} &&r_{tmp} && r_{fl} && && \text{; Load address of head of current free list}\\
+    &\textbf{(50)}\quad&& &&\inst{sub} &&r_{p} && r_{cs} && && \text{; Set p to previous block address}\\
+    &\textbf{(51)}\quad&& &&\cdots\cdots && && && &&\text{; Code for $r_{e2_{i1}}\ \leftarrow\ \llbracket p - c_{size} \neq addr(freelists[counter])\rrbracket$}\\
+    &\textbf{(52)}\quad&& &&\cdots\cdots && && && &&\text{; Code for $r_{e2_{i2}}\ \leftarrow\ \llbracket addr(freelists[counter]) = 0 \rrbracket$}\\
+    &\textbf{(53)}\quad&& &&\cdots\cdots && && && &&\text{; Code for $r_{e2_{i3}}\ \leftarrow\ \llbracket (p - c_{size} \neq addr(freelists[counter])) \vee (addr(freelists[counter]) = 0) \rrbracket$}\\
+    &\textbf{(54)}\quad&& &&\inst{xor} &&r_{r2} && r_{e2_{i3}} && && \text{; Copy value of $r_{e2_{i3}}$ into $r_{t2}$}\\
+    &\textbf{(55)}\quad&& &&\cdots\cdots && && && &&\text{; Inverse of \textbf{(53)}}\\
+    &\textbf{(56)}\quad&& &&\cdots\cdots && && && &&\text{; Inverse of \textbf{(52)}}\\
+    &\textbf{(57)}\quad&& &&\cdots\cdots && && && &&\text{; Inverse of \textbf{(51)}}\\
+    &\textbf{(58)}\quad&& &&\inst{add} &&r_{p} && r_{cs} && && \text{; Inverse of \textbf{(50)}}\\
+    &\textbf{(59)}\quad&& &&\inst{exch} &&r_{tmp} && r_{fl} && && \text{; Inverse of \textbf{(49)}}\\
+    &\textbf{(60)}\quad&&o_{assert}\ \texttt{:}\quad &&\inst{bne} &&r_{t} && r_0 && o_{assert_t} && \text{; Receive jump}\\
+    &\textbf{(61)}\quad&& &&\cdots\cdots && && && &&\text{; Code for $r_{e2_o}\ \leftarrow\ \llbracket c_{size} < object_{size} \rrbracket$}\\
+    &\textbf{(62)}\quad&& &&\inst{xor}\quad &&r_t && r_{e2_o} && &&\text{; Copy value of $c_{size} < object_{size}$ into $r_t$}\\        
+    &\textbf{(63)}\quad&& &&\cdots\cdots && && && &&\text{; Inverse of \textbf{(61)}}\\ 
+    &\textbf{(64)}\quad&&malloc1_{bot}\ \texttt{:}\quad  &&\inst{bra}\quad &&malloc1_{top} \span\omit\span\quad \span\omit\span\quad &&\text{; Jump}\\
+\end{alignat*}
+
+}%

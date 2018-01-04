@@ -1,0 +1,8 @@
+counter += 1
+call double(csize)
+call malloc1(p, osize, freelists, 
+             counter, csize)
+uncall double(csize)
+counter -= 1
+freelists[counter] += p
+p += csize

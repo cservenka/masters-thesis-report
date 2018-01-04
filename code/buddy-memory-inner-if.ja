@@ -1,0 +1,8 @@
+p += freelists[counter]
+freelists[counter] -= p
+
+// Swap head of free list 
+// with p's next block
+freelists[counter] ^= M(p)
+M(p) ^= freelists[counter]
+freelists[counter] ^= M(p)
