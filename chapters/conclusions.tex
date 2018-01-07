@@ -1,8 +1,17 @@
 \chapter{Conclusions}
 \label{chp:conclusions}
+We formally presented a dynamic memory management extension for the reversible object-oriented programing languages, \textsc{Roopl}, in form of the superset language \rooplpp. The extension expands upon the previously presented static typing system defining well-typedness. The language successfully extends the expressiveness of its predecessor by allowing more flexibility within the domain of reversible object-oriented programming. With \rooplpp we, as reversible programmers, can now define and model non-trivial dynamic data structures in a reversible setting, such as lists, trees and graphs. We illustrated this by examples programs such a new reversible Turing machine implementation along with implementations for linked lists, doubly-linked lists and binary trees as well as techniques for traversing these. Besides expanding the expressiveness of \textsc{Roopl}, we have further shown that complex dynamic data structures are not only feasible, but furthermore does not contradict the reversible computing paradigm.
 
+We presented various dynamic memory management layouts and how each would translate into the reversible setting. Weighing the pros and cons of each, the buddy memory layout was found to translate into reversible code very naturally with few side effects. With dynamically life-timed objects allocation and deallocation order is important in terms of a entirely garbage-free computation. In most cases with \rooplpp, we only obtain partially garbage-free computations, as our free lists might not be restored to their original form, without an effective garbage collector design for the memory manager.
+
+Techniques for clean translations of extended parts of the language, such as the memory manager and the new static array type have been demonstrated and implemented in a proof-of-concept compiler for validation.
+
+With \rooplpp, we have successfully further strengthened the high-level layer of abstraction within the reversible programming paradigm.  
 
 \section{Future work}
 \label{sec:future-work}
+Naturally with the discovery of feasibility of non-trivial, reversible data structures with the introduction of \rooplpp, further study of design and implementation of reversible algorithms working with these data structures are an obvious contender for future research.
 
+In terms of the future of reversible object-oriented languages, additional works could be made to extend the static array type with a fully dynamic array supporting multiple dimensionality. This addition could further help the discovery and research of reversible data structures such as trees and graphs.
 
+Finally, more research could be conducted into reversible heap managers. We provided a simple manager which translated to our problem domain naturally. To obtain completely garbage free computations, a garbage collector could be designed to work with the reversible buddy memory memory manager. A reversible garbage collector has also been designed and shown feasible for the reversible functional language \textsc{Rcfun} in~\cite{tm:garbage}. This garbage collector could perhaps be converted to an object-oriented setting.  

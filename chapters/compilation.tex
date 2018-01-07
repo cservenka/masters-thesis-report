@@ -47,6 +47,7 @@ Figure~\ref{fig:roopl-memory-layout} shows the memory layout of a compiled \text
             \filldraw[fill = darkgrey, draw = black] (0, .5) rectangle (3, 1) node[midway] {x};
             \filldraw[fill = grey, draw = black] (0, 0) rectangle (3, .5) node[midway] {y};
             \draw[dashed] (0, 0) -- (0, -.5);
+
             \draw[dashed] (3, 0) -- (3, -.5);
     
             \node at (-.3, 1.25) {\texttt{+}$0$};
@@ -729,7 +730,7 @@ Figure~\ref{fig:pisa-allocation-deallocation} shows how each \textbf{new} and \t
 \label{sec:referencing-compilation}
 As mentioned, one of the main strengths of \rooplpp in terms of increased expressiveness is allowance of multiple reference to objects and arrays. When an object or array is constructed we allocate enough space to hold an additional \textit{reference counter} which is initialized to $1$, when the object is created. For each reference copied using the \textbf{copy}-statement, we incrementally increase the reference counter by $1$. When we \textbf{uncopy} a reference, the reference counter is decreased. The object or array cannot be deconstructed until its reference counter is returned to $1$ as we would have reference pointer to cleared memory in the heap. Such references are known as dangling pointers.
 
-\begin{figure}[H]
+\begin{figure}[ht]
     \centering
     \begin{subfigure}[ht]{.32\textwidth}
         \vskip 0pt
@@ -812,7 +813,7 @@ As mentioned, one of the main strengths of \rooplpp in terms of increased expres
 
 Figure~\ref{fig:ref-counting-object-layout} shows the object layout of \rooplpp objects with the added space for the reference counting from the original \textsc{Roopl} model in figure~\ref{fig:roopl-object-layout} on page~\pageref{fig:roopl-object-layout}.
 
-\begin{figure}[H]
+\begin{figure}[ht]
     \centering
     
     \begin{subfigure}[t]{0.495\linewidth}
@@ -1018,7 +1019,6 @@ Array elements are simply passed as any other variable to methods or statements.
 
 \section{Error Handling}
 \label{sec:error-handling}
-
 While a program written in \rooplpp might be syntactically valid and well-typed, it is not a guarantee that it compiles successfully. A number of conditions exists, which cannot be determined at compile time, which results in erroneous compiled code. \citeauthor{th:roopl} describes the following conditions:
 
 \begin{itemize}
@@ -1062,6 +1062,6 @@ As with the \textsc{Roopl} compiler, the \rooplpp compiler is structured around 
     \item \textbf{Macro Expansion} expands macros left by the code generator for i.e. configuration variables, etc.
 \end{enumerate}
 
-Compiled \textsc{Roopl} programs had a size increase by a factor of 10 to 15 in terms of the lines of code. For \rooplpp the size increase is much larger, partially due to the increase of static code included in form of the memory manager using the buddy layout described in this chapter and partially because heap allocations are most more costly than stack allocations in terms of lines of code.
+Compiled \textsc{Roopl} programs has a size increase by a factor of 10 to 15 in terms of the lines of code. For \rooplpp the size increase is much larger, partially due to the increase of static code included in form of the memory manager using the buddy layout described in this chapter and partially because heap allocations are most more costly than stack allocations in terms of lines of code.
 
 The entire compiler source code as well as example programs and their compiled versions are provided in the appendices and in the supplied zip archive. It is also hosted on Github as open source software under the MIT license at \url{https://github.com/cservenka/ROOPLPPC}.

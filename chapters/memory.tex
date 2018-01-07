@@ -254,8 +254,7 @@ This intuitively leads to the question of garbage classification. In the reversi
 
 \section{Linearity and Reference Counting}
 \label{sec:referencing}
-% cite: http://home.pipeline.com/~hbaker1/Use1Var.html
-Programming languages uses different approaches for storing and synchronizing variables and objects in memory. Typing \textit{linearity} is a distinction, which can reduce storage management and synchronization costs. %TODO: Cite here.
+Programming languages uses different approaches for storing and synchronizing variables and objects in memory. Typing \textit{linearity} is a distinction, which can reduce storage management and synchronization costs~\cite{hb:linearity}.
 
 Reversible programming languages such as \textsc{Janus} and \textsc{Roopl} are linear in the sense that object and variable pointers cannot be copied and are only deleted during deallocation. Pointer copying greatly increases the flexibility of programming, especially in a reversible settings where zero-clearing is critical, at the cost of increased management in form of reference counting for e.g. objects. For variables, pointer copying is not particular interesting, nor would it add much flexibility as the values of a variable simply can be copied into statically-scoped local blocks. For objects however, tedious amounts of boilerplate work must be done if object $A$ and $B$ need to work on the same object $C$ and only one reference to each object is allowed.
 
@@ -710,5 +709,3 @@ Implementation-wise, this design would require doubling and halving of numbers r
 
 Listing~\ref{lst:buddy-memory} shows the buddy memory algorithm implemented in the extended Janus variant with local blocks from~\cite{ty:ejanus}. For simplification in object sizes are rounded to the nearest power-of-two during compile-time and we only allow allocations using the heads of the free lists. The algorithm extends on the one heap per power-of-two algorithm presented in listing~\ref{lst:one-heap-per-power-of-two}, page~\pageref{lst:one-heap-per-power-of-two}.
 The body of the allocation function is still executed recursively until a free list for a $2^n$ larger than the size of the object has been found. Once found, we continue searching until we have found a non-empty free list. If the non-empty free list for a $2^n$ larger than the object is found, the head of the list is popped and the popped block is split recursively, until a block the desired size is obtained. Throughout the splitting process, empty free lists are updated when a larger free block is split into a block which fits into those lists. 
-
-
