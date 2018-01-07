@@ -1,0 +1,12 @@
+class Program
+    int result
+    int n
+    int m
+
+    method main()
+        n ^= 3
+        m ^= 4
+        new Ackermann ack
+        call ack::find(m, n)
+        call ack::get(result) 
+        delete Ackermann ack

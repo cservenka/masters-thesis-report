@@ -1,0 +1,23 @@
+method moveRight(int symbol, Cell tapeHead)
+    local Cell right = nil
+    local Cell tmp = nil
+    uncall tapeHead::getSymbol(symbol)   // Put symbol back in current cell
+    call tapeHead::getRight(right)       // Get right neighbour
+    if right = nil && symbol = BLANK then
+        symbol ^= BLANK                  // Zero clear symbol
+        new Cell right                   // Init new neighbour
+        copy Cell right tmp              // Copy reference to self
+        uncall right::getSelf(tmp)       // Store self reference
+        uncall right::getLeft(tapeHead)  // Set tape head as left of new cell
+        right <=> tapeHead 
+    else          
+        call right::getLeft(tmp)         // Get copy of tape head reference
+        uncopy Cell tmp tapeHead         // Clear reference to tape head
+        uncall right::getLeft(tmp)       // Put tape head reference back
+        tapeHead <=> right
+        call tapeHead::getRight(right)   // Get right of new tape head
+        call tapeHead::getSymbol(symbol) // Get symbol of new tape head
+    fi right = nil
+    uncall tapeHead::getRight(right)    // Set right neighbour
+    delocal Cell right = nil
+    delocal Cell tmp = nil

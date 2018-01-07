@@ -1,0 +1,12 @@
+method simulate(Cell tapeHead, int state, int[] q1, int[] s1, int[] s2, int[] q2, int pc) 
+    from state = Qs do
+        pc += 1                               // Increment pc local int symbol = 0
+        call tapeHead::getSymbol(symbol)      // Fetch current symbol 
+        call inst(state, symbol, q1, s1, s2, q2, pc, tapeHead)
+        uncall tapeHead::getSymbol(symbol)    // Zero-clear symbol delocal symbol = 0
+        if pc = PC_MAX then                   // Reset pc 
+            pc ^= PC_MAX
+        else skip
+        fi pc = 0 
+    loop skip
+    until state = Qf
