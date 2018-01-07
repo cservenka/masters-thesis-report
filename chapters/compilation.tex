@@ -1019,14 +1019,14 @@ Array elements are simply passed as any other variable to methods or statements.
 
 \section{Error Handling}
 \label{sec:error-handling}
-While a program written in \rooplpp might be syntactically valid and well-typed, it is not a guarantee that it compiles successfully. A number of conditions exists, which cannot be determined at compile time, which results in erroneous compiled code. \citeauthor{th:roopl} describes the following conditions:
+While a program written in \rooplpp might be syntactically valid and well-typed, it is not a guarantee that it executes successfully. A number of conditions exists, which cannot be determined at compile time, which results in erroneous compiled and executed code. \citeauthor{th:roopl} describes the following conditions:
 
 \begin{itemize}
     \item If the entry expression of a conditional is \textbf{true}, then the exit assertion should also be \textbf{true} after executing the then-branch.
     \item If the entry expression of a conditional is \textbf{false}, then the exit assertion should also be \textbf{false} after executing the else-branch.
     \item The entry expression of a loop should initially be \textbf{true}.
     \item If the exit assertion of a loop is \textbf{false}, then the entry expression should also be \textbf{false} after executing the loop-statement.
-    \item All instance variables should be zero-cleared within an object block, before the object is deallocated.
+    \item All instance variables should be zero-cleared within an object block before the object is deallocated.
     \item The value of a local variable should always match the value of the delocal-expression after the block statement has executed.
 \end{itemize}
 

@@ -200,13 +200,13 @@ However, we do allow other initialized, non-zero-cleared array elements to be re
 \label{sec:local-blocks}
 The local block presented in the extended \textsc{Janus} in~\cite{ty:ejanus} consisted of a local variable allocation, a statement and a local variable deallocation. These local variable blocks add immense programmer usability as the introduce a form of reversible temporary variable. The \textsc{Roopl} compiler features support for local integer blocks, but not object blocks. In \rooplpp, local blocks can be instantiated with all of the languages variable types; integers, arrays and user-defined types in form of objects.
 
-Local integer blocks works exactly the same as in \text{Roopl} and \textsc{Janus}, where in the local variable will be set to result a given expression.
+Local integer blocks works exactly the same as in \text{Roopl} and \textsc{Janus}, where the local variable initialized will be set to evaluated result a given expression.
 
-Local array and object blocks features a number of different options. If a local array or object block is initialized with a \textbf{nil} value, the variable must afterwards be initialized using a \text{new} statement before any type-specific functionality is possible. If the block is initiated with an existing object or array reference, the local variable does in fact become a reference copy, analogous to a variable initialized from a \textbf{copy} statement. 
+Local array and object blocks feature a number of different options. If a local array or object block is initialized with a \textbf{nil} value, the variable must afterwards be initialized using a \text{new} statement before any type-specific functionality is possible. If the block is initiated with an existing object or array reference, the local variable becomes a reference copy, analogous to a variable initialized from a \textbf{copy} statement. 
 
 For objects, the \textbf{construct}/\textbf{destruct}-blocks can be considered syntactic-sugar for a local block defined with a \textbf{nil} value, containing a \textbf{new} statement in the beginning of its statement block and a \textbf{delete} statement in the very end.
 
-As local array and object block allow more freedom in terms of their interaction with other statements in the language, it is the programmer's responsibility that the local variable is deallocated using a correct expression in the end of the block definition. As the value of the variable is a pointer to an object or an array, said object or array must have all their fields/cells zero-cleared before the its pointer is zero-cleared at the end of the local block. If the pointer is at any point exchanged with the pointer of another object or array using the \textbf{swap} statement, the same conditions apply.  
+As local array and object blocks allow freedom in terms of their interaction with other statements in the language, it is the programmer's responsibility that the local variable is deallocated using a correct expression at its end of the block definition. As the value of the variable is a pointer to an object or an array, said object or array must have all fields/cells zero-cleared before the pointer is zero-cleared at the end of the local block. If the pointer is at any point exchanged with the pointer of another object or array using the \textbf{swap} statement, the same conditions apply.  
 
 
 \section{\rooplpp Expressiveness}
@@ -215,7 +215,7 @@ By introducing dynamic lifetime objects and by allowing objects to be referenced
 
 \subsection{Linked List}
 \label{subsec:linked-list}
-\citeauthor{th:roopl} presented a Linked List implemented in \textsc{Roopl}. The implementation featured a \textit{ListBuilder} and a \textit{Sum} class, required to determine and retain the sum of a constructed linked list as \textsc{Roopl}'s statically scoped object blocks would deallocate automatically after building the full list. In \rooplpp we do not face the same challenges and the implementation becomes much more forward. Figure~\ref{fig:linked-list-class} implemented a \textit{LinkedList} class, simply has the head of the list and the list of length as its internal fields. For demonstration, the class allows extension of the list by either appending or prepending cell elements to the list. In either case, we first check if the \textit{head} field is initialized. If not, the cell we are either appending or prepending simply becomes the new head of the list. If we are appending a cell the Cell-class \textit{append} method is called on the \textit{head} cell with the new cell as its only argument. When prepending, the existing head is simply appended to the new cell and the new cell is set as head of the linked list.
+\citeauthor{th:roopl} presented a linked list implemented in \textsc{Roopl} in~\cite{th:roopl}. The implementation featured a \textit{ListBuilder} and a \textit{Sum} class, required to determine and retain the sum of a constructed linked list as \textsc{Roopl}'s statically scoped object blocks would deallocate automatically after building the full list. In \rooplpp, we do not face the same challenges and the implementation becomes much more forward. Figure~\ref{fig:linked-list-class} implements a \textit{LinkedList} class, simply has the head of the list and the list length as its internal fields. For demonstration, the class allows extension of the list by either appending or prepending cell elements to the list. In either case, we first check if the \textit{head} field is initialized. If not, the cell we are either appending or prepending simply becomes the new head of the list. If we are appending a cell the Cell-class \textit{append} method is called on the \textit{head} cell with the new cell as its only argument. When prepending, the existing head is simply appended to the new cell and the new cell is set as head of the linked list.
 
 \begin{figure}[ht!]
     \centering
@@ -363,7 +363,7 @@ Summing and mirroring the tree works in a similar fashion by recursively iterati
     \label{fig:binary-tree-node-class-cont}
 \end{figure}
 
-The binary tree could be extended with a method for flattening into an array of size equal to the number of tree nodes. The inverse of this method would be construction of a tree from a flattening method. This way, sorting an array could effectively be implemented by constructing a tree from an array, performing some recursive tree sorting method, and then flattening the tree into an array again.
+The binary tree could be extended with a method for flattening into an array of size equal to the number of tree nodes. The inverse of this method would be construction of a tree from a flattening method. Conventional flattening is not reversible, but perhaps a simplified reversible version could be defined. This way, sorting an array could effectively be implemented by constructing a tree from an array, performing some recursive tree sorting method, and then flattening the tree into an array again.
 
 \begin{figure}[ht!]
     \centering
@@ -437,7 +437,43 @@ Finally, we present the reversible doubly linked list, shown in figures~\ref{fig
     \label{fig:doubly-linked-list-class}
 \end{figure}
 
-This data structure is particularly interesting, as it, unlike the former two presented structures, cannot be expressed in \textsc{Roopl}, as this requires multiple reference to objects, in order for an object to point to itself.
+This data structure is particularly interesting, as it, unlike the former two presented structures, cannot be expressed in \textsc{Roopl}, as this requires multiple reference to objects, in order for an object to point to itself and to its left and right neighbours. Figure~\ref{fig:doubly-linked-list-reference} shows the multiple reference needed for the doubly linked list implementation denoted by different the three different arrow types.
+
+\begin{figure}[ht]
+    \centering
+    \begin{tikzpicture}
+        % Cells
+        \draw (0,0) rectangle (2,2) node[midway] {$c_1$};
+        \draw (3,0) rectangle (5,2) node[midway] {$c_2$};
+        \draw (6,0) rectangle (8,2) node[midway] {$c_3$};
+
+        % Arrows
+        \node[circle,fill,inner sep=1pt] at (1.25, 1.75) {};
+        \draw[-latex] (1.25, 1.75) to[out=45, in=135, distance=.85cm] (.75, 1.70);
+
+        \node[circle,fill,inner sep=1pt] at (3.25, .5) {};
+        \draw[-latex] (3.25, .5) to[out=-135, in=-45] (1.75, .5);
+
+
+        \node[circle,fill,inner sep=1pt] at (4.25, 1.75) {};
+        \draw[-latex, dotted] (4.25, 1.75) to[out=45, in=135, distance=.85cm] (3.75, 1.70);
+
+        \node[circle,fill,inner sep=1pt] at (6.25, .5) {};
+        \draw[-latex, dotted] (6.25, .5) to[out=-135, in=-45] (4.75, .5);
+
+        \node[circle,fill,inner sep=1pt] at (1.75, 1.5) {};
+        \draw[-latex, dotted] (1.75, 1.5) to[out=45, in=135] (3.25, 1.5);
+
+        
+        \node[circle,fill,inner sep=1pt] at (4.75, 1.5) {};
+        \draw[-latex, dashed] (4.75, 1.5) to[out=45, in=135] (6.25, 1.5);
+
+        \node[circle,fill,inner sep=1pt] at (7.25, 1.75) {};
+        \draw[-latex, dashed] (7.25, 1.75) to[out=45, in=135, distance=.85cm] (6.75, 1.70);
+    \end{tikzpicture}
+    \caption{Multiple identical reference are needed for a doubly linked list implementation}
+    \label{fig:doubly-linked-list-reference}
+\end{figure}
 
 When we append a cell to the list, we first search recursively through the list until we are at the end. The new cell is then set as \textit{right} of the current cell. A reference to the current self is created using the \textbf{copy} statement, and set as \textit{left} of the new end of the list, thus resulting on the new cell being linked to list and now acting as end of the list.
 
@@ -497,7 +533,7 @@ When we append a cell to the list, we first search recursively through the list 
     \label{fig:doubly-linked-list-cell-class-cont}
 \end{figure}
 
-The data structure could relatively easily be extended to work as a dynamic array. Currently each cell contains an \textit{index} field, specifying their in the list. If, say, we wanted to insert some new data at index $n$, without updating the existing value, but essentially squeezing in a new cell, we could add a method to the \textit{DoublyLinkedList} class taking a data value and an index. When executing this method, we could iterate the list until we reach the cell with index $n$, construct a new \textit{cell} instance, update required \textit{left} and \textit{right} pointers to insert the new cell at the correct position, in such a way that the old cell at index $n$ now is the new cell's right neighbour and finally recursively iterating the list, incrementing the index of cells to the right of the new cell by one. If we want to update an existing value at a index, a similar technique could be used, where we iterate through the cells until we find the correct index. If we're given an index that is out of bounds in terms of the current length of the list, we could extend the tail on the list until reach a cell with the wanted index. When we're zero-clearing a value that is the furthest index, the inverse would apply, and a such we would zero-clear the cell, and the deallocate cells until we reach a cell which does not have a zero-cleared \textit{data} field. 
+The data structure could relatively easily be extended to work as a dynamic array. Currently each cell contains an \textit{index} field, specifying their position in the list. If, say, we wanted to insert some new data at index $n$, without updating the existing value, but essentially squeezing in a new cell, we could add a method to the \textit{DoublyLinkedList} class taking a data value and an index. When executing this method, we could iterate the list until we reach the cell with index $n$, construct a new \textit{cell} instance, update required \textit{left} and \textit{right} pointers to insert the new cell at the correct position, in such a way that the old cell at index $n$ now is the new cell's right neighbour and finally recursively iterating the list, incrementing the index of cells to the right of the new cell by one. If we want to update an existing value at a index, a similar technique could be used, where we iterate through the cells until we find the correct index. If we are given an index that is out of bounds in terms of the current length of the list, we could extend the tail on the list until reach a cell with the wanted index. When we are zero-clearing a value that is the furthest index, the inverse would apply, and a such we would zero-clear the cell, and the deallocate cells until we reach a cell which does not have a zero-cleared \textit{data} field. 
 
 This extended doubly linked list would also allow lists of n-dimensional lists, as the type of the \textit{data} field simply could be changed to, say, a \textit{FooDoublyLinkedList}, resulting in an array of Foo arrays. 
 
@@ -505,7 +541,7 @@ This extended doubly linked list would also allow lists of n-dimensional lists, 
 \newpage
 \section{Type System}
 \label{sec:type-system}
-The type system of \rooplpp expands on the type system of \textsc{Roopl} presented by~\citeauthor{th:roopl} in~\cite{th:roopl} and is analogously described by syntax-directed inference typing rules in the style of ~\citeauthor{wi:semantics} in~\cite{wi:semantics}. As \rooplpp introduces two new types in form of \textit{references} and arrays, a few \textsc{Roopl} typing rules must be modified to accommodate these added types. For completeness all typing rules, including unmodified rules, are included in the following sections. 
+The type system of \rooplpp expands on the type system of \textsc{Roopl} presented by~\citeauthor{th:roopl}\cite{th:roopl} and is analogously described by syntax-directed inference typing rules in the style of ~\citeauthor{wi:semantics}\cite{wi:semantics}. As \rooplpp introduces two new types in form of \textit{references} and arrays, a few \textsc{Roopl} typing rules must be modified to accommodate these added types. For completeness all typing rules, including unmodified rules, are included in the following sections. 
 
 \subsection{Preliminaries}
 \label{subsec:preliminaries}
@@ -528,7 +564,7 @@ The binary subtype relation $c_1 \prec: c_2$ is required for supporting subtype 
     c_1 &\prec: c_3 &&\text{if}\ c_1 \prec: c_2\ \text{and}\ c_2 \prec: c_3\ (transitivity)
 \end{align*}
 
-Furthermore, we formally define object models, in such a way that inherited fields and methods are included, unless overridden by the derived fields. Therefore, we define $\Gamma$ to be the class map of a program $p$, such that $\Gamma$ is a finite map from class identifiers to tuples of methods and fields for the class $p$. Application of a class map $\Gamma$ to some class $cl$ is denoted as $\Gamma(cl)$. Construction of a class map is done through function $gen$, as shown in figure~\ref{fig:class-gen}. Figure~\ref{fig:fields-methods} defines the $fields$ and $methods$ functions to determine these given a class. Set operation $\uplus$ defines method overloading by dropping base class methods if a similarly named method exists in the derived class. The definitions shown in Figure~\ref{fig:class-gen} and~\ref{fig:fields-methods} are graciously borrowed from~\cite{th:roopl}.
+Furthermore, we formally define object models in such a way that inherited fields and methods are included, unless overridden by the derived fields. Therefore, we define $\Gamma$ to be the class map of a program $p$, such that $\Gamma$ is a finite map from class identifiers to tuples of methods and fields for the class $p$. Application of a class map $\Gamma$ to some class $cl$ is denoted as $\Gamma(cl)$. Construction of a class map is done through function $gen$, as shown in figure~\ref{fig:class-gen}. Figure~\ref{fig:fields-methods} defines the $fields$ and $methods$ functions to determine these given a class. Set operation $\uplus$ defines method overloading by dropping base class methods if a similarly named method exists in the derived class. The definitions shown in Figure~\ref{fig:class-gen} and~\ref{fig:fields-methods} are graciously borrowed from~\cite{th:roopl}.
  
 \begin{figure}[ht]
     \centering
@@ -647,9 +683,9 @@ With the addition of the \rooplpp array type, we extend the expression typing ru
 
 \begin{figure}[ht]
     \begin{center}
-        \AXC{$\Pi(x) = \tau'$}
+        \AXC{$\text{arrayType}(x) = \tau$}
         \AXC{$\Pi_{expr} \vdash\ e\ :\ \textbf{int}$}
-        \AXC{$\Pi(x) = \tau$}
+        \AXC{$\Pi(x[e]) = \tau$}
         \RL{\textsc{T-ArrElemVar}}
         \TIC{$\Pi \vdash_{expr}\ x[e] : \tau$} 
         \DP
@@ -1176,9 +1212,9 @@ defines the meaning of statements. We say that under environment $\gamma$ and ob
             \vskip 2em
             
             % Object Uncall
-            \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \text{call}\ x_0::q(x_1,\ ...,\ x_n)\ :\ \mu' \rightleftharpoons \mu$}
+            \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{call}\ x_0::q(x_1,\ ...,\ x_n)\ :\ \mu' \rightleftharpoons \mu$}
             \RL{\textsc{ObjUncall}}
-            \UIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \text{uncall}\ x_0::q(x_1,\ ...,\ x_n)\ :\ \mu \rightleftharpoons \mu'$}
+            \UIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{uncall}\ x_0::q(x_1,\ ...,\ x_n)\ :\ \mu \rightleftharpoons \mu'$}
             \DP
         \end{center}
         \caption{Semantic inference rules for statements, originally from~\cite{th:roopl} (cont)}
@@ -1241,11 +1277,9 @@ defines the meaning of statements. We say that under environment $\gamma$ and ob
             \vskip 2em
                 
             % Object delete
-            \AXC{$\mu\Big( \gamma(x) \Big) = r$}
-            \AXC{$\mu\Big( \gamma(r) \Big) = l'$}
-            \AXC{$\mu' = \mu\Big[l' \mapsto 0,\ r \mapsto 0 \Big]$}
+            \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{new}\ c\ x\ :\ \mu' \rightleftharpoons \mu$}
             \RL{\textsc{ObjDelete}}
-            \TIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{delete}\ c\ x\ :\ \mu \rightleftharpoons \mu' \setminus \{\gamma(x)\}$}
+            \UIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{delete}\ c\ x\ :\ \mu \rightleftharpoons \mu'$}
             \DP
 
             \vskip 2em
@@ -1270,15 +1304,15 @@ defines the meaning of statements. We say that under environment $\gamma$ and ob
             \vskip 2em
                 
             % Array delete
-            \AXC{$\langle \gamma, \mu \rangle \vdash^{\Gamma}_{stmt}\ e \Rightarrow v$}
-            \DP
-            \vskip 1em
-            \AXC{$\mu\Big( \gamma(x_s) \Big) = v$}
-            \AXC{$\mu\Big( \gamma(x) \Big) = r$}
-            \AXC{$\mu\Big( \gamma(r) \Big) = l'$}
-            \AXC{$\mu' = \mu\Big[l' \mapsto 0, r \mapsto 0, x_s \mapsto 0\Big]$}
+            % \AXC{$\langle \gamma, \mu \rangle \vdash^{\Gamma}_{stmt}\ e \Rightarrow v$}
+            % \DP
+            % \vskip 1em
+            % \AXC{$\mu\Big( \gamma(x_s) \Big) = v$}
+            % \AXC{$\mu\Big( \gamma(x) \Big) = r$}
+            % \AXC{$\mu\Big( \gamma(r) \Big) = l'$}
+            \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{new}\ a[e]\ x\ :\ \mu' \rightleftharpoons \mu$}
             \RL{\textsc{ArrDelete}}
-            \QIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{delete}\ a[e]\ x\ :\ \mu \rightleftharpoons \mu' \setminus \{\gamma(x)\}$}
+            \UIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{delete}\ a[e]\ x\ :\ \mu \rightleftharpoons \mu'$}
             \DP
         \end{center}  
         \caption{Extension to the semantic inference rules for statements in \rooplpp}
@@ -1292,16 +1326,15 @@ defines the meaning of statements. We say that under environment $\gamma$ and ob
             \AXC{$\mu\Big( \gamma(r) \Big) = l$}
             \AXC{$\mu\Big( \gamma(l) \Big) = \langle c, \gamma' \rangle$}
             \RL{\textsc{Copy}}
-            \TIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{copy}\ c\ x\ x'\ :\ \mu\leftrightharpoons \mu[x' \mapsto r]$} 
+            \TIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{copy}\ c\ x\ x'\ :\ \mu\leftrightharpoons \mu[\gamma(x') \mapsto r]$} 
             \DP
 
             \vskip 2em
             
             % Uncopy
-            \AXC{$\mu\Big( \gamma(x) \Big) = r$}
-            \AXC{$\mu\Big( \gamma(x') \Big) = r$}
+            \AXC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{copy}\ c\ x\ x'\ :\ \mu' \leftrightharpoons \mu$}
             \RL{\textsc{Uncopy}}
-            \BIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{uncopy}\ c\ x\ x'\ :\ \mu \setminus \{ \gamma(x')\}$}
+            \UIC{$\langle l, \gamma \rangle \vdash^{\Gamma}_{stmt}\ \textbf{uncopy}\ c\ x\ x'\ :\ \mu \rightleftharpoons \mu'$}
             \DP
 
             \vskip 2em
