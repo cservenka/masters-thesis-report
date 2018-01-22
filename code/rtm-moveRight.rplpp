@@ -3,6 +3,7 @@ method moveRight(int symbol, Cell tapeHead)
     local Cell tmp = nil
     uncall tapeHead::getSymbol(symbol)   // Put symbol back in current cell
     call tapeHead::getRight(right)       // Get right neighbour
+
     if right = nil && symbol = BLANK then
         symbol ^= BLANK                  // Zero clear symbol
         new Cell right                   // Init new neighbour
@@ -13,6 +14,15 @@ method moveRight(int symbol, Cell tapeHead)
     else          
         call right::getLeft(tmp)         // Get copy of tape head reference
         uncopy Cell tmp tapeHead         // Clear reference to tape head
+
+        if tapeHead = nil && symbol = BLANK 
+            call tmp::getSelf(tapeHead) // rev: set self pointer
+            uncopy Cell tmp tapeHead    // rev: new self pointer
+            delete Cell tmp             // rev: new left neighbour
+            symbol ^= BLANK             
+        else skip                       // In reverse:
+        fi tmp = nil                    // Allocate new left if current is nil
+
         uncall right::getLeft(tmp)       // Put tape head reference back
         tapeHead <=> right
         call tapeHead::getRight(right)   // Get right of new tape head

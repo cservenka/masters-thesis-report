@@ -1,10 +1,10 @@
 \chapter{Compilation}
 \label{chp:compilation}
-The following chapter presents the considerations and translation schemas used in the process of translating \rooplpp to the reversible low-level machine language \textsc{Pisa}. As \rooplpp is a continuation of \textsc{Roopl}, many techniques are carried directly over and have a such been left out.
+The following chapter presents the considerations and translation schemas used in the process of translating \rooplpp to the reversible low-level machine language \textsc{Pisa}. As \rooplpp is an extension of \textsc{Roopl}, many techniques are carried directly over and have as such been left out.
 
 Before presenting the \rooplpp compiler, a brief overview of the memory layout and modeling of the \textsc{Roopl} compiler, which the \rooplpp compiler is a continuation of, is provided. 
 
-\section{The \textsc{Roopl} to \textsc{Pisa} compiler}
+\section{The \textsc{Roopl} to \textsc{Pisa} Compiler}
 \label{sec:roopl-to-pisa-compiler}
 \citeauthor{th:roopl} presented a proof-of-concept compiler along with the design for \textsc{Roopl}. The compiler translates well-typed \textsc{Roopl} programs into the reversible machine language \textsc{Pisa} in~\cite{th:roopl}. The \textsc{Roopl} compiler (\textsc{RooplC}) is written in \textsc{Haskell} and hosted at \url{https://github.com/TueHaulund/ROOPLC}.
 
@@ -117,7 +117,7 @@ The object model is simple and only features one additional word for storing the
 
 \section{\rooplpp Memory Layout}
 \label{sec:rooplpp-memory-layout}
-\rooplpp builds upon its predecessor's memory layout with dynamic memory management. The reversible Buddy Memory heap layout presented in section~\ref{subsec:buddy-memory} is utilized in \rooplpp as it is an interesting layout, naturally translates into a reversible setting with one simple restriction (i.e only blocks which are heads of their respectable free lists are allocatable) and since its only drawback is dismissible in most real world scenarios.
+\rooplpp builds upon its predecessor's memory layout with dynamic memory management. The reversible Buddy Memory heap layout presented in section~\ref{subsec:buddy-memory} is utilized in \rooplpp as it is an interesting layout, addressing a number of disadvantages found in other considered layouts, naturally translates into a reversible setting with one simple restriction (i.e only blocks which are heads of their respectable free lists are allocatable) and since its only drawback is dismissible in most real world scenarios.
 
 \begin{figure}[ht]
     \centering
@@ -163,31 +163,31 @@ Figure~\ref{fig:memory-layout} shows the full layout of a \rooplpp program store
 \begin{itemize}
     \item As with \textsc{Roopl}, the static storage segment contains load-time labelled \inst{data} instructions, initialized with virtual function tables and other static data needed by the translated program.
 
-    \item The program segment is stored right after the static storage and contains the translate \rooplpp program instructions.
+    \item The program segment is stored right after the static storage and contains the translated \rooplpp program instructions.
 
-    \item The free lists maintained by the Buddy Memory heap layout is placed right after the program segment, with the \textit{free list pointer} $flp$ pointing at the first free list. The free lists are simple the address to the first block of its respective size. The free lists are stores such that the free list at address $flp + i$ corresponds to the free list of size $2^{i+1}$.   
+    \item The free lists maintained by the Buddy Memory heap layout is placed right after the program segment, with the \textit{free list pointer} $flp$ pointing at the first free list. The free lists are simply the address pointing to the first block of its respective size. The free lists are stored such that the free list at address $flp + i$ corresponds to the free list of size $2^{i+1}$.   
 
     \item The heap begins directly following the free lists. Its beginning is marked by the \textit{heap pointer} $(hp)$. 
 
-    \item Unlike in \textsc{Roopl}, where the stack grows upwards, the \rooplpp stack grows downwards and is begins at address $p$. The stack remains a LIFO structure, analogously to \textsc{Roopl}.
+    \item Unlike in \textsc{Roopl}, where the stack grows upwards, the \rooplpp stack grows downwards and begins at address $p$. The stack remains a LIFO structure, analogously to \textsc{Roopl}.
 \end{itemize}
 
-As mentioned in the previous chapter, we assume an underlying reversible operating system providing us with additional memory when needed. With no real way of simulating this, the \rooplpp compiler places the stack at a fixed address $p$ and sets one free block in the largest $2^n$ free list initially. The number of free lists and the address $p$ is configurable in the source code, but is defaulted to $10$ free lists, meaning initially one block of size $1024$ is available and the stack is placed at address $2048$.
+As mentioned in the previous chapter, we assume an underlying reversible operating system providing us with additional memory when needed. With no real way of simulating this, the \rooplpp compiler places the stack at a fixed address $p$ and sets one free block in the largest $2^n$ free list initially. The number of free lists and the address $p$ is configurable in the source code, but defaults to $10$ free lists, meaning initially one block of size $1024$ is available and the stack is placed at address $1024$ words after the heap.
 
 In traditional compilers, the heap pointer usually points to the end of the heap. For reasons stated above, we never grow the heap as we start with a heap of fixed size. As such, the heap pointer simply points to the beginning of the heap.
 
-The heap can simply be expanded by added another block of largest possible size and adding the address to the respective free list.
+The heap can simply be expanded by adding another block of the largest possible size and storing the address of the respective free list.
 
 
 \section{Inherited \textsc{Roopl} features}
 \label{sec:inherited-features}
-As mentioned, a number of features from \textsc{Roopl} carries over in \rooplpp.
+As mentioned, a number of features from \textsc{Roopl} carries over to \rooplpp.
 
 The dynamic dispatching mechanism presented in~\cite{th:roopl} is inherited. As such, the invocation of a method implementation is based on the type of the object at run time. Virtual function tables are still the implementation strategy used in the dynamic dispatching implementation.
 
 Evaluation of expressions and control flow remains unchanged. 
 
-For completeness, object blocks are included and still stack allocated as their life time is limited to the scope of their block and the dynamic allocation process is quite expensive in terms of register pressure and number of instructions compared to the stack allocated method presented implemented in the \textsc{Roopl} compiler.
+For completeness, object blocks are included and still stack allocated as their life time is limited to the scope of their block and the dynamic allocation process is quite expensive in terms of register pressure and number of instructions compared to the stack allocated method implemented in the \textsc{Roopl} compiler.
 
 
 \section{Program Structure}
@@ -237,25 +237,25 @@ The program structure of a translated \rooplpp is analogous to the program struc
     \label{fig:pisa-program-layout}
 \end{figure}
 
-This \textsc{Pisa} code block initializes the free lists pointer, the heap pointer, the stack pointer, allocates the main object on the stack, calls the main method, deallocates the main object and finally clears the free lists, heap and stack pointers.
+The following \textsc{Pisa} code block initializes the free lists pointer, the heap pointer, the stack pointer, allocates the main object on the stack, calls the main method, deallocates the main object and finally clears the free lists, heap and stack pointers.
 
 The free lists pointer is initialized by adding the base address, which varies with the size of the translated program, to the register $r_{flps}$. In figure~\ref{fig:pisa-program-layout} the base address is denoted by $p$.
 
-The heap pointer is initialized directly after the free lists pointer by adding the size of the free lists. One free lists is the size of one word and the full size of the free lists is configured in the source code (defaulted to 10, as described earlier).
+The heap pointer is initialized directly after the free lists pointer by adding the size of the free lists. One free list is the size of one word and the full size of the free lists is configured in the source code (defaulted to 10, as described earlier).
 
-Once the heap pointer and free lists pointer is initialized, the initial block of free memory is placed in the largest free lists by indexing to said list, by adding the length of the list of free lists, subtracting 1, writing the address of the first block (which is the same address as the heap pointer, which points to the beginning of the heap) to the last free list and then resetting the free lists pointer to point to the 1st list again, afterwards.
+Once the heap pointer and free lists pointer is initialized, the initial block of free memory is placed in the largest free lists by indexing to said list, by adding the length of the list of free lists, subtracting 1, writing the address of the first block (which is the same address as the heap pointer, which points to the beginning of the heap) to the last free list and then resetting the free lists pointer to point to the first list again, afterwards.
 
-The stack pointer is initialized simply by adding the stack offset to the heap pointer register $r_{hp}$. The stack offset is configured in the source code and defaults to $2048$, as described earlier in this chapter. As such, the heap and the stack each have $1024$ words of space to utilize. Once the stack pointer has been initialized, the main object is allocated on the stack and the main method called, analogously to the \textsc{Roopl} program structure.
+The stack pointer is initialized simply by adding the stack offset to the heap pointer register $r_{hp}$. The stack offset is configured in the source code and defaults to $1024$, as described earlier in this chapter. As such, the heap and the stack each have $1024$ words of space to utilize. Once the stack pointer has been initialized, the main object is allocated on the stack and the main method called, analogously to the \textsc{Roopl} program structure.
 
 When the program terminates and the main method returns, the main object is popped from the stack and deallocated and the stack pointer is cleared. The heap pointer is then cleared followed by the free lists pointer. The contents of the free lists and whatever is left on the heap is untouched at this point. It is the programmers responsibility to free dynamically allocated objects in their \rooplpp program. Furthermore, depending on the deallocation order, we might not end up with exactly one fully merged block in the end and as such, we do not invert the steps taken to initialize this initial free memory block.
-Analogously to \textsc{Roopl}, the values of the main object are left in stack section of memory.
+Analogously to \textsc{Roopl}, the values of the main object are left in the stack section of memory.
 
 
 \section{Buddy Memory Translation}
 \label{sec:buddy-memory-translation}
-As briefly mentioned, the buddy memory layout was selected as the memory manager layout as it addressed a number of problems related to fragmentation and initialization. The buddy memory layout could be converted to a reversible section with only a few restrictions and side effects, which will be described in this section. Firstly, we present the algorithm translated to \textsc{Pisa}. As the algorithm is quite lengthy, it will be broken down into smaller chunks. The full translation is shown in a more readable version in appendix~\ref{app:pisa-translated-buddy-memory}.
+As briefly mentioned in section~\ref{sec:rooplpp-memory-layout}, the Buddy Memory layout was selected as the memory manager layout as it addressed a number of problems related to fragmentation and initialization. The Buddy Memory layout could be converted to a reversible section with only a few restrictions and side effects, which will be described in this section. Firstly, we present the algorithm translated to \textsc{Pisa}. As the algorithm is quite lengthy, it will be broken down into smaller chunks. The full translation is shown in appendix~\ref{app:pisa-translated-buddy-memory}.
 
-The buddy memory algorithm consists of three \textsc{Janus} procedures; the entry point \textbf{malloc}, the recursion body \textbf{malloc1} and a helper function \textbf{double}. The entry point is omitted for now, as it differs depending on which type of memory object we are allocating and will be presented in sections~\ref{sec:object-allocation-deallocation} and~\ref{subsec:construction-destruction}. The helper function can be implemented using a single instruction in \textsc{Pisa} for our specific case of doubling number in the power-of-two, which we will show later. 
+The Buddy Memory algorithm consists of three \textsc{Janus} procedures; the entry point \textbf{malloc}, the recursion body \textbf{malloc1} and a helper function \textbf{double}. The entry point is omitted for now, as it differs depending on which type of memory object we are allocating and will be presented in sections~\ref{sec:object-allocation-deallocation} and~\ref{subsec:construction-destruction}. The helper function can be implemented using a single instruction in \textsc{Pisa} for our specific case of doubling number in the power-of-two, which we will show later. 
 
 \begin{figure}[ht]
     \centering
@@ -277,7 +277,7 @@ The buddy memory algorithm consists of three \textsc{Janus} procedures; the entr
     \label{fig:buddy-allocation-entry}
 \end{figure}
 
-Before we go into depth with the translation of the algorithm, we consider the mechanism for triggering the allocation mechanisms. Naively, we could generate the entire block of code required for allocation for every \textbf{new} or \textbf{delete} statement in the target program. This approach would severely limit the amounts of objects we can allocate as the register pressure of the buddy memory implementation is quite high, as will seen in this section. Instead, we can utilize the dynamic dispatching mechanisms, which also is used for method calling. This way, we only generate the allocation instructions once, and then simply jump to the entry point from different locations in the program. Figure~\ref{fig:buddy-allocation-entry} outlines the structure for this approach. By using the \inst{swapbr} instruction we can jump from multiple points of origin in the compiled program and recursively for the algorithm's own recursive needs.  
+Before we go into depth with the translation of the algorithm, we consider the mechanism for triggering allocation subroutine. Naively, we could generate the entire block of code required for allocation for every \textbf{new} or \textbf{delete} statement in the target program. This approach would severely limit the amount of objects we could allocate as the register pressure of the Buddy Memory implementation is quite high, as we be shown in this section. Instead, we can utilize the  dynamic dispatching technique, which also is used for method invocations. This way, we only generate the allocation instructions once, and then simply jump to the entry point from different locations in the program. Figure~\ref{fig:buddy-allocation-entry} outlines the structure for this approach. By using the \inst{swapbr} instruction we can jump from multiple points of origin in the compiled program and recursively for the algorithm's own recursive needs.  
 
 \begin{figure}[ht]
     \centering
@@ -291,8 +291,8 @@ Before we go into depth with the translation of the algorithm, we consider the m
         \resizebox{0.9\linewidth}{!}{
         \begin{minipage}{\linewidth}
             \begin{alignat*}{7}
-                &\textbf{(7)}\quad&& &&\cdots\cdots && && && &&\text{; Code for $r_{fl}\ \leftarrow\ addr(freelists[counter])$}\\
-                &\textbf{(8)}\quad&& &&\cdots\cdots && && && &&\text{; Code for $r_{block}\ \leftarrow\ \llbracket freelists[counter] \rrbracket$}\\
+                &\textbf{(7)}\quad&& &&\cdots\cdots && && && &&\text{; Code for $r_{fl}\ \leftarrow\ addr(fl[c])$}\\
+                &\textbf{(8)}\quad&& &&\cdots\cdots && && && &&\text{; Code for $r_{block}\ \leftarrow\ \llbracket fl[c] \rrbracket$}\\
                 &\textbf{(9)}\quad&& &&\cdots\cdots && && && &&\text{; Code for $r_{e1_o}\ \leftarrow\ \llbracket c_{size} < object_{size} \rrbracket$}\\
                 &\textbf{(10)}\quad&& &&\inst{xor}\quad &&r_t && r_{e1_o} && &&\text{; Copy value of $c_{size} < object_{size}$ into $r_t$}\\        
                 &\textbf{(11)}\quad&& &&\cdots\cdots && && && &&\text{; Inverse of \textbf{(9)}}\\ 
@@ -302,7 +302,7 @@ Before we go into depth with the translation of the algorithm, we consider the m
                 &\textbf{(22)}\quad&& &&\inst{xori} &&r_t && 1 && && \text{; Set $r_t = 1$}\\
                 &\textbf{(23)}\quad&&o_{assert_t}\ \texttt{:}\quad &&\inst{bra} &&o_{assert} \span\omit\span\quad \span\omit\span\quad && \text{; Jump}\\
                 &\textbf{(24)}\quad&&o_{test_f}\ \texttt{:}\quad &&\inst{bra} &&o_{test} \span\omit\span\quad \span\omit\span\quad && \text{; Receive jump}\\
-                &\textbf{(25)}\quad&& &&\cdots\cdots && && && &&\text{; Code for $r_{e1_i}\ \leftarrow\ \llbracket addr(freelists[counter]) \neq 0 \rrbracket$}\\
+                &\textbf{(25)}\quad&& &&\cdots\cdots && && && &&\text{; Code for $r_{e1_i}\ \leftarrow\ \llbracket addr(fl[c]) \neq 0 \rrbracket$}\\
                 &\textbf{(26)}\quad&& &&\inst{xor}\quad &&r_{t2} && r_{e1_i} && &&\text{; Copy value of $r_{e1_i}$ into $r_{t2}$}\\        
                 &\textbf{(27)}\quad&& &&\cdots\cdots && && && &&\text{; Inverse of \textbf{(25)}}\\
                 &\textbf{(28)}\quad&&i_{test}\ \texttt{:}\quad &&\inst{beq} &&r_{t2} && r_0 && i_{test_f} && \text{; Receive jump}\\
@@ -315,9 +315,9 @@ Before we go into depth with the translation of the algorithm, we consider the m
                 &\textbf{(48)}\quad&&i_{assert}\ \texttt{:}\quad &&\inst{bne} &&r_{t2} && r_0 && i_{assert_t} && \text{; Receive jump}\\
                 &\textbf{(49)}\quad&& &&\inst{exch} &&r_{tmp} && r_{fl} && && \text{; Load address of head of current free list}\\
                 &\textbf{(50)}\quad&& &&\inst{sub} &&r_{p} && r_{cs} && && \text{; Set p to previous block address}\\
-                &\textbf{(51)}\quad&& &&\cdots\cdots && && && &&\text{; Code for $r_{e2_{i1}}\ \leftarrow\ \llbracket p - c_{size} \neq addr(freelists[counter])\rrbracket$}\\
-                &\textbf{(52)}\quad&& &&\cdots\cdots && && && &&\text{; Code for $r_{e2_{i2}}\ \leftarrow\ \llbracket addr(freelists[counter]) = 0 \rrbracket$}\\
-                &\textbf{(53)}\quad&& &&\cdots\cdots && && && &&\text{; Code for $r_{e2_{i3}}\ \leftarrow\ \llbracket (p - c_{size} \neq addr(freelists[counter])) \vee (addr(freelists[counter]) = 0) \rrbracket$}\\
+                &\textbf{(51)}\quad&& &&\cdots\cdots && && && &&\text{; $r_{e2_{i1}}\ \leftarrow\ \llbracket p - c_{size} \neq addr(fl[c])\rrbracket$}\\
+                &\textbf{(52)}\quad&& &&\cdots\cdots && && && &&\text{; $r_{e2_{i2}}\ \leftarrow\ \llbracket addr(fl[c]) = 0 \rrbracket$}\\
+                &\textbf{(53)}\quad&& &&\cdots\cdots && && && &&\text{; $r_{e2_{i3}}\ \leftarrow\ \llbracket (p - c_{size} \neq addr(fl[c])) \vee (addr(fl[c]) = 0) \rrbracket$}\\
                 &\textbf{(54)}\quad&& &&\inst{xor} &&r_{r2} && r_{e2_{i3}} && && \text{; Copy value of $r_{e2_{i3}}$ into $r_{t2}$}\\
                 &\textbf{(55)}\quad&& &&\cdots\cdots && && && &&\text{; Inverse of \textbf{(53)}}\\
                 &\textbf{(56)}\quad&& &&\cdots\cdots && && && &&\text{; Inverse of \textbf{(52)}}\\
@@ -332,17 +332,17 @@ Before we go into depth with the translation of the algorithm, we consider the m
         \end{minipage}
     }
     \end{subfigure}
-    \caption{\textsc{Pisa} translation of the nested conditionals in the buddy memory algorithm}
+    \caption{\textsc{Pisa} translation of the nested conditionals in the Buddy Memory algorithm}
     \label{fig:pisa-buddy-conditionals}
 \end{figure}
 
-The main recursion body of the algorithm, \textbf{malloc1} from listing~\pageref{lst:buddy-memory}, page~\ref{lst:buddy-memory} consists of two conditionals, in which one is nested in the else branch of the outer conditional. Figure~\ref{fig:pisa-buddy-conditionals} shows the translation structure of the nested conditional pair, using the translation techniques for conditionals presented in~\cite{ha:translation}.
+The main recursion body of the algorithm, \textbf{malloc1} from listing~\ref{lst:buddy-memory}, page~\pageref{lst:buddy-memory} consists of two conditionals, in which one is nested in the else branch of the outer conditional. Figure~\ref{fig:pisa-buddy-conditionals} shows the translation structure of the nested conditional pair, using the translation techniques for conditionals presented in~\cite{ha:translation}.
 
-The nested conditionals contains large amounts of boilerplate code for evaluating the various expressions of the conditionals. As these conditionals requires comparisons with contents of the free lists, we must be careful with extracting and storing the values in the free list. 
+The nested conditionals contain large amounts of boilerplate code for evaluating the various expressions of the conditionals. As these conditionals requires comparisons with contents of the free lists, we must be careful with extracting and storing the values in the free list. 
 
 We have three statements to translate from here. The outer \textbf{if-then} statement, the inner \textbf{if-then} statement and the inner \textbf{else} statement. 
 
-\begin{figure}[ht]
+\begin{figure}[ht!]
     \centering
     \begin{subfigure}{.4\textwidth}
         \lstinputlisting[language=janus, style=basic, frame=none]{buddy-memory-outer-if.ja}  
@@ -364,11 +364,11 @@ We have three statements to translate from here. The outer \textbf{if-then} stat
         \end{minipage}
         }
     \end{subfigure}
-    \caption{\textsc{Pisa} translation of the outer \textbf{if-then} statement for the buddy memory algorithm}
+    \caption{\textsc{Pisa} translation of the outer \textbf{if-then} statement for the Buddy Memory algorithm}
     \label{fig:pisa-buddy-outer-if}
 \end{figure}
 
-Figure~\ref{fig:pisa-buddy-outer-if} shows the translation of the outer \textbf{if-then} statement. As briefly mentioned, we can utilize \textsc{Pisa}'s right bit shift instruction, \inst{RL}, in place of the \textbf{double} helper procedure from the \textsc{Janus} implementation. By using a simple bit shift, we are maintain reversibility elegantly when doubling or halving numbers in the power-of-two. This statement also contains one of the careful storage operations of the free list values, in instruction \textbf{(16)}. Before we recursively branch to the entry point, we must place the previously extracted address of the head of the free list back into the free list. This is also the reason for instruction \textbf{(3)} in figure~\ref{fig:buddy-allocation-entry}. Furthermore, we must all temporary evaluated expression values to the stack, so they can be popped when we return.   
+Figure~\ref{fig:pisa-buddy-outer-if} shows the translation of the outer \textbf{if-then} statement. As briefly mentioned, we can utilize \textsc{Pisa}'s right bit shift instruction, \inst{RL}, in place of the \textbf{double} helper procedure from the \textsc{Janus} implementation. By using a simple bit shift, we are able to maintain reversibility elegantly when doubling or halving numbers in the power-of-two. This statement also contains one of the careful storage operations of the free list values, in instruction \textbf{(16)}. Before we recursively branch to the entry point, we must place the previously extracted address of the head of the free list back into the free list. This is also the reason for instruction \textbf{(3)} in figure~\ref{fig:buddy-allocation-entry}. Furthermore, we must push all temporary evaluated expression values to the stack, so they can be popped when we return.   
 
 \begin{figure}[ht]
     \centering
@@ -389,7 +389,7 @@ Figure~\ref{fig:pisa-buddy-outer-if} shows the translation of the outer \textbf{
         \end{minipage}
         }
     \end{subfigure}
-    \caption{\textsc{Pisa} translation of the inner \textbf{if-then} statement for the buddy memory algorithm}
+    \caption{\textsc{Pisa} translation of the inner \textbf{if-then} statement for the Buddy Memory algorithm}
     \label{fig:pisa-buddy-inner-if}
 \end{figure}
 
@@ -400,32 +400,32 @@ Figure~\ref{fig:pisa-buddy-inner-if} shows the translation of the inner \textbf{
     \begin{subfigure}{.4\textwidth}
         \lstinputlisting[language=janus, style=basic, frame=none]{buddy-memory-inner-else.ja}  
     \end{subfigure}%
-    \begin{subfigure}{.6\textwidth}
+    \begin{subfigure}{.5\textwidth}
         \centering
         \resizebox{\linewidth}{!}{
         \begin{minipage}{\linewidth}
             \begin{alignat*}{7}
                 &\textbf{(38)}\quad&& &&\inst{addi} &&r_{c} && 1 && && \text{; $Counter\texttt{++}$}\\
                 &\textbf{(39)}\quad&& &&\inst{rl} &&r_{sc}\ && 1 && && \text{; Call $double(c_{size}$)}\\
-                &\textbf{(40)}\quad&& &&\cdots\cdots && && && &&\text{; Code for pushing temp reg values to stack}\\
+                &\textbf{(40)}\quad&& &&\cdots\cdots && && && &&\text{; Push temp reg values to stack}\\
                 &\textbf{(41)}\quad&& &&\inst{bra}\quad &&malloc1_{entry} \span\omit\span\quad \span\omit\span\quad && \text{; Call $malloc1()$)}\\
                 &\textbf{(42)}\quad&& &&\cdots\cdots && && && &&\text{; Inverse of \textbf{(40)}}\\
                 &\textbf{(43)}\quad&& &&\inst{rr} &&r_{sc}\ && 1 && && \text{; Inverse of \textbf{(39)}}\\
                 &\textbf{(44)}\quad&& &&\inst{subi} &&r_{c} && 1 && && \text{; Inverse of \textbf{(38)}}\\
-                &\textbf{(45)}\quad&& &&\inst{xor} &&r_{tmp} && r_p && && \text{; Copy current address of p}\\
-                &\textbf{(46)}\quad&& &&\inst{exch} &&r_{tmp} && r_{fl} && && \text{; Store current address of p in current free list}\\
-                &\textbf{(47)}\quad&& &&\inst{add} &&r_{p} && r_{cs} && && \text{; Split block by setting p to second half of current block}\\
+                &\textbf{(45)}\quad&& &&\inst{xor} &&r_{tmp} && r_p && && \text{; Copy current address of $p$}\\
+                &\textbf{(46)}\quad&& &&\inst{exch} &&r_{tmp} && r_{fl} && && \text{; Store address of $p$ in free list}\\
+                &\textbf{(47)}\quad&& &&\inst{add} &&r_{p} && r_{cs} && && \text{; Split block by $p$ = other half of block}\\
             \end{alignat*}
         \end{minipage}
         }
     \end{subfigure}
-    \caption{\textsc{Pisa} translation of the inner \textbf{else} statement for the buddy memory algorithm}
+    \caption{\textsc{Pisa} translation of the inner \textbf{else} statement for the Buddy Memory algorithm}
     \label{fig:pisa-buddy-inner-else}
 \end{figure}
 
-The last statement translation is the inner \textbf{else} statement shown in figure~\ref{fig:pisa-buddy-inner-else}. This statement is almost identical to the outer \textbf{if-then} with the addition of the block splitting code. The block splitting is done in three steps. First, the current block we are examining is set as the new head of the current free list. Afterwards the current free list block size is added to out pointer $p$, resulting in an effectively split block.
+The last statement translation is the inner \textbf{else} statement shown in figure~\ref{fig:pisa-buddy-inner-else}. This statement is almost identical to the outer \textbf{if-then} with the addition of the block splitting code. The block splitting is done in three instructions. First, the current block we are examining is set as the new head of the current free list. Afterwards the current free list block size is added to out pointer $p$, resulting in an effectively split block.
 
-During the design of the reversible buddy memory algorithm a number of simplifications and limitations was required to ensure reversibility. Firstly, we only allow allocation from the head of a free list. This restriction ensures reversibility as we always can add a new head to a list, but not to the exact point in the linked list, where the block originally came from. Furthermore, we round all class sizes to the power-of-two. This simplifies the process of finding the right free list to allocate from, as the sizes we are comparing with always is of a power-of-two. The effects of these choices differs in severity. The latter, results in increased amounts of internal fragmentation, as discussed in the previous chapter. The former, however, prevents us from returning to one final block of free memory, if the deallocation order is not exactly opposite of the allocation order.
+During the design of the reversible Buddy Memory algorithm a number of simplifications and limitations were required to ensure reversibility. Firstly, we only allow allocation from the head of a free list. This restriction ensures reversibility as we always can add a new head to a list, but not to the exact point in the linked list, where the block originally came from. Furthermore, we round all class sizes up to the power-of-two. This simplifies the process of finding the right free list to allocate from, as the sizes we are comparing with always is of a power-of-two. The effects of these choices differ in severity. The latter, results in increased amounts of internal fragmentation, as discussed in the previous chapter. The former, however, prevents us from returning to one final block of free memory, if the deallocation order is not exactly opposite of the allocation order.
 
 \begin{figure}[ht]
     \centering
@@ -612,18 +612,18 @@ During the design of the reversible buddy memory algorithm a number of simplific
         \end{tikzpicture}
         \caption{\footnotesize Deallocate the object of size $2^3$, then the object of $2^2$}
     \end{subfigure}%
-    \caption{Non-oppsite deallocation results in a different free list after termination}
+    \caption{Non-opposite deallocation results in a different free list after termination}
     \label{fig:deallocation-order-free-list}
 \end{figure}
 
-Figure~\ref{fig:deallocation-order-free-list} shows how alternative deallocation orders results in different free lists, compared to the original given to some function. However, as discussed in the section~\ref{sec:memory-garbage}, we can consider every collection of buddy memory free lists equivalent, as a later computation can take another set of free lists and still execute its function, as long as the free lists have the required blocks available.
+Figure~\ref{fig:deallocation-order-free-list} shows how alternative deallocation orders results in different free lists, compared to the original given to some function. However, as discussed in section~\ref{sec:memory-garbage}, we can consider every collection of Buddy Memory free lists equivalent, as a later computation can take another set of free lists and still execute its function, as long as the free lists have the required blocks available.
 
 
 \section{Object Allocation and Deallocation}
 \label{sec:object-allocation-deallocation}
 Now that we have the main allocation mechanism in place and a method of accessing it through a label and a \inst{swapbr} instruction, we can continue translating the \textbf{malloc} procedure entry point from listing~\ref{lst:buddy-memory} on page~\pageref{lst:buddy-memory}.
 
-\begin{figure}[ht]
+\begin{figure}[ht!]
     \centering
     \begin{subfigure}{.4\textwidth}
         \lstinputlisting[language=janus, style=basic, frame=none]{buddy-memory-malloc.ja}  
@@ -650,13 +650,13 @@ Now that we have the main allocation mechanism in place and a method of accessin
         \end{minipage}
         }
     \end{subfigure}
-    \caption{\textsc{Pisa} translation of the \textbf{malloc} procedure entry point of buddy memory algorithm}
+    \caption{\textsc{Pisa} translation of the \textbf{malloc} procedure entry point of Buddy Memory algorithm}
     \label{fig:pisa-buddy-malloc-entry}
 \end{figure}
 
-Figure~\ref{fig:pisa-buddy-malloc-entry} shows the translated \textbf{malloc} procedure. In addition to the original procedure, we also push the current return offset register value to the stack before we branch to the \textbf{malloc1} implementation, to ensure we have a zero-cleared register before starting the allocating process. The translated procedure assumes that the pointer to the object we are allocating and its size are on top of the stack before entering the block. This translates procedure serves as the entry point for the allocation subroutine as is also only generated once. Each \textbf{new} and \textbf{delete} statement branches to the $l_{malloc}$ label to begin an allocation or a deallocation.  
+Figure~\ref{fig:pisa-buddy-malloc-entry} shows the translated \textbf{malloc} procedure. In addition to the original procedure, we also push the current return offset register value to the stack before we branch to the \textbf{malloc1} implementation, to ensure we have a zero-cleared register before starting the allocation process. The translated procedure assumes that the pointer to the object we are allocating and its size are on top of the stack before entering the block. This translated procedure serves as the entry point for the allocation subroutine as it is also only generated once. Each \textbf{new} and \textbf{delete} statement branches to the $l_{malloc}$ label to begin an allocation or a deallocation.  
 
-\begin{figure}[ht]
+\begin{figure}[ht!]
     \centering
     \begin{subfigure}[t]{0.495\linewidth}
         \vskip 0pt
@@ -723,16 +723,17 @@ Figure~\ref{fig:pisa-buddy-malloc-entry} shows the translated \textbf{malloc} pr
     \label{fig:pisa-allocation-deallocation}
 \end{figure}
 
-Figure~\ref{fig:pisa-allocation-deallocation} shows how each \textbf{new} and \textbf{delete} statement for objects are translated during compilation. They are simply each others inverse. For allocation, the object pointer and its size are pushed to the stack and then a jump to the malloc entry point is executed. After allocation, the virtual table and reference count are stored in the first two words of the allocated memory. Note how deallocation jumps and flips the direction of execution using the \inst{rbra} instruction, which then runs the allocation process in reverse. In the figure $x_{size}$ denotes the computed size of objects with class $c$, plus two, to account for the virtual table and reference count space, rounded up to nearest power-of-two.
+Figure~\ref{fig:pisa-allocation-deallocation} shows how each \textbf{new} and \textbf{delete} statement for objects are translated during compilation. They are simply each others inverse. For allocation, the object pointer and its size are pushed to the stack and then a jump to the malloc entry point is executed. After allocation, the virtual table and reference count are stored in the first two words of the allocated memory. Note how deallocation jumps and flips the direction of execution using the \inst{rbra} instruction, which then runs the allocation process in reverse. In the figure $x_{size}$ denotes the computed size of objects with class $c$, plus two, to account for the virtual table pointer and reference count space, rounded up to nearest power-of-two.
 
 
 \section{Referencing}
 \label{sec:referencing-compilation}
-As mentioned, one of the main strengths of \rooplpp in terms of increased expressiveness is allowance of multiple reference to objects and arrays. When an object or array is constructed we allocate enough space to hold an additional \textit{reference counter} which is initialized to $1$, when the object is created. For each reference copied using the \textbf{copy}-statement, we incrementally increase the reference counter by $1$. When we \textbf{uncopy} a reference, the reference counter is decreased. The object or array cannot be deconstructed until its reference counter is returned to $1$ as we would have reference pointer to cleared memory in the heap. Such references are known as dangling pointers.
+As mentioned, one of the main strengths of \rooplpp in terms of increased expressiveness is allowance of multiple references to objects and arrays. When an object or array is constructed we allocate enough space to hold an additional \textit{reference counter} which is initialized to $1$. For each reference copied using the \textbf{copy}-statement, we incrementally increase the reference counter by $1$. When we \textbf{uncopy} a reference, the reference counter is decreased. The object or array cannot be deconstructed until its reference counter has been returned to $1$ as we would have a reference pointer to cleared memory in the heap. Such references are known as dangling pointers.
 
 \begin{figure}[ht]
     \centering
-    \begin{subfigure}[ht]{.32\textwidth}
+    \begin{subfigure}[t]{.32\textwidth}
+        \vspace{0pt}
         \vskip 0pt
         \centering
         \begin{tikzpicture}
@@ -755,7 +756,8 @@ As mentioned, one of the main strengths of \rooplpp in terms of increased expres
             \node at (1.5, 2.5) {\textbf{Shape}};
         \end{tikzpicture}
     \end{subfigure}
-    \begin{subfigure}[ht]{.32\textwidth}
+    \begin{subfigure}[t]{.32\textwidth}
+        \vspace{0pt}
         \vskip 0pt
         \centering
         \begin{tikzpicture}
@@ -780,7 +782,8 @@ As mentioned, one of the main strengths of \rooplpp in terms of increased expres
             \node at (1.5, 2.5) {\textbf{Circle}};
         \end{tikzpicture}
     \end{subfigure}
-    \begin{subfigure}[ht]{.32\textwidth}
+    \begin{subfigure}[t]{.32\textwidth}
+        \vspace{0pt}
         \vskip 0pt
         \centering
         \begin{tikzpicture}
@@ -869,12 +872,12 @@ Figure~\ref{fig:ref-counting-object-layout} shows the object layout of \rooplpp 
     \label{fig:pisa-referencing}
 \end{figure}
 
-Figure~\ref{fig:pisa-referencing} shows the translated \textsc{Pisa} code for the \textbf{copy} and \textbf{uncopy} statements. As shown, they are both very simple and each others inverse. For copying, the address of the passed variable $x$ is simply copied into the zero-cleared value of $x'$ and the reference count incremented by one. For deletion, the address is copied cleared and the reference count decremented. Coping and clearing is done through the \inst{xor} instruction. These translations features no error handling, but a solution is discussed in section~\ref{sec:error-handling}.
+Figure~\ref{fig:pisa-referencing} shows the translated \textsc{Pisa} code for the \textbf{copy} and \textbf{uncopy} statements. As shown, they are both very simple and each others inverse. For copying, the address of the passed variable $x$ is simply copied into the zero-cleared value of $x'$ and the reference count incremented by one. For deletion, the address is cleared and the reference count decremented. Copying and clearing is done through the \inst{xor} instruction. These translations features no error handling, but a solution is discussed in section~\ref{sec:error-handling}.
 
 
 \section{Arrays}
 \label{sec:arrays}
-The static arrays in \rooplpp are also heap allocated to allow dynamic life-time. The array memory layout is presented in figure~\ref{fig:array-layout}. As shown, the arrays features two additional fields to store the size of the array and the reference count. Additionally, integer arrays store their values directly in the array while object arrays are a simple pointer store.
+The static arrays in \rooplpp are also heap allocated to allow dynamic lifetime. The array memory layout is presented in figure~\ref{fig:array-layout}. As shown, the arrays feature two additional fields to store the size of the array and the reference count. Additionally, integer arrays store their values directly in the array while object arrays are a simple pointer stores.
 
 \begin{figure}[ht]
     \centering
@@ -940,7 +943,7 @@ The static arrays in \rooplpp are also heap allocated to allow dynamic life-time
 
 \subsection{Construction and Destruction}
 \label{subsec:construction-destruction}
-As \rooplpp arrays also are heap allocated, the buddy allocation implementation is also used for allocating arrays. The only difference between object and array allocation is that no virtual table is stored in the allocated space but the offsets for the reference counter are equal. Due to this fact, \textbf{copy} and \textbf{uncopy} \textsc{Pisa} blocks generated during compile time are exactly the same for arrays and objects, as shown in the previous section.
+As \rooplpp arrays also are heap allocated, the buddy allocation implementation is also used for allocating arrays. The only difference between object and array allocation is that no virtual table is stored in the allocated space while the offsets for the reference counter are shared for both types. Due to this fact, \textbf{copy} and \textbf{uncopy} \textsc{Pisa} blocks generated during compile time are exactly the same for arrays and objects, as shown in the previous section.
 
 \begin{figure}[ht]
     \centering
@@ -1010,16 +1013,16 @@ As \rooplpp arrays also are heap allocated, the buddy allocation implementation 
     \label{fig:array-allocation-deallocation}
 \end{figure}
 
-Figure~\ref{fig:array-allocation-deallocation} shows the translation schemes used for array allocation and deallocation. As said, these are almost identical to the object allocation and deallocation schemes presented in figure~\ref{fig:pisa-allocation-deallocation} on page~\pageref{fig:pisa-allocation-deallocation}. Classes are analyzed during a compilation phase and their allocation size, the object size + 2 (for virtual table and reference counter) rounded up to nearest power of two. Arrays cannot be sized determined during compilation, as that would require evaluating the expression passed to the initialization call, and as such, we add the overhead needed directly in the allocation and deallocation instructions.   
+Figure~\ref{fig:array-allocation-deallocation} shows the translation schemes used for array allocation and deallocation. As said, these are almost identical to the object allocation and deallocation schemes presented in figure~\ref{fig:pisa-allocation-deallocation} on page~\pageref{fig:pisa-allocation-deallocation}. Classes are analyzed during a compilation phase and their allocation size, the object size + 2 (for virtual table and reference counter) rounded up to nearest power-of-two. The size of arrays cannot be determined during compilation, as that would require evaluating the expression passed to the initialization call, and as such, we add the overhead needed directly in the allocation and deallocation instructions.   
 
 \subsection{Array Element Access}
 \label{subsec:array-element-access}
-Array elements are simply passed as any other variable to methods or statements. Based on the variable type, compilation of various statements individually determine whether the address or the value of the passed variable should be used for the compiling the statement. For arrays, this is no different. If an integer array element is passed, it is treated just liked a regular integer variable. For an object array element, it is treated just like a regular object variable. 
+Array elements are simply passed as any other variable to methods or statements. Based on the variable type, compilation of various statements individually determines whether the address or the value of the passed variable should be used for the compiling the statement. For arrays, this is no different. If an integer array element is passed, it is treated just liked a regular integer variable. For an object array element, it is treated just like a regular object variable. 
 
 
 \section{Error Handling}
 \label{sec:error-handling}
-While a program written in \rooplpp might be syntactically valid and well-typed, it is not a guarantee that it executes successfully. A number of conditions exists, which cannot be determined at compile time, which results in erroneous compiled and executed code. \citeauthor{th:roopl} describes the following conditions:
+While a program written in \rooplpp might be syntactically valid and well-typed, this is not a guarantee that it executes successfully. A number of conditions exist, which cannot be determined at compile time, which in turn results in erroneous compiled and executed code. \citeauthor{th:roopl} describes the following conditions:
 
 \begin{itemize}
     \item If the entry expression of a conditional is \textbf{true}, then the exit assertion should also be \textbf{true} after executing the then-branch.
@@ -1027,14 +1030,14 @@ While a program written in \rooplpp might be syntactically valid and well-typed,
     \item The entry expression of a loop should initially be \textbf{true}.
     \item If the exit assertion of a loop is \textbf{false}, then the entry expression should also be \textbf{false} after executing the loop-statement.
     \item All instance variables should be zero-cleared within an object block before the object is deallocated.
-    \item The value of a local variable should always match the value of the delocal-expression after the block statement has executed.
+    \item The value of a local variable should always match the value of the delocal-expression after the block statement has executed~\cite{th:roopl}.
 \end{itemize}
 
 The extensions made to \textsc{Roopl} in \rooplpp brings forth a number of additional conditions:
 
 \begin{itemize}
     \item All fields of an object instance should be zero-cleared before the object is deallocated using the \textbf{delete} statement.
-    \item All cells of an an instance should be zero-cleared before the array is deallocated using the \textbf{delete} statement.
+    \item All cells of an instance should be zero-cleared before the array is deallocated using the \textbf{delete} statement.
     \item Local object blocks should have their fields zero-cleared after the execution of the block statement.
     \item Local array blocks should have their cells zero-cleared after the execution of the block statement.
     \item If a local object variable's value is exchanged during its block statement and the new value is an object reference, this object must have its fields zero-cleared after the execution of the block statement.
@@ -1046,11 +1049,11 @@ The extensions made to \textsc{Roopl} in \rooplpp brings forth a number of addit
     \item Array cell indices must be within bounds defined in the expression passed during initialization. 
 \end{itemize}
 
-It is the programmer's responsibility to meet these conditions are met. As these conditions, in general, cannot be determined at compile time, undefined program behaviour will occur as the termination will continue silently, resulting in erroneous program state. We can insert run time error checks in the generated instructions such that the program is terminated if one of the conditions does not hold. The run time error checks can be added as dynamic error checks using error routines defined at labels, such as $label_{uninitialized\_object}$ which the program can jump to, if such a condition is unmet. \citeauthor{th:roopl} presented an example for dynamic error checking for local blocks in~\cite{th:roopl}. \textsc{Pisa} and its simulator PendVM is, however, limited and does not support exit codes natively. To fully support dynamic error checking, PendVM could be extended to read from a value from a designated register to supply a more meaningful message for the programmer in the case of a run time exit.
+It is the programmer's responsibility to meet these conditions. As these conditions, in general, cannot be determined at compile time, undefined program behaviour will occur as the termination will continue silently, resulting in erroneous program state. We can insert run time error checks in the generated instructions such that the program is terminated if one of the conditions does not hold. The run time error checks can be added as dynamic error checks using error routines defined at labels, such as $label_{uninitialized\_object}$ which the program can jump to, if such a condition is unmet. \citeauthor{th:roopl} presented an example for dynamic error checking for local blocks in~\cite{th:roopl}. \textsc{Pisa} and its simulator PendVM is, however, limited and does not support exit codes natively. To fully support dynamic error checking, PendVM could be extended to read from a value from a designated register to supply a more meaningful message for the programmer in the case of a run time exit.
  
 \section{Implementation}
 \label{sec:implementation}
-The \rooplpp compiler (\textsc{Rooplppc}) was implemented using techniques and translation schemes presented in this chapters, expanding upon the work of the original \textsc{Roopl} compiler (\textsc{Rooplc}). The compiler serves as a proof-of-concept and simply performs one-to-one translations of \rooplpp code to \textsc{Pisa} code without any optimizations along the way. The compiler is written in \textsc{Haskell} 7.10 and the translated output was tested on the Pendulum simulator, PendVM~\cite{cr:pendvm}. 
+The \rooplpp compiler (\textsc{Rooplppc}) was implemented using techniques and translation schemes presented in this chapter, expanding upon the work of the original \textsc{Roopl} compiler (\textsc{Rooplc}). The compiler serves as a proof-of-concept and simply performs one-to-one translations of \rooplpp code to \textsc{Pisa} code without any optimizations along the way. The compiler is written in \textsc{Haskell} 7.10 and the translated output was tested on the Pendulum simulator, PendVM~\cite{cr:pendvm}. 
 
 As with the \textsc{Roopl} compiler, the \rooplpp compiler is structured around the same six separate compilation phases.
 \begin{enumerate}
@@ -1062,6 +1065,33 @@ As with the \textsc{Roopl} compiler, the \rooplpp compiler is structured around 
     \item \textbf{Macro Expansion} expands macros left by the code generator for i.e. configuration variables, etc.
 \end{enumerate}
 
-Compiled \textsc{Roopl} programs has a size increase by a factor of 10 to 15 in terms of the lines of code. For \rooplpp the size increase is much larger, partially due to the increase of static code included in form of the memory manager using the buddy layout described in this chapter and partially because heap allocations are most more costly than stack allocations in terms of lines of code.
+Compiled \textsc{Roopl} programs have a size increase by a factor of 10 to 15 in terms of the lines of code. For \rooplpp the size increase is much larger, partially due to the increase of static code included in form of the memory manager using the buddy layout described in this chapter and partially because heap allocations are more costly than stack allocations in terms of lines of code.
 
-The entire compiler source code as well as example programs and their compiled versions are provided in the appendices and in the supplied zip archive. It is also hosted on Github as open source software under the MIT license at \url{https://github.com/cservenka/ROOPLPPC}.
+The \textsc{Roopl} compiler was implemented in $1400$ lines of \textsc{Haskell} and the \rooplpp compiler was extended to $2091$ lines of \textsc{Haskell}.
+
+The entire compiler source code as well as example programs and their compiled versions are provided in the appendices and in the supplied ZIP archive. It is also hosted on Github as open source software under the MIT license at \url{https://github.com/cservenka/ROOPLPPC}.
+
+Building and usage of the compiler is supplied in the README.md file found in the ZIP archive and in appendix~\ref{app:rooplc-source}.
+
+\section{Evaluation}
+\label{sec:evaluation}
+For evaluating the results of the implemented compiler, it was tested against example code provided throughout this thesis. Tests programs utilizing the linked list, doubly-linked list and binary tree data structures and the RTM implementation are found in appendix~\ref{app:example-output}.
+
+\begin{figure}[ht]
+    \centering
+    \begin{tabular}{ c | c | c }
+        \textbf{Program} & \textbf{\rooplpp LOC} & \textbf{\textsc{Pisa} LOC} \\ \hline 
+        Linked List & 61 & 1268 \\
+        Doubly-Linked List & 66 & 1331 \\
+        Binary Tree & 86 & 2048 \\ 
+        RTM Simulation & 211 & 6712 \\ 
+      \end{tabular}
+    \caption{Lines of code comparison between target and compiled \rooplpp programs}
+    \label{fig:lines-of-code}
+\end{figure}
+
+The linked list test programs simply instantiates ten cells and links them in their respective lists. The binary tree test program instantiates three nodes and adds them to the tree structure, which afterwards is traversed to determine the sum of the nodes and finally mirroring the tree. The Reversible Turing Machine implementing incrementation of a non-negative $n$-bit binary number by 1 originally described in~\cite{ty:ejanus} has been implemented in \rooplpp and successfully converts its initial tape value of $1101$ to $0011$ after termination.
+
+As discussed, the compiler is considered proof-of-concept and no noteworthy optimizations has been implemented. However, for the sake of giving the reader an idea of the size blowup of a compiled \rooplpp program, figure~\ref{fig:lines-of-code} details this difference. The lines of translated \textsc{Pisa} instructions includes the $204$ instructions needed for the \textbf{malloc} and \textbf{malloc1} \textsc{Pisa}-equivalent mechanisms.
+
+
