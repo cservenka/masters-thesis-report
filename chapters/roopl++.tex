@@ -708,9 +708,8 @@ With the addition of the \rooplpp array type, we extend the expression typing ru
 
 \begin{figure}[ht]
     \begin{center}
-        \AXC{$\text{arrayType}(x) = \tau$}
+        \AXC{$\Pi(x) = \tau[\ ]$}
         \AXC{$\Pi_{expr} \vdash\ e\ :\ \textbf{int}$}
-        % \AXC{$\Pi(x[e]) = \tau$}
         \RL{\textsc{T-ArrElemVar}}
         \BIC{$\Pi \vdash_{expr}\ x[e] : \tau$} 
         \DP
@@ -861,11 +860,10 @@ The typing rules \textsc{T-UC} and \textsc{T-UCO} defines uncalling of methods i
         \AXC{$\Pi \vdash_{expr} e_1\ :\ \textbf{int}$}
         \DP
         \vskip 1em
-        \AXC{$x \not\in \text{vars}(e_2)$}
-        \AXC{$\text{vars}(e_1) \wedge \text{vars}(e_2) = \emptyset$}
+        \AXC{$\Big( {\ x\ } \cup \text{vars}(e_1) \Big) \cap \text{vars}(e_2) = \emptyset$}
         \AXC{$\Pi \vdash_{expr}\ e_2 : \textbf{int}$}
         \RL{\textsc{T-ArrElemAss}}
-        \TIC{$\langle \Pi, c \rangle \vdash^{\Gamma}_{stmt}\ x[e_1] \odot= e_2$}
+        \BIC{$\langle \Pi, c \rangle \vdash^{\Gamma}_{stmt}\ x[e_1]\ \texttt{$\odot$=}\ e_2$}
         \DP 
 
         \vskip 2em
@@ -931,7 +929,7 @@ The typing rules \textsc{T-UC} and \textsc{T-UCO} defines uncalling of methods i
 
 Figure~\ref{fig:typing-rules-statements-extensions} shows the typing rules for the extensions made to \textsc{Roopl} in \rooplpp, covering the \textbf{new}/\textbf{delete} and \textbf{copy}/\textbf{uncopy} statements for objects and arrays and local blocks.
 
-The typing rule \textsc{T-ArrElemAss} defines assignment to integer array element variables, and is well-typed when the type of array $x$ is \textbf{int}, the variable $x[e_1]$ is not present in the right-hand side of the statement and both expressions $e_1$ and $e_2$ evaluates to integers.
+The typing rule \textsc{T-ArrElemAss} defines assignment to integer array element variables, and is well-typed when the type of array $x$ is \textbf{int}, the variable $x[e_1]$ is not present in the right-hand side of the statement, no variables in $e_1$ exist in $e_2$ and both expressions $e_1$ and $e_2$ evaluates to integers.
 
 The \textsc{T-ObjNew} and \textsc{T-ObjDlt} rules define well-typed \textbf{new} and \textbf{delete} statements for dynamically lifetimed objects. The \textbf{new} statement is well-typed, as long as $c' \in \text{classIDs}$ and the variable $x$ is a \textbf{nil}-type and the \textbf{delete} is well-typed if the type of $x$ under type environment $\Pi$ is equal to $c'$.
 
