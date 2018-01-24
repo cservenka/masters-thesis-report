@@ -249,7 +249,7 @@ Returning the free list(s) to their original states is a non-trivial matter, whi
   \label{fig:equivalent-free-lists}
 \end{figure}
 
-This intuitively leads to the question of garbage classification. In the reversible setting all functions are injective. Thus, given some $input_f$, in a reversible computation using heap allocation, the injective function $f$ produces some $output_f$ and some $garbage_f$ (e.g. garbage in form of storing data in the heap, so the free list changes, the heap grows, etc.). Its inverse function $f^{-1}$ must thus take $f$'s $output_f$ and $garbage_f$ as $input_{f^{-1}}$ to produce its output $output_{f^{-1}}$ which is $f$'s $input_f$. However, in the context of reversible heaps, we must consider all free lists as of "equivalent garbage class" and thus freely substitutable with each other, as injective functions still can drastically change the block layout, free list order, etc. during its execution in either direction. Figure~\ref{fig:equivalent-free-lists} shows how any free list can be passed between a function $f$ and its inverse $f^{-1}$.
+This intuitively leads to the question of garbage classification. In the reversible setting all functions are injective. Thus, given some $input_f$, in a reversible computation using heap allocation, the injective function $f$ produces some $output_f$ and some $garbage_f$ (e.g. garbage in form of storing data in the heap, so the free list changes, the heap grows, etc.). Its inverse function $f^{-1}$ must thus take the $output_f$ of $f$ and $garbage_f$ as $input_{f^{-1}}$ to produce its output $output_{f^{-1}}$ which is the $input_f$ of $f$. However, in the context of reversible heaps, we must consider all free lists as of "equivalent garbage class" and thus freely substitutable with each other, as injective functions still can drastically change the block layout, free list order, etc. during its execution in either direction. Figure~\ref{fig:equivalent-free-lists} shows how any free list can be passed between a function $f$ and its inverse $f^{-1}$.
 
 
 \section{Linearity and Reference Counting}
@@ -362,7 +362,7 @@ The algorithm consists of an entry point named \textbf{malloc} and a recursion b
           p += freelists[counter]
           freelists[counter] -= p
 
-          // Swap head of free list with p's next block
+          // Swap head of free list with next block of p 
           freelists[counter] ^= M(p)
           M(p) ^= freelists[counter]
           freelists[counter] ^= M(p)
@@ -468,7 +468,7 @@ Listing~\ref{lst:one-heap-per-power-of-two} shows a modified \textbf{malloc1} re
             p += freelists[counter]
             freelists[counter] -= p
 
-            // Swap head of free list with p's next block
+            // Swap head of free list with next block of p
             freelists[counter] ^= M(p)
             M(p) ^= freelists[counter]
             freelists[counter] ^= M(p)
@@ -683,7 +683,7 @@ Implementation-wise, this design would require doubling and halving of numbers r
             p += freelists[counter]
             freelists[counter] -= p
 
-            // Swap head of free list with p's next block
+            // Swap head of free list with next block of p
             freelists[counter] ^= M(p)
             M(p) ^= freelists[counter]
             freelists[counter] ^= M(p)

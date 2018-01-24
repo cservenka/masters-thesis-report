@@ -1,6 +1,6 @@
 \chapter{The \textsc{Roopl\texttt{++}} Language}
 \label{chp:rooplpp}
-With the design and implementation of the \textsc{Reversible Object-Oriented Programming Language} (\textsc{Roopl}) and the work-in-progress report of \textsc{Joule}, the first steps into the uncharted lands of Object-Oriented Programming (OOP) and reversibility was taken. In this chapter, we will present \rooplpp, the natural successor to \textsc{Roopl}, improving the language's object instantiation by letting objects live outside \textbf{construct}/\textbf{deconstruct} blocks, allowing complex, reversible programs to be written using OOP methodologies. As with its predecessor, \rooplpp is purely reversible and each component of a program written in \rooplpp is locally invertible. This ensures no computation history is required nor added program size for backwards direction program execution.
+With the design and implementation of the \textsc{Reversible Object-Oriented Programming Language} (\textsc{Roopl}) and the work-in-progress report of \textsc{Joule}, the first steps into the uncharted lands of Object-Oriented Programming (OOP) and reversibility were taken. In this chapter, we present \rooplpp, the natural successor to \textsc{Roopl}, improving the object instantiation of the language by letting objects live outside \textbf{construct}/\textbf{deconstruct} blocks, allowing complex, reversible programs to be written using OOP methodologies. As with its predecessor, \rooplpp is purely reversible and each component of a program written in \rooplpp is locally invertible. This ensures no computation history is required, nor added program size for backwards program execution.
 
 Inspired by other language successors such as \textsc{C\texttt{++}} was to \textsc{C}, \rooplpp is a superset of \textsc{Roopl}, containing all original functionality of its predecessor, extended with new object instantiation methods for increased programming usability and an array type.
 
@@ -16,7 +16,7 @@ Inspired by other language successors such as \textsc{C\texttt{++}} was to \text
 
 \section{Syntax}
 \label{sec:syntax}
-A \rooplpp program consists, analogously to a \textsc{Roopl} program, of one or more class definitions, each with a varying number of fields and class methods. The program's entry point is a nullary main method, which is defined exactly once and is instantiated during program start-up. Fields of the main object will serve as output of the program, just as in \textsc{Roopl}.
+A \rooplpp program consists, analogously to a \textsc{Roopl} program, of one or more class definitions, each with a varying number of fields and class methods. The entry point of the program is a nullary main method, which is defined exactly once and is instantiated during program start-up. Fields of the main object will serve as output of the program, just as in \textsc{Roopl}.
 \begin{figure}[h]
     \centering
     \vspace{3mm}
@@ -54,19 +54,19 @@ A \rooplpp program consists, analogously to a \textsc{Roopl} program, of one or 
     \label{fig:roopl-grammar}
 \end{figure}
 
-The \rooplpp grammar extends \textsc{Roopl}'s grammar with a new static integer or class array type and a new object lifetime option in form of objects outside of blocks, using the \textbf{new} and \textbf{delete} approach. Furthermore, the local block extension proposed in~\cite{th:roopl} has become a standard part of the language. Class definitions remains unchanged, and consists of a \textbf{class} keyword followed by a class name. Subclasses must be specified using the \textbf{inherits} keyword and a following parent class name. Classes can have any number of fields of any of the data types, including the new Array type. A class definition is required to include at least one method, defined by the \textbf{method} keyword followed by a method name, a comma-separated list of parameters and a body.
+The \rooplpp grammar extends the grammar of \textsc{Roopl}  with a new static integer or class array type and a new object lifetime option in form of objects outside of blocks, using the \textbf{new} and \textbf{delete} approach. Furthermore, the local block extension proposed in~\cite{th:roopl} has become a standard part of the language. Class definitions remains unchanged, and consists of a \textbf{class} keyword followed by a class name. Subclasses must be specified using the \textbf{inherits} keyword and a following parent class name. Classes can have any number of fields of any of the data types, including the new Array type. A class definition is required to include at least one method, defined by the \textbf{method} keyword followed by a method name, a comma-separated list of parameters and a body.
 
-Reversible assignments for integer variables and integer array elements uses similar syntax as \textsc{Janus} assignments, by updating a variable through any of the addition (\texttt{+=}), subtraction (\texttt{-=}) or bitwise XOR (\texttt{\^{}=}) operators. As with \textsc{Janus}, when updating a variable $x$ using any of said operators, the right-hand side of the operator argument must be entirely independent of $x$ to maintain reversibility. Usage of these reversible assignment operators for object or array variables is undefined.
+Reversible assignments for integer variables and integer array elements uses similar syntax as \textsc{Janus} assignments, by updating a variable through any of the addition (\texttt{+=}), subtraction (\texttt{-=}) or bitwise XOR (\texttt{\^{}=}) operators. As with \textsc{Janus}, when updating a variable $x$ using any of said operators, the right-hand side of the operator argument must be entirely independent of $x$ to maintain reversibility. Usage of these reversible assignment operators for object or array variables is undefined. Variables and array elements of any type can be swapped using the \texttt{<=>} operator as long as the variable is of same type as the array type. If an array is of a base class type, subclass variable values can be swapped in and out of the array, as long as the resulting value in the variable is still of the original subclass type.  
 
 \rooplpp objects can be instantiated in two ways. Either using object blocks known from \textsc{Roopl}, or by using the \textbf{new} statement. The object-blocks have a statically-scoped lifetime, as the object only exists within the \textbf{construct} and \textbf{destruct} segments. Using \textbf{new} allows the object to live until program termination, if the program terminates with a \textbf{delete} call. By design, it is the programmers responsibility to deallocate objects instantiated by the \textbf{new} statement.
 
 Arrays are also instantiated by usage of \textbf{new} and \textbf{delete}. Assignment of array cells depend on the type of the arrays, which is further discussed in section~\ref{sec:array-instantiation}.
 
-The methodologies for argument aliasing and its restrictions on method on invocations from \textsc{Roopl} carries over in \rooplpp and object fields are as such disallowed as arguments to local methods to prevent irreversible updates and non-local method calls to a passed objects are prohibited. The parameter passing scheme remains call-by-reference and the \textsc{Roopl}'s object model remains largely unchanged in \rooplpp.
+The methodologies for argument aliasing and its restrictions on method on invocations from \textsc{Roopl} carries over in \rooplpp and object fields are as such disallowed as arguments to local methods to prevent irreversible updates and non-local method calls to a passed objects are prohibited. The parameter passing scheme remains call-by-reference and the object model of \textsc{Roopl} remains largely unchanged in \rooplpp.
 
 \section{Object Instantiation}
 \label{sec:object-instantiation}
-Object instantiation through the \textbf{new} statement, follows the pattern of the mechanics known from the \textbf{construct}/\textbf{destruct} blocks from \textsc{Roopl}, but providing improved scoping and lifetime options objects. The mechanisms of the statement 
+Object instantiation through the \textbf{new} statement follows the pattern of the mechanics known from the \textbf{construct}/\textbf{destruct} blocks from \textsc{Roopl}, but providing improved scoping and lifetime options objects. The mechanisms of the statement 
 
 \begin{align*}
 \textbf{construct}\ c\ x\ \quad s\ \quad \textbf{destruct}\ x
@@ -85,7 +85,7 @@ are as follows:
 The statement pair consisting of
 
 \begin{align*}
-\textbf{new}\ c\ x\ \quad s\ \quad \textbf{delete}\ c\ x\
+\textbf{new}\ c\ x\ \quad \dots\ \quad \textbf{delete}\ c\ x\
 \end{align*}
 
 could be considered a \textit{dynamic} block, meaning we can have overlapping blocks. Compared to \textbf{construct}/\textbf{destruct} block consisting of a single statement, the \textbf{new}/\textbf{delete} block consist of two separate statements. We can as such initialize an object $x$ of class $c$ and an object $y$ of class $d$ and destroy $x$ before we destroy $y$, a feature that was not possible in \textsc{Roopl}. The mechanisms of the \textbf{new} statement are as follows:
@@ -93,7 +93,6 @@ could be considered a \textit{dynamic} block, meaning we can have overlapping bl
 \begin{enumerate}
     \item Memory for an object of class $c$ is allocated. All fields are automatically zero-initialized by virtue of residing in already zero-cleared memory.
     \item The address of the newly allocated block is stored in the previously defined and zero-cleared reference $x$.
-    \item The block statement $s$ is executed.
 \end{enumerate}
 
 and the mechanisms of the \textbf{delete} statement are as follow
@@ -104,21 +103,23 @@ and the mechanisms of the \textbf{delete} statement are as follow
     \item The zero-cleared memory is reclaimed by the system.
 \end{enumerate}
 
-The mechanisms of the \textbf{new} and \textbf{delete} statements are, essentially, a split of the mechanisms of the \textbf{construct}/\textbf{destruct} blocks into two separate statements. As with \textsc{Roopl}, fields must be zero-cleared after object deletion, otherwise it is impossible for the system to reclaim the memory reversibly. This is the responsibility of the of the programmer to maintain this, and to ensure that objects are indeed deleted in the first place. A \textbf{new} statement without a corresponding \textbf{delete} statement targeting the same object further ahead in the program is undefined.
+The mechanisms of the \textbf{new} and \textbf{delete} statements are, essentially, a split of the mechanisms of the \textbf{construct}/\textbf{destruct} blocks into two separate statements. As with \textsc{Roopl}, fields must be zero-cleared after object deletion, otherwise it is impossible for the system to reclaim the memory reversibly. This is the responsibility of the of the programmer to maintain this, and to ensure that objects are indeed deleted in the first place. A \textbf{new} statement without a corresponding \textbf{delete} statement targeting the same object further ahead in the program is undefined, as is a delete statement without a preceding \textbf{new} statement.
+
+Note that variable scopes are always static, but object scopes can be either static (using \textbf{construct}/\textbf{destruct}) or dynamic (using \textbf{new}/\textbf{delete}).
 \newpage
 
 \section{Array Model}
 \label{sec:array-model}
-Besides asymmetric object lifetimes, \rooplpp also introduces reversible, static arrays of either integer or object types. While \textsc{Roopl} only featured integers and custom data types in form of classes, one of its main inspirations, \textsc{Janus}, implemented static, reversible arrays~\cite{ty:janus}. 
+Besides asymmetric object lifetimes, \rooplpp also introduces reversible, fixed-sized arrays of either integer or object types. While \textsc{Roopl} only featured integers and custom data types in form of classes, one of its main inspirations, \textsc{Janus}, implemented static, reversible arrays~\cite{ty:janus}. 
 
 While \textsc{Roopl} by design did not include any data storage language constructs, as they are not especially noteworthy nor interesting from an OOP perspective, they do generally improve the expressiveness of the language. Arrays were decided to be part of the core language for this reason, as one of the main goals of \rooplpp is increased expressiveness while implementing reversible programs.
 
-\rooplpp's arrays expand upon the array model from \textsc{Janus}. Arrays are index by integers, starting from 0. In \textsc{Janus}, only integer arrays were allowed, while in \rooplpp arrays of any type can be defined, meaning either integer arrays or custom data types in form of class arrays. They are however, still restricted to one dimension.
+In \rooplpp, arrays expand upon the array model from \textsc{Janus}. Arrays are indexed by integers, starting from 0. In \textsc{Janus}, only integer arrays were allowed, while in \rooplpp arrays of any type can be defined, meaning either integer arrays or custom data types in form of class arrays. They are however, still restricted to one dimension.
 
-Array element accessing is accomplished using the bracket notation known from Janus \textsc{Janus}. Accessing an out-of-bounds index is undefined.
+Array element accessing is accomplished using the bracket notation known from \textsc{Janus}. Accessing an out-of-bounds index is undefined.
 Array instantiation and element assignments, aliasing and circularity is described in detail in the following section.
 
-Arrays can contain elements of different classes sharing a base class, that is, say class $A$ and $B$ both inherit from some class $C$ and array $x$ is of type $C[]$. In this case, the array can hold elements of type $A$, $B$, and $C$. When swapping array elements from a base class array with object references the programmer must be careful not to swap the values of, say, and $A$ object into a $B$ reference.
+Arrays can contain elements of different classes sharing a base class, that is, say class $A$ and $B$ both inherit from some class $C$ and array $x$ is of type $C[]$. In this case, the array can hold elements of type $A$, $B$, and $C$. When swapping array elements from a base class array with object references, the programmer must be careful not to swap the values of, say, and $A$ object into a $B$ reference.
 
 \section{Array Instantiation}
 \label{sec:array-instantiation}
@@ -126,15 +127,15 @@ Array instantiation uses the \textbf{new} and \textbf{delete} keywords to revers
 \begin{align*}
 \textbf{new}\ \textbf{int}[e]\ x
 \end{align*} 
-in which we reserved memory for an integer array are as follows
+in which we reserve memory for an integer array are as follows
 
 \begin{enumerate}
     \item The expression $e$ is evaluated
-    \item Memory equal to the integer value $e$ evaluates to and an additional small amount memory for of overhead is reserved for the array.
+    \item Memory equal to the integer value that $e$ evaluates to and an additional small amount of memory for of overhead is reserved for the array.
     \item The address of the newly allocated memory is stored in the previously defined and zero-cleared reference $x$.
 \end{enumerate}
 
-In \rooplpp, we only allow instantiation of static arrays of a length defined in the given expression $e$. Array elements are assigned dependent on the type of the array. For integer arrays, any of the reversible assignment operators can be used to assign values to cells. For class arrays, we assign cell elements a little differently. We either make use of the \textbf{new} and \textbf{delete} statements, but instead of specifying which variable should hold the newly created/deleted object or array, we specify which array cell it should be stored in or we use the \textbf{swap} statement to swap values in and out of array cells. Usage of the assignment operators on non-integer arrays is undefined.
+In \rooplpp, we only allow instantiation of fixed-sized arrays of a length defined in the given expression $e$. Array elements are assigned dependent on the type of the array. For integer arrays, any of the reversible assignment operators can be used to assign values to cells. For class arrays, we assign cell elements a little differently. We either make use of the \textbf{new} and \textbf{delete} statements, but instead of specifying which variable should hold the newly created/deleted object or array, we specify which array cell it should be stored in or we use the \textbf{swap} statement to swap values in and out of array cells. Usage of the assignment operators on non-integer arrays is undefined.
 
 \begin{lstlisting}[caption={Assignment of array elements}, language=roopl, style=basic,label={lst:array-assignment}]
     new int[5] intArray         // Init new integer array
@@ -164,15 +165,20 @@ with the following mechanics
 
 \begin{enumerate}
 \item The reference $x$ may be modified by swapping, assigning cell element values and zero-clearing cell element values, but must be restored to an array of same type with fully zero-cleared cells before the \textbf{delete} statement. Otherwise, the meaning of the statement is undefined.
+\item The value of the expression $e$ is evaluated and used to reclaim the allocated memory space. 
 \item If the reference $x$ is a fully zero-cleared array upon the \textbf{delete} statement execution, the zero-cleared memory is reclaimed by the system.
 \end{enumerate}
 
-With reversible, static arrays of varying types, we must be extremely careful when updating and assigning values, to ensure we maintain reversibility and avoid irreversible statements. Therefore, when assigning or updating integer elements with one of the reversible assignment operators, we prohibit the cell value from being reference on the right hand side, meaning the following statement is prohibited
+With reversible, fixed-sized arrays of varying types, we must be extremely careful when updating and assigning values, to ensure we maintain reversibility and avoid irreversible statements. Therefore, when assigning or updating integer elements with one of the reversible assignment operators, we prohibit the cell value from being reference on the right hand side, meaning the following statement is prohibited
 \begin{align*}
-x[5] \texttt{+=}\ x[5] + 1 
+x[5]\ \texttt{+=}\ x[5] + 1 
 \end{align*}
 
-However, we do allow other initialized, non-zero-cleared array elements to be referenced in the right hand side of the statement.
+However, we do allow other initialized, non-zero-cleared array elements from the same array or arrays of same type to be referenced in the right hand side of the statement. As with regular assignment, we still prohibit the left side reference to occur in the ride side, meaning the following statements are also prohibited
+\begin{align*}
+x\ \texttt{+=}\ y[x]\\
+y[x]\ \texttt{+=}\ x
+\end{align*}
 
 \newpage
 \section{Referencing}
@@ -237,7 +243,7 @@ By introducing dynamic lifetime objects and by allowing objects to be referenced
 
 \subsection{Linked List}
 \label{subsec:linked-list}
-\citeauthor{th:roopl} presented a linked list implemented in \textsc{Roopl} in~\cite{th:roopl}. The implementation featured a \textit{ListBuilder} and a \textit{Sum} class, required to determine and retain the sum of a constructed linked list as \textsc{Roopl}'s statically scoped object blocks would deallocate automatically after building the full list. In \rooplpp, we do not face the same challenges and the implementation becomes much more forward. Figure~\ref{fig:linked-list-class} implements a \textit{LinkedList} class, which simply has the head of the list and the list length as its internal fields. For demonstration, the class allows extension of the list by either appending or prepending cell elements to the list. In either case, we first check if the \textit{head} field is initialized. If not, the cell we are either appending or prepending simply becomes the new head of the list. If we are appending a cell the Cell-class \textit{append} method is called on the \textit{head} cell with the new cell as its only argument. When prepending, the existing head is simply appended to the new cell and the new cell is set as head of the linked list.
+\citeauthor{th:roopl} presented a linked list implemented in \textsc{Roopl} in~\cite{th:roopl}. The implementation featured a \textit{ListBuilder} and a \textit{Sum} class, required to determine and retain the sum of a constructed linked list as the statically scoped object blocks of \textsc{Roopl} would deallocate automatically after building the full list. In \rooplpp, we do not face the same challenges and the implementation becomes much more straightforward. Figure~\ref{fig:linked-list-class} implements a \textit{LinkedList} class, which simply has the head of the list and the list length as its internal fields. For demonstration, the class allows extension of the list by either appending or prepending cell elements to the list. In either case, we first check if the \textit{head} field is initialized. If not, the cell we are either appending or prepending simply becomes the new head of the list. If we are appending a cell the Cell-class \textit{append} method is called on the \textit{head} cell with the new cell as its only argument. When prepending, the existing head is simply appended to the new cell and the new cell is set as head of the linked list.
 
 \begin{figure}[ht!]
     \centering
@@ -311,7 +317,7 @@ Figure~\ref{fig:linked-list-cell-class} shows the \textit{Cell} class of the lin
     \label{fig:linked-list-class}
 \end{figure}
 
-An interesting observation, is that the \textit{append} method is called an additional time \textit{after} setting the cell as the new end of the linked list. In a non-reversible programming language, we would simply call append in the else-branch of the first conditional. In the reversible setting, this is not an option, as the append call would modify the value of the \textit{next} and \textit{cell} variables and as such, corrupt the control flow as the exit condition would be true after executing both the then- and else-branch of the conditional. To avoid this, we simply call one additional time with a \textbf{nil} value \textit{cell}.
+An interesting observation is that the \textit{append} method is called an additional time \textit{after} setting the cell as the new end of the linked list. In a non-reversible programming language, we would simply call append in the else-branch of the first conditional. In the reversible setting, this is not an option, as the append call would modify the value of the \textit{next} and \textit{cell} variables and as such, corrupt the control flow as the exit condition would be true after executing both the then- and else-branch of the conditional. To avoid this, we simply call one additional time with a \textbf{nil} value \textit{cell}.
 This "wasted" additional call with a \textbf{nil} value is a recurring technique in the following presented reversible data structure implementations. 
 
 \subsection{Binary Tree}
@@ -384,8 +390,6 @@ Summing and mirroring the tree works in a similar fashion by recursively iterati
     \label{fig:binary-tree-node-class-cont}
 \end{figure}
 
-The binary tree could be extended with a method for flattening into an array of size equal to the number of tree nodes. The inverse of this method would be construction of a tree from a flattening method. Conventional flattening is not reversible, but perhaps a simplified reversible version could be defined by applying some limitations or restrictions. This way, sorting an array could effectively be implemented by constructing a tree from an array, performing some recursive tree sorting method, and then flattening the tree into an array again.
-
 \begin{figure}[ht!]
     \centering
     \begin{lstlisting}[style = basic, language = roopl] 
@@ -434,32 +438,6 @@ The binary tree could be extended with a method for flattening into an array of 
 \label{subsec:doubly-linked-list}
 Finally, we present the reversible doubly linked list, shown in figures~\ref{fig:doubly-linked-list-class}-\ref{fig:doubly-linked-list-cell-class-cont}. A \textit{cell} in a doubly linked list contains a reference to itself named \textit{self}, a reference to its left and right neighbours, a data and an index field. As with the linked list and binary tree implementation the \textit{DoubleLinkedList} class has a field referencing the head of the list and its \textit{appendCell} method is identical to the one of the linked list. 
 
-\begin{figure}[ht!]
-    \centering
-    \begin{lstlisting}[style = basic, language = roopl] 
-    class DoublyLinkedList
-        Cell head
-        int length
-    
-        method appendCell(Cell cell)
-            if head = nil & cell != nil then
-                head <=> cell
-            else skip
-            fi head != nil & cell = nil
-    
-            if head != nil then 
-                call head::append(cell)
-            else skip
-            fi head != nil
-    
-            length += 1
-    \end{lstlisting}
-    \caption{Doubly Linked List class}
-    \label{fig:doubly-linked-list-class}
-\end{figure}
-
-This data structure is particularly interesting, as it, unlike the former two presented structures, cannot be expressed in \textsc{Roopl}, as this requires multiple reference to objects, in order for an object to point to itself and to its left and right neighbours. Figure~\ref{fig:doubly-linked-list-reference} shows the multiple references needed for the doubly linked list implementation denoted by the three different arrow types.
-
 \begin{figure}[ht]
     \centering
     \begin{tikzpicture}
@@ -494,6 +472,32 @@ This data structure is particularly interesting, as it, unlike the former two pr
     \end{tikzpicture}
     \caption{Multiple identical reference are needed for a doubly linked list implementation}
     \label{fig:doubly-linked-list-reference}
+\end{figure}
+
+This data structure is particularly interesting, as it, unlike the former two presented structures, cannot be expressed in \textsc{Roopl}, as this requires multiple reference to objects, in order for an object to point to itself and to its left and right neighbours. Figure~\ref{fig:doubly-linked-list-reference} shows the multiple references needed for the doubly linked list implementation denoted by the three different arrow types.
+
+\begin{figure}[ht!]
+    \centering
+    \begin{lstlisting}[style = basic, language = roopl] 
+    class DoublyLinkedList
+        Cell head
+        int length
+    
+        method appendCell(Cell cell)
+            if head = nil & cell != nil then
+                head <=> cell
+            else skip
+            fi head != nil & cell = nil
+    
+            if head != nil then 
+                call head::append(cell)
+            else skip
+            fi head != nil
+    
+            length += 1
+    \end{lstlisting}
+    \caption{Doubly Linked List class}
+    \label{fig:doubly-linked-list-class}
 \end{figure}
 
 When we append a cell to the list, we first search recursively through the list until we are at the end. The new cell is then set as \textit{right} of the current cell. A reference to the current self is created using the \textbf{copy} statement, and set as \textit{left} of the new end of the list, thus resulting in the new cell being linked to list and now acting as end of the list.
@@ -554,12 +558,12 @@ When we append a cell to the list, we first search recursively through the list 
     \label{fig:doubly-linked-list-cell-class-cont}
 \end{figure}
 
-The data structure could relatively easily be extended to work as a dynamic array. Currently each cell contains an \textit{index} field, specifying their position in the list. If, say, we wanted to insert some new data at index $n$, without updating the existing value, but essentially squeezing in a new cell, we could add a method to the \textit{DoublyLinkedList} class taking a data value and an index. When executing this method, we could iterate the list until we reach the cell with index $n$, construct a new \textit{cell} instance, update required \textit{left} and \textit{right} pointers to insert the new cell at the correct position, in such a way that the old cell at index $n$ now is the new cell's right neighbour and finally recursively iterating the list, incrementing the index of cells to the right of the new cell by one. In reverse, this would remove a cell from the list. If we want to update an existing value at a index, a similar technique could be used, where we iterate through the cells until we find the correct index. If we are given an index that is out of bounds in terms of the current length of the list, we could extend the tail on the list until reach a cell with the wanted index. When we are zero-clearing a value that is the furthest index, the inverse would apply, and a such we would zero-clear the cell, and the deallocate cells until we reach a cell which does not have a zero-cleared \textit{data} field. 
+The data structure could relatively easily be extended to work as a dynamic array. Currently each cell contains an \textit{index} field, specifying their position in the list. If, say, we wanted to insert some new data at index $n$, without updating the existing value, but essentially squeezing in a new cell, we could add a method to the \textit{DoublyLinkedList} class taking a data value and an index. When executing this method, we could iterate the list until we reach the cell with index $n$, construct a new \textit{cell} instance, update required \textit{left} and \textit{right} pointers to insert the new cell at the correct position, in such a way that the old cell at index $n$ now is the new right neighbour of the cell and finally recursively iterating the list, incrementing the index of cells to the right of the new cell by one. In reverse, this would remove a cell from the list. If we want to update an existing value at a index, a similar technique could be used, where we iterate through the cells until we find the correct index. If we are given an index that is out of bounds in terms of the current length of the list, we could extend the tail on the list until reach a cell with the wanted index. When we are zero-clearing a value that is the furthest index, the inverse would apply, and a such we would zero-clear the cell, and the deallocate cells until we reach a cell which does not have a zero-cleared \textit{data} field. 
 
 This extended doubly linked list would also allow lists of n-dimensional lists, as the type of the \textit{data} field simply could be changed to, say, a \textit{FooDoublyLinkedList}, resulting in an array of Foo arrays. 
-
-
 \newpage
+
+
 \section{Type System}
 \label{sec:type-system}
 The type system of \rooplpp expands on the type system of \textsc{Roopl} presented by~\citeauthor{th:roopl}~\cite{th:roopl} and is analogously described by syntax-directed inference typing rules in the style of ~\citeauthor{wi:semantics}~\cite{wi:semantics}. As \rooplpp introduces two new types in form of \textit{references} and arrays, a few \textsc{Roopl} typing rules must be modified to accommodate these added types. For completeness all typing rules, including unmodified rules, are included in the following sections. 
@@ -575,7 +579,7 @@ The type environment $\Pi$ is a finite map pairing variables to types, which can
     &\text{vars}(\bar{n}) &&= \emptyset\\
     &\text{vars}(\textbf{nil}) &&= \emptyset\\
     &\text{vars}(x) &&= \{\ x\ \}\\
-    &\text{vars}(x[e]) &&= \{\ x[e]\ \}\\
+    &\text{vars}(x[e]) &&= \{\ x\ \} \cup \text{vars}(e)\\
     &\text{vars}(e_1 \otimes e_2) &&= \text{vars}(e_1) \cup \text{vars}(e_2).
 \end{align*}
 The binary subtype relation $c_1 \prec: c_2$ is required for supporting subtype polymorphism and is defined as follows:
@@ -687,9 +691,9 @@ defines the type of expressions. The judgment reads as: under type environment $
         \DP
 
         \vskip 2em % BinOpObj
-        \AXC{$\Pi \vdash_{expr}\ e_1 : \textbf{int}$}
-        \AXC{$\Pi \vdash_{expr}\ e_2 : \textbf{int}$}
-        \AXC{$\ominus \in \{ \texttt{\textbf{=}}, \texttt{\textbf{!=}} \}$}
+        \AXC{$\Pi \vdash_{expr}\ e_1 : c$}
+        \AXC{$\Pi \vdash_{expr}\ e_2 : c$}
+        \AXC{$\otimes \in \{ \texttt{\textbf{=}}, \texttt{\textbf{!=}} \}$}
         \RL{\textsc{T-BinOpObj}}
         \TIC{$\Pi \vdash_{expr}\ e_1 \otimes e_2 : \textbf{int}$}
         \DP
@@ -706,9 +710,9 @@ With the addition of the \rooplpp array type, we extend the expression typing ru
     \begin{center}
         \AXC{$\text{arrayType}(x) = \tau$}
         \AXC{$\Pi_{expr} \vdash\ e\ :\ \textbf{int}$}
-        \AXC{$\Pi(x[e]) = \tau$}
+        % \AXC{$\Pi(x[e]) = \tau$}
         \RL{\textsc{T-ArrElemVar}}
-        \TIC{$\Pi \vdash_{expr}\ x[e] : \tau$} 
+        \BIC{$\Pi \vdash_{expr}\ x[e] : \tau$} 
         \DP
     \end{center}
     \caption{Typing rule extension for the \textsc{Roopl} typing rules}
@@ -733,7 +737,7 @@ defines well-typed statements. The judgment reads as under type environment $\Pi
         \AXC{$\Pi \vdash_{expr}\ e : \textbf{int}$}
         \AXC{$\Pi(x) = \textbf{int}$}
         \RL{\textsc{T-AssVar}}
-        \TIC{$\langle \Pi, c \rangle \vdash^{\Gamma}_{stmt}\ x \odot= e$}
+        \TIC{$\langle \Pi, c \rangle \vdash^{\Gamma}_{stmt}\ x\ \texttt{$\odot$=}\ e$}
         \DP
 
         \vskip 2em
@@ -852,17 +856,21 @@ The typing rules \textsc{T-UC} and \textsc{T-UCO} defines uncalling of methods i
 \begin{figure}[H]
     \begin{center}
         % Assignment
-        \AXC{$x \in \text{IntegerArrayIDs}$}
+        \AXC{$\Pi(x) = \textbf{int}[\ ]$}
+        \DP
         \AXC{$\Pi \vdash_{expr} e_1\ :\ \textbf{int}$}
-        \AXC{$x[e_1] \not\in \text{vars}(e_2)$}
+        \DP
+        \vskip 1em
+        \AXC{$x \not\in \text{vars}(e_2)$}
+        \AXC{$\text{vars}(e_1) \wedge \text{vars}(e_2) = \emptyset$}
         \AXC{$\Pi \vdash_{expr}\ e_2 : \textbf{int}$}
         \RL{\textsc{T-ArrElemAss}}
-        \QIC{$\langle \Pi, c \rangle \vdash^{\Gamma}_{stmt}\ x[e_1] \odot= e_2$}
-        \DP
+        \TIC{$\langle \Pi, c \rangle \vdash^{\Gamma}_{stmt}\ x[e_1] \odot= e_2$}
+        \DP 
 
         \vskip 2em
          % Object new + delete
-        \AXC{$\Pi(x) = \textbf{nil}$}
+        \AXC{$\Pi(x) = c'$}
         \RL{\textsc{T-ObjNew}}
         \UIC{$\langle \Pi, c \rangle  \vdash^{\Gamma}_{stmt}\ \textbf{new}\ c'\ x$} 
         \DP
@@ -877,7 +885,7 @@ The typing rules \textsc{T-UC} and \textsc{T-UCO} defines uncalling of methods i
          % Array new
          \AXC{$\text{arrayType}(a) \in \Big\{ \text{classIDs}, \textbf{int} \Big\}$}
          \AXC{$\Pi \vdash_{expr}\ e = \textbf{int}$}
-         \AXC{$\Pi(x) = \textbf{nil}$}
+         \AXC{$\Pi(x) = a[\ ]$}
          \RL{\textsc{T-ArrNew}}
          \TIC{$\langle \Pi, c \rangle  \vdash^{\Gamma}_{stmt}\ \textbf{new}\ a[e]\ x$} 
          \DP
@@ -887,7 +895,7 @@ The typing rules \textsc{T-UC} and \textsc{T-UCO} defines uncalling of methods i
          % Array delete
          \AXC{$\text{arrayType}(a) \in \Big\{ \text{classIDs}, \textbf{int} \Big\}$}
          \AXC{$\Pi \vdash_{expr}\ e = \textbf{int}$}
-         \AXC{$\Pi(x) = a$}
+         \AXC{$\Pi(x) = a[\ ]$}
          \RL{\textsc{T-ArrDlt}}
          \TIC{$\langle \Pi, c \rangle  \vdash^{\Gamma}_{stmt}\ \textbf{delete}\ a[e]\ x$}
          \DP
@@ -896,7 +904,7 @@ The typing rules \textsc{T-UC} and \textsc{T-UCO} defines uncalling of methods i
 
         % Copy + uncopy
         \AXC{$\Pi(x) = c'$}
-        \AXC{$\Pi(x') = \textbf{nil}$}
+        \AXC{$\Pi(x') = c'$}
         \RL{\textsc{T-Cp}}
         \BIC{$\langle \Pi, c \rangle  \vdash^{\Gamma}_{stmt}\ \textbf{copy}\ c'\ x\ x'$} 
         \DP
@@ -910,9 +918,9 @@ The typing rules \textsc{T-UC} and \textsc{T-UCO} defines uncalling of methods i
         \vskip 2em
 
         % Local block
-        \AXC{$\langle \Pi, c \rangle \vdash_{expr}^{\Gamma}\ e_1$}
+        \AXC{$\langle \Pi, c \rangle \vdash_{expr}\ e_1\ :\ c'$}
         \AXC{$\langle \Pi[x \mapsto c'], c \rangle \vdash^{\Gamma}_{stmt}\ s$}
-        \AXC{$\langle \Pi, c \rangle \vdash_{expr}^{\Gamma}\ e_2$}
+        \AXC{$\langle \Pi, c \rangle \vdash_{expr}\ e_2\ :\ c'$}
         \RL{\textsc{T-LocalBlock}}
         \TIC{$\langle \Pi, c \rangle \vdash^{\Gamma}_{stmt}\ \textbf{local}\ c'\ x = e_1\quad s\quad \textbf{delocal}\ c'\ x = e_2$} 
         \DP

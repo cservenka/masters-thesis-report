@@ -117,7 +117,7 @@ The object model is simple and only features one additional word for storing the
 
 \section{\rooplpp Memory Layout}
 \label{sec:rooplpp-memory-layout}
-\rooplpp builds upon its predecessor's memory layout with dynamic memory management. The reversible Buddy Memory heap layout presented in section~\ref{subsec:buddy-memory} is utilized in \rooplpp as it is an interesting layout, addressing a number of disadvantages found in other considered layouts, naturally translates into a reversible setting with one simple restriction (i.e only blocks which are heads of their respectable free lists are allocatable) and since its only drawback is dismissible in most real world scenarios.
+\rooplpp builds upon the memory layout of its predecessor  with dynamic memory management. The reversible Buddy Memory heap layout presented in section~\ref{subsec:buddy-memory} is utilized in \rooplpp as it is an interesting layout, addressing a number of disadvantages found in other considered layouts, naturally translates into a reversible setting with one simple restriction (i.e only blocks which are heads of their respectable free lists are allocatable) and since its only drawback is dismissible in most real world scenarios.
 
 \begin{figure}[ht]
     \centering
@@ -290,7 +290,7 @@ The Buddy Memory algorithm consists of three \textsc{Janus} procedures; the entr
     \label{fig:buddy-allocation-entry}
 \end{figure}
 
-Before we go into depth with the translation of the algorithm, we consider the mechanism for triggering allocation subroutine. Naively, we could generate the entire block of code required for allocation for every \textbf{new} or \textbf{delete} statement in the target program. This approach would severely limit the amount of objects we could allocate as the register pressure of the Buddy Memory implementation is quite high, as we be shown in this section. Instead, we can utilize the  dynamic dispatching technique, which also is used for method invocations. This way, we only generate the allocation instructions once, and then simply jump to the entry point from different locations in the program. Figure~\ref{fig:buddy-allocation-entry} outlines the structure for this approach. By using the \inst{swapbr} instruction we can jump from multiple points of origin in the compiled program and recursively for the algorithm's own recursive needs.  
+Before we go into depth with the translation of the algorithm, we consider the mechanism for triggering allocation subroutine. Naively, we could generate the entire block of code required for allocation for every \textbf{new} or \textbf{delete} statement in the target program. This approach would severely limit the amount of objects we could allocate as the register pressure of the Buddy Memory implementation is quite high, as we be shown in this section. Instead, we can utilize the  dynamic dispatching technique, which also is used for method invocations. This way, we only generate the allocation instructions once, and then simply jump to the entry point from different locations in the program. Figure~\ref{fig:buddy-allocation-entry} outlines the structure for this approach. By using the \inst{swapbr} instruction we can jump from multiple points of origin in the compiled program and internally for the recursive needs of the algorithm itself.
 
 \begin{figure}[ht]
     \centering
@@ -381,7 +381,7 @@ We have three statements to translate from here. The outer \textbf{if-then} stat
     \label{fig:pisa-buddy-outer-if}
 \end{figure}
 
-Figure~\ref{fig:pisa-buddy-outer-if} shows the translation of the outer \textbf{if-then} statement. As briefly mentioned, we can utilize \textsc{Pisa}'s right bit shift instruction, \inst{RL}, in place of the \textbf{double} helper procedure from the \textsc{Janus} implementation. By using a simple bit shift, we are able to maintain reversibility elegantly when doubling or halving numbers in the power-of-two. This statement also contains one of the careful storage operations of the free list values, in instruction \textbf{(16)}. Before we recursively branch to the entry point, we must place the previously extracted address of the head of the free list back into the free list. This is also the reason for instruction \textbf{(3)} in figure~\ref{fig:buddy-allocation-entry}. Furthermore, we must push all temporary evaluated expression values to the stack, so they can be popped when we return.   
+Figure~\ref{fig:pisa-buddy-outer-if} shows the translation of the outer \textbf{if-then} statement. As briefly mentioned, we can utilize the right bit shift instruction of \textsc{Pisa}, \inst{RL}, in place of the \textbf{double} helper procedure from the \textsc{Janus} implementation. By using a simple bit shift, we are able to maintain reversibility elegantly when doubling or halving numbers in the power-of-two. This statement also contains one of the careful storage operations of the free list values, in instruction \textbf{(16)}. Before we recursively branch to the entry point, we must place the previously extracted address of the head of the free list back into the free list. This is also the reason for instruction \textbf{(3)} in figure~\ref{fig:buddy-allocation-entry}. Furthermore, we must push all temporary evaluated expression values to the stack, so they can be popped when we return.   
 
 \begin{figure}[ht]
     \centering
@@ -915,7 +915,7 @@ Figure~\ref{fig:pisa-referencing} shows the translated \textsc{Pisa} code for th
 
 \section{Arrays}
 \label{sec:arrays}
-The static arrays in \rooplpp are also heap allocated to allow dynamic lifetime. The array memory layout is presented in figure~\ref{fig:array-layout}. As shown, the arrays feature two additional fields to store the size of the array and the reference count. Additionally, integer arrays store their values directly in the array while object arrays are a simple pointer stores.
+The fixed-sized arrays in \rooplpp are also heap allocated to allow dynamic lifetime. The array memory layout is presented in figure~\ref{fig:array-layout}. As shown, the arrays feature two additional fields to store the size of the array and the reference count. Additionally, integer arrays store their values directly in the array while object arrays are a simple pointer stores.
 
 As the size of \rooplpp arrays is determined by a passed expression evaluation, it is unknown at compile time. This also means that out-of-bounds checking cannot be conducted during compilation. A possible solution for this is presented in section~\ref{sec:error-handling}.  
 
@@ -1190,8 +1190,8 @@ The extensions made to \textsc{Roopl} in \rooplpp brings forth a number of addit
     \item All cells of an instance should be zero-cleared before the array is deallocated using the \textbf{delete} statement.
     \item Local object blocks should have their fields zero-cleared after the execution of the block statement.
     \item Local array blocks should have their cells zero-cleared after the execution of the block statement.
-    \item If a local object variable's value is exchanged during its block statement and the new value is an object reference, this object must have its fields zero-cleared after the execution of the block statement.
-    \item If a local array variable's value is exchanged during its block statement and the new value is an array reference, this array must have its cell zero-cleared after the execution of the block statement.
+    \item If the value of a local object variable is exchanged during its block statement and the new value is an object reference, this object must have its fields zero-cleared after the execution of the block statement.
+    \item If the value of a local array variable is exchanged during its block statement and the new value is an array reference, this array must have its cell zero-cleared after the execution of the block statement.
     \item The variable in the \textbf{new} statement must be zero-cleared beforehand.
     \item The variable in the \textbf{copy} statement must be zero-cleared beforehand.
     \item An object variable must be initialized using \textbf{new} or \textbf{copy} before its methods can be called.
@@ -1231,12 +1231,12 @@ For evaluating the results of the implemented compiler, it was tested against ex
 
 \begin{figure}[ht]
     \centering
-    \begin{tabular}{ c | c | c }
-        \textbf{Program} & \textbf{\rooplpp LOC} & \textbf{\textsc{Pisa} LOC} \\ \hline 
-        Linked List & 61 & 1280 \\
-        Doubly-Linked List & 66 & 1339 \\
-        Binary Tree & 86 & 2056 \\ 
-        RTM Simulation & 211 & 6716 \\ 
+    \begin{tabular}{ c | c | c | c}
+        \textbf{Program} & \textbf{\rooplpp LOC} & \textbf{\textsc{Pisa} LOC} & \textbf{Number of executed instructions}  \\ \hline 
+        Linked List & 61 & 1280 & 18015 \\
+        Doubly-Linked List & 66 & 1339 & 21825 \\
+        Binary Tree & 86 & 2056 & 6065\\ 
+        RTM Simulation & 211 & 6716 & 64922\\ 
       \end{tabular}
     \caption{Lines of code comparison between target and compiled \rooplpp programs}
     \label{fig:lines-of-code}
@@ -1244,6 +1244,6 @@ For evaluating the results of the implemented compiler, it was tested against ex
 
 The linked list test programs simply instantiates ten cells and links them in their respective lists. The binary tree test program instantiates three nodes and adds them to the tree structure, which afterwards is traversed to determine the sum of the nodes and finally mirroring the tree. The Reversible Turing Machine implementing incrementation of a non-negative $n$-bit binary number by 1 originally described in~\cite{ty:ejanus} has been implemented in \rooplpp and successfully converts its initial tape value of $1101$ to $0011$ after termination.
 
-As discussed, the compiler is considered proof-of-concept and no noteworthy optimizations has been implemented. However, for the sake of giving the reader an idea of the size blowup of a compiled \rooplpp program, figure~\ref{fig:lines-of-code} details this difference. The lines of translated \textsc{Pisa} instructions includes the $204$ instructions needed for the \textbf{malloc} and \textbf{malloc1} \textsc{Pisa}-equivalent mechanisms.
+As discussed, the compiler is considered proof-of-concept and no noteworthy optimizations has been implemented. However, for the sake of giving the reader an idea of the size blowup of a compiled \rooplpp program, figure~\ref{fig:lines-of-code} details this difference. The lines of translated \textsc{Pisa} instructions includes the $204$ instructions needed for the \textbf{malloc} and \textbf{malloc1} \textsc{Pisa}-equivalent mechanisms. The last row of the table shows how many instructions are execution during simulation using PendVM.
 
 
