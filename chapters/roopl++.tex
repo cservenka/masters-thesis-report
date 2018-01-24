@@ -2,15 +2,15 @@
 \label{chp:rooplpp}
 With the design and implementation of the \textsc{Reversible Object-Oriented Programming Language} (\textsc{Roopl}) and the work-in-progress report of \textsc{Joule}, the first steps into the uncharted lands of Object-Oriented Programming (OOP) and reversibility was taken. In this chapter, we will present \rooplpp, the natural successor to \textsc{Roopl}, improving the language's object instantiation by letting objects live outside \textbf{construct}/\textbf{deconstruct} blocks, allowing complex, reversible programs to be written using OOP methodologies. As with its predecessor, \rooplpp is purely reversible and each component of a program written in \rooplpp is locally invertible. This ensures no computation history is required nor added program size for backwards direction program execution.
 
-\begin{figure}
+Inspired by other language successors such as \textsc{C\texttt{++}} was to \textsc{C}, \rooplpp is a superset of \textsc{Roopl}, containing all original functionality of its predecessor, extended with new object instantiation methods for increased programming usability and an array type.
+
+\vskip 2em
+
+\begin{figure}[ht]
     \centering
     \lstinputlisting[language=roopl, style=basic, frame=none, multicols=2]{fib.rplpp}
     \caption{Example \rooplpp program implementing the Fibonacci function}    
 \end{figure}
-
-Inspired by other language successors such as \textsc{C\texttt{++}} was to \textsc{C}, \rooplpp is a superset of \textsc{Roopl}, containing all original functionality of its predecessor, extended with new object instantiation methods for increased programming usability and an array type.
-
-
 \newpage
 
 
@@ -31,7 +31,7 @@ A \rooplpp program consists, analogously to a \textsc{Roopl} program, of one or 
     s			\quad&::=\quad y\ \odot\textbf{\texttt{=}}\ e\ |\ y\ \textbf{\texttt{<=>}}\ y\tag{assignment}\\\
     			&\ |\ \qquad \textbf{if}\ e\ \textbf{then}\ s\ \textbf{else}\ s\ \textbf{fi}\ e\tag{conditional}\\
     			&\ |\ \qquad \textbf{from}\ e\ \textbf{do}\ s\ \textbf{loop}\ s\ \textbf{until}\ e\tag{loop}\\
-                &\ |\ \qquad \textbf{construct}\ d\ y\quad s\quad\textbf{destruct}\ y\tag{object block}\\
+                &\ |\ \qquad \textbf{construct}\ c\ x\quad s\quad\textbf{destruct}\ x\tag{object block}\\
                 &\ |\ \qquad \textbf{local}\ t\ x\ \texttt{=}\ e\quad s\quad\textbf{delocal}\ t\ x\ \texttt{=}\ e\tag{local variable block}\\
                 &\ |\ \qquad \textbf{new}\ d\ y\ |\ \textbf{delete}\ d\ y \tag{object con- and destruction}\\
                 &\ |\ \qquad \textbf{copy}\ d\ y\ y\ |\ \textbf{uncopy}\ d\ y\ y \tag{reference con- and destruction}\\
@@ -213,7 +213,20 @@ Local integer blocks works exactly the same as in \textsc{Roopl} and \textsc{Jan
 
 Local array and object blocks feature a number of different options. If a local array or object block is initialized with a \textbf{nil} value, the variable must afterwards be initialized using a \text{new} statement before any type-specific functionality is accessible. If the block is initiated with an existing object or array reference, the local variable essentially becomes a reference copy, analogous to a variable initialized from a \textbf{copy} statement. 
 
-For objects, the \textbf{construct}/\textbf{destruct}-blocks can be considered syntactic-sugar for a local block defined with a \textbf{nil} value, containing a \textbf{new} statement in the beginning of its statement block and a \textbf{delete} statement in the very end. % TOOD: Add figure
+\begin{figure}[h]
+    \centering
+    \begin{equation*}
+        \textbf{construct}\ c\ x\ \quad s\ \quad \textbf{destruct}\ x\ \qquad \overset{\textbf{def}}{\scalebox{1.8}{=}} \qquad \begin{array}{ l }
+            \textbf{local}\ c\ x\ = \textbf{nil}\\
+            \textbf{new}\ c\ x \quad s \quad \textbf{delete}\ c\ x\\
+            \textbf{delocal}\ c\ x = \textbf{nil} 
+        \end{array}
+      \end{equation*}
+    \caption{\textbf{construct}/\textbf{destruct}-blocks can be considered syntactic sugar}
+    \label{fig:sugar-construct-destruct}
+\end{figure}
+
+For objects, the \textbf{construct}/\textbf{destruct}-blocks can be considered syntactic sugar for a local block defined with a \textbf{nil} value, containing a \textbf{new} statement in the beginning of its statement block and a \textbf{delete} statement in the very end, as shown in figure~\ref{fig:sugar-construct-destruct}.
 
 As local array and object blocks allow freedom in terms of their interaction with other statements in the language, it is the programmer's responsibility that the local variable is deallocated using a correct expression at the end of the block definition. The value of the variable is a pointer to an object or an array. Said object or array must have all fields/cells zero-cleared before the pointer is zero-cleared at the end of the local block. If the pointer is at any point exchanged with the pointer of another object or array using the \textbf{swap} statement, the same conditions apply.  
 

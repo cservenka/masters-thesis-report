@@ -178,6 +178,19 @@ In traditional compilers, the heap pointer usually points to the end of the heap
 
 The heap can simply be expanded by adding another block of the largest possible size and storing the address of the respective free list.
 
+In the following sections of this chapter, we will present various translation techniques. In these translations we will make use of a number of \textsc{Pisa} pseudo-instructions to subtract integer values from registers and pushing/popping to the program stack. The pseudo-instructions are shown in figure~\ref{fig:pseudo-instructions} and are modified from~\cite{th:roopl}, as the direction of the program stack is flipped in \rooplpp.
+
+\begin{figure}[ht]
+    \centering
+    \begin{alignat*}{2}
+        \inst{subi}\quad r\quad i \qquad &\overset{\textbf{def}}{\scalebox{1.8}{=}} \qquad&&\ \inst{addi}\quad r\quad -i\\[1.6ex]
+        \inst{push}\quad r \qquad &\overset{\textbf{def}}{\scalebox{1.8}{=}} \qquad&&\Big[\inst{exch}\quad r\quad r_{sp}\ , \quad \inst{subi}\quad r_{sp}\quad 1\Big]\\[1.6ex]
+        \inst{pop}\quad r \qquad &\overset{\textbf{def}}{\scalebox{1.8}{=}} \qquad&&\Big[\inst{addi}\quad r_{sp}\quad 1\ , \quad \inst{exch}\quad r\quad r_{sp}\Big]
+    \end{alignat*}
+    \caption{Definition of pseudoinstructions \inst{subi}, \inst{push} and \inst{pop}, modified from~\cite{th:roopl}}
+    \label{fig:pseudo-instructions}
+\end{figure}
+
 
 \section{Inherited \textsc{Roopl} features}
 \label{sec:inherited-features}
@@ -205,25 +218,25 @@ The program structure of a translated \rooplpp is analogous to the program struc
                 &\textbf{(4)}\quad&& &&\inst{addi}\quad &&r_{flps}\quad &&p&&\text{; Initialize free lists pointer}\\
                 &\textbf{(5)}\quad&& &&\inst{xor}\quad &&r_{hp}\quad &&r_{flps}\qquad &&\text{; Initialize heap pointer}\\
                 &\textbf{(6)}\quad&& &&\inst{addi}\quad &&r_{hp}\quad &&size_{fls}&&\text{; Initialize heap pointer}\\
-                &\textbf{(7)}\quad&& &&\inst{xor}\quad &&r_{b}\quad &&r_{hp}\qquad &&\text{; Store address of initial free  memory block in $r_b$}\\
-                &\textbf{(8)}\quad&& &&\inst{ADDI}\quad &&r_{flps}\quad &&size_{fls}\quad &&\text{; Index to end of free    lists}\\
-                &\textbf{(9)}\quad&& &&\inst{SUBI}\quad &&r_{flps}\quad && 1\quad &&\text{; Index to last element of free   lists}\\
-                &\textbf{(10)}\quad&& &&\inst{EXCH}\quad &&rb\quad &&r_{flps}\quad &&\text{; Store address of first block in    last element of free lists}\\
+                &\textbf{(7)}\quad&& &&\inst{xor}\quad &&r_{b}\quad &&r_{hp}\qquad &&\text{; Store address of initial free memory block in $r_b$}\\
+                &\textbf{(8)}\quad&& &&\inst{ADDI}\quad &&r_{flps}\quad &&size_{fls}\quad &&\text{; Index to end of free lists}\\
+                &\textbf{(9)}\quad&& &&\inst{SUBI}\quad &&r_{flps}\quad && 1\quad &&\text{; Index to last element of free lists}\\
+                &\textbf{(10)}\quad&& &&\inst{EXCH}\quad &&rb\quad &&r_{flps}\quad &&\text{; Store address of first block in last element of free lists}\\
                 &\textbf{(11)}\quad&& &&\inst{ADDI}\quad &&r_{flps}\quad && 1\quad &&\text{; Index to end of free lists}\\
                 &\textbf{(12)}\quad&& &&\inst{SUBI}\quad &&r_{flps}\quad &&s\quad &&\text{; Index to beginning of free lists}   \\
                 &\textbf{(13)}\quad&& &&\inst{xor}\quad &&r_{sp}\quad &&r_{hp} &&\text{; Initialize stack pointer}\\
-                &\textbf{(14)}\quad&& &&\inst{addi}\quad &&r_{sp}\quad &&offset_{stack}&&\text{; Initialize stack pointer}\\
-                &\textbf{(15)}\quad&& &&\inst{xor}\quad &&r_m\quad &&r_{sp}\qquad &&\text{; Store address of main object in     $r_m$}\\
-                &\textbf{(16)}\quad&& &&\inst{xori}\quad &&r_v\quad &&label_{vt}\qquad &&\text{; Store address of vtable in     $r_v$}\\
-                &\textbf{(17)}\quad&& &&\inst{exch}\quad &&r_v\quad &&r_{sp}\qquad &&\text{; Push address of vtable onto    stack}\\
-                &\textbf{(18)}\quad&& &&\inst{subi}\quad &&r_{sp}\quad &&size_m\qquad &&\text{; Allocate space for main     object}\\
+                &\textbf{(14)}\quad&& &&\inst{addi}\quad &&r_{sp}\quad &&offset_{stack}\ &&\text{; Initialize stack pointer}\\
+                &\textbf{(15)}\quad&& &&\inst{subi}\quad &&r_{sp}\quad &&size_m\qquad &&\text{; Allocate space for main object}\\
+                &\textbf{(16)}\quad&& &&\inst{xor}\quad &&r_m\quad &&r_{sp}\qquad &&\text{; Store address of main object in $r_m$}\\
+                &\textbf{(17)}\quad&& &&\inst{xori}\quad &&r_v\quad &&label_{vt}\qquad &&\text{; Store address of vtable in $r_v$}\\
+                &\textbf{(18)}\quad&& &&\inst{push}\quad &&r_v\quad && &&\text{; Push address of vtable onto stack}\\
                 &\textbf{(19)}\quad&& &&\inst{push}\quad &&r_m\quad && &&\text{; Push '\textit{this}' onto stack}\\
                 &\textbf{(20)}\quad&& &&\inst{bra}\quad &&label_m \span\omit\span \qquad&&\text{; Call main procedure}\\
                 &\textbf{(21)}\quad&& &&\inst{pop}\quad &&r_m\quad && &&\text{; Pop '\textit{this}' from stack}\\
-                &\textbf{(22)}\quad&& &&\inst{subi}\quad &&r_{sp}\quad &&size_m\qquad &&\text{; Deallocate space of main    object}\\
-                &\textbf{(23)}\quad&& &&\inst{exch}\quad &&r_v\quad &&r_{sp}\qquad &&\text{; Pop vtable address into $r_v$}\\
-                &\textbf{(24)}\quad&& &&\inst{xori}\quad &&r_v\quad &&label_{vt}\qquad &&\text{; Clear $r_v$}\\
-                &\textbf{(25)}\quad&& &&\inst{xor}\quad &&r_m\quad &&r_{sp}\qquad &&\text{; Clear $r_m$}\\
+                &\textbf{(22)}\quad&& &&\inst{pop}\quad &&r_v\quad && &&\text{; Pop vtable address into $r_v$}\\
+                &\textbf{(23)}\quad&& &&\inst{xori}\quad &&r_v\quad &&label_{vt}\qquad &&\text{; Clear $r_v$}\\
+                &\textbf{(24)}\quad&& &&\inst{xor}\quad &&r_m\quad &&r_{sp}\qquad &&\text{; Clear $r_m$}\\
+                &\textbf{(25)}\quad&& &&\inst{addi}\quad &&r_{sp}\quad &&size_m\qquad &&\text{; Deallocate space of main object}\\
                 &\textbf{(26)}\quad&& &&\inst{subi}\quad &&r_{sp}\quad &&offset_{stack} &&\text{; Clear stack pointer}\\
                 &\textbf{(27)}\quad&& &&\inst{xor}\quad &&r_{sp}\quad &&r_{hp} &&\text{; Clear stack pointer}\\
                 &\textbf{(28)}\quad&& &&\inst{subi}\quad &&r_{hp}\quad &&size_{fls} &&\text{; Clear heap pointer}\\
@@ -656,7 +669,7 @@ Now that we have the main allocation mechanism in place and a method of accessin
 
 Figure~\ref{fig:pisa-buddy-malloc-entry} shows the translated \textbf{malloc} procedure. In addition to the original procedure, we also push the current return offset register value to the stack before we branch to the \textbf{malloc1} implementation, to ensure we have a zero-cleared register before starting the allocation process. The translated procedure assumes that the pointer to the object we are allocating and its size are on top of the stack before entering the block. This translated procedure serves as the entry point for the allocation subroutine as it is also only generated once. Each \textbf{new} and \textbf{delete} statement branches to the $l_{malloc}$ label to begin an allocation or a deallocation.  
 
-\begin{figure}[ht!]
+\begin{figure}[H]
     \centering
     \begin{subfigure}[t]{0.495\linewidth}
         \vskip 0pt
@@ -722,15 +735,43 @@ Figure~\ref{fig:pisa-buddy-malloc-entry} shows the translated \textbf{malloc} pr
     \caption{PISA translation of heap allocation and deallocation for objects}
     \label{fig:pisa-allocation-deallocation}
 \end{figure}
+\clearpage
 
 Figure~\ref{fig:pisa-allocation-deallocation} shows how each \textbf{new} and \textbf{delete} statement for objects are translated during compilation. They are simply each others inverse. For allocation, the object pointer and its size are pushed to the stack and then a jump to the malloc entry point is executed. After allocation, the virtual table and reference count are stored in the first two words of the allocated memory. Note how deallocation jumps and flips the direction of execution using the \inst{rbra} instruction, which then runs the allocation process in reverse. In the figure $x_{size}$ denotes the computed size of objects with class $c$, plus two, to account for the virtual table pointer and reference count space, rounded up to nearest power-of-two.
+
+\begin{figure}[ht]
+    \centering
+    \begin{equation*}
+        \textbf{construct}\ c\ x\quad s\quad\textbf{destruct}\ x
+    \end{equation*}
+    \resizebox{.8\linewidth}{!}{
+    \begin{minipage}{\linewidth}
+    \begin{alignat*}{6}
+    &\textbf{(1)}\quad&&\inst{xor}\quad &&r_x\quad &&r_{sp}\qquad &&\text{; Store address of new object $x$ in $r_x$}\\
+    &\textbf{(2)}\quad&&\inst{push}\quad &&r_x\quad && &&\text{; Push $r_x$ to the stack}\\
+    &\textbf{(3)}\quad&&\cdots\cdots && && &&\text{; Code for \textbf{new} $c$ $x$}\\
+    &\textbf{(4)}\quad&&\cdots\cdots && && &&\text{; Code for statement $s$}\\
+    &\textbf{(5)}\quad&&\cdots\cdots && && &&\text{; Code for \textbf{delete} $c$ $x$}\\
+    &\textbf{(6)}\quad&&\inst{pop}\quad &&r_x\quad && &&\text{; Pop $r_x$ from the stack}\\
+    &\textbf{(7)}\quad&&\inst{xor}\quad &&r_x\quad &&r_{sp}\qquad &&\text{; Clear $r_x$}
+    \end{alignat*}
+    \end{minipage}
+    }
+    \caption{PISA translation of a \rooplpp object block}
+    \label{fig:pisa-object-block}
+\end{figure}
+
+Figure~\ref{fig:pisa-object-block} shows the updated translation technique for object blocks. In \textsc{Roopl}, the object blocks allocated their objects on the stack, but in \rooplpp, we can now allocate them on the heap. to facilitate this, we simply execute the exact same instructions as in \textbf{new} and \textbf{delete} statements, with body statement execution code in between. As described in section~\ref{sec:local-blocks}, the \textbf{construct}/\textbf{desctruct} block can be considered syntactic sugar and its usage in a real world example would probably be limited.
 
 
 \section{Referencing}
 \label{sec:referencing-compilation}
-As mentioned, one of the main strengths of \rooplpp in terms of increased expressiveness is allowance of multiple references to objects and arrays. When an object or array is constructed we allocate enough space to hold an additional \textit{reference counter} which is initialized to $1$. For each reference copied using the \textbf{copy}-statement, we incrementally increase the reference counter by $1$. When we \textbf{uncopy} a reference, the reference counter is decreased. The object or array cannot be deconstructed until its reference counter has been returned to $1$ as we would have a reference pointer to cleared memory in the heap. Such references are known as dangling pointers.
+As mentioned, one of the main strengths of \rooplpp in terms of increased expressiveness is allowance of multiple references to objects and arrays. When an object or array is constructed we allocate enough space to hold an additional \textit{reference counter} which is initialized to $1$. For each reference copied using the \textbf{copy}-statement, we incrementally increase the reference counter by one. When we \textbf{uncopy} a reference, the reference counter is decreased by one. The object or array cannot be deconstructed until its reference counter has been returned to $1$ as we would have a reference pointer to cleared memory in the heap. Such references are known as dangling pointers.
 
-\begin{figure}[ht]
+Figure~\ref{fig:ref-counting-object-layout} shows the object layout of \rooplpp objects with the added space for the reference counting from the original \textsc{Roopl} model in figure~\ref{fig:roopl-object-layout} on page~\pageref{fig:roopl-object-layout}.
+\newpage
+
+\begin{figure}[ht!]
     \centering
     \begin{subfigure}[t]{.32\textwidth}
         \vspace{0pt}
@@ -814,7 +855,7 @@ As mentioned, one of the main strengths of \rooplpp in terms of increased expres
     \label{fig:ref-counting-object-layout}
 \end{figure}
 
-Figure~\ref{fig:ref-counting-object-layout} shows the object layout of \rooplpp objects with the added space for the reference counting from the original \textsc{Roopl} model in figure~\ref{fig:roopl-object-layout} on page~\pageref{fig:roopl-object-layout}.
+Figure~\ref{fig:pisa-referencing} shows the translated \textsc{Pisa} code for the \textbf{copy} and \textbf{uncopy} statements. As shown, they are both very simple and each others inverse. For copying, the address of the passed variable $x$ is simply copied into the zero-cleared value of $x'$ and the reference count incremented by one. For deletion, the address is cleared and the reference count decremented. Copying and clearing is done through the \inst{xor} instruction. These translations features no error handling, but a solution is discussed in section~\ref{sec:error-handling}.
 
 \begin{figure}[ht]
     \centering
@@ -872,12 +913,11 @@ Figure~\ref{fig:ref-counting-object-layout} shows the object layout of \rooplpp 
     \label{fig:pisa-referencing}
 \end{figure}
 
-Figure~\ref{fig:pisa-referencing} shows the translated \textsc{Pisa} code for the \textbf{copy} and \textbf{uncopy} statements. As shown, they are both very simple and each others inverse. For copying, the address of the passed variable $x$ is simply copied into the zero-cleared value of $x'$ and the reference count incremented by one. For deletion, the address is cleared and the reference count decremented. Copying and clearing is done through the \inst{xor} instruction. These translations features no error handling, but a solution is discussed in section~\ref{sec:error-handling}.
-
-
 \section{Arrays}
 \label{sec:arrays}
 The static arrays in \rooplpp are also heap allocated to allow dynamic lifetime. The array memory layout is presented in figure~\ref{fig:array-layout}. As shown, the arrays feature two additional fields to store the size of the array and the reference count. Additionally, integer arrays store their values directly in the array while object arrays are a simple pointer stores.
+
+As the size of \rooplpp arrays is determined by a passed expression evaluation, it is unknown at compile time. This also means that out-of-bounds checking cannot be conducted during compilation. A possible solution for this is presented in section~\ref{sec:error-handling}.  
 
 \begin{figure}[ht]
     \centering
@@ -887,7 +927,7 @@ The static arrays in \rooplpp are also heap allocated to allow dynamic lifetime.
         \begin{tikzpicture}
             \draw[dashed] (0, 2) -- (0, 2.5);
             \draw[dashed] (3, 2) -- (3, 2.5);
-            \filldraw[fill = darkgrey, draw = black] (0, 1.5) rectangle (3, 2) node[midway] {$n$};
+            \filldraw[fill = darkgrey, draw = black] (0, 1.5) rectangle (3, 2) node[midway] {$\llbracket e \rrbracket$};
             \filldraw[fill = grey, draw = black] (0, 1) rectangle (3, 1.5) node[midway] {reference count};
             \filldraw[fill = darkgrey, draw = black] (0, .5) rectangle (3, 1) node[midway] {$x[0]$ (value)};
             \filldraw[fill = grey, draw = black] (0, 0) rectangle (3, .5) node[midway] {$x[1]$ (value)};
@@ -906,7 +946,7 @@ The static arrays in \rooplpp are also heap allocated to allow dynamic lifetime.
             \draw[->] (3.5, 1.75) -- (3.1, 1.75);
             \node[rotate = 270] at (3.7, 1.75) {$r_{x}$};
             
-            \node at (1.5, 3) {\textbf{int}[$n$] $x$};
+            \node at (1.5, 3) {\textbf{int}[$e$] $x$};
         \end{tikzpicture}
     \end{subfigure}
     \begin{subfigure}[ht]{.32\textwidth}
@@ -915,7 +955,7 @@ The static arrays in \rooplpp are also heap allocated to allow dynamic lifetime.
         \begin{tikzpicture}
             \draw[dashed] (0, 2) -- (0, 2.5);
             \draw[dashed] (3, 2) -- (3, 2.5);
-            \filldraw[fill = darkgrey, draw = black] (0, 1.5) rectangle (3, 2) node[midway] {$n$};
+            \filldraw[fill = darkgrey, draw = black] (0, 1.5) rectangle (3, 2) node[midway] {$\llbracket e \rrbracket$};
             \filldraw[fill = grey, draw = black] (0, 1) rectangle (3, 1.5) node[midway] {reference count};
             \filldraw[fill = darkgrey, draw = black] (0, .5) rectangle (3, 1) node[midway] {$y[0]$ (address)};
             \filldraw[fill = grey, draw = black] (0, 0) rectangle (3, .5) node[midway] {$y[1]$ (address)};
@@ -934,13 +974,13 @@ The static arrays in \rooplpp are also heap allocated to allow dynamic lifetime.
             \draw[->] (3.5, 1.75) -- (3.1, 1.75);
             \node[rotate = 270] at (3.7, 1.75) {$r_{y}$};
             
-            \node at (1.5, 3) {\textbf{Shape}[$n$] $y$};
+            \node at (1.5, 3) {\textbf{Shape}[$e$] $y$};
         \end{tikzpicture}
     \end{subfigure}
     \caption{Illustration of prefixing in the memory layout of two \rooplpp arrays}
     \label{fig:array-layout}
 \end{figure}
-
+\newpage
 \subsection{Construction and Destruction}
 \label{subsec:construction-destruction}
 As \rooplpp arrays also are heap allocated, the buddy allocation implementation is also used for allocating arrays. The only difference between object and array allocation is that no virtual table is stored in the allocated space while the offsets for the reference counter are shared for both types. Due to this fact, \textbf{copy} and \textbf{uncopy} \textsc{Pisa} blocks generated during compile time are exactly the same for arrays and objects, as shown in the previous section.
@@ -1013,7 +1053,117 @@ As \rooplpp arrays also are heap allocated, the buddy allocation implementation 
     \label{fig:array-allocation-deallocation}
 \end{figure}
 
-Figure~\ref{fig:array-allocation-deallocation} shows the translation schemes used for array allocation and deallocation. As said, these are almost identical to the object allocation and deallocation schemes presented in figure~\ref{fig:pisa-allocation-deallocation} on page~\pageref{fig:pisa-allocation-deallocation}. Classes are analyzed during a compilation phase and their allocation size, the object size + 2 (for virtual table and reference counter) rounded up to nearest power-of-two. The size of arrays cannot be determined during compilation, as that would require evaluating the expression passed to the initialization call, and as such, we add the overhead needed directly in the allocation and deallocation instructions.   
+Figure~\ref{fig:array-allocation-deallocation} shows the translation schemes used for array allocation and deallocation. As said, these are almost identical to the object allocation and deallocation schemes presented in figure~\ref{fig:pisa-allocation-deallocation} on page~\pageref{fig:pisa-allocation-deallocation}. Classes are analyzed during a compilation phase and their allocation size, the object size + 2 (for virtual table and reference counter) rounded up to nearest power-of-two. The size of arrays cannot be determined during compilation, as that would require evaluating the expression passed to the initialization call, and as such, we add the overhead needed directly in the allocation and deallocation instructions.
+
+\begin{figure}[ht]
+    \centering
+        \begin{subfigure}{.75\textwidth}
+            \centering
+            \begin{tikzpicture}[scale=0.75]
+                % Fills
+                \draw[fill=grey] (4,0) rectangle (8,1);
+                
+                % Boxes
+                \draw (0,0) rectangle (8, 1);
+
+                % lines
+                \draw[dotted] (5, 0) to (5, 1);
+                \draw[dotted] (6, 0) to (6, 1);
+                \draw[dotted] (7, 0) to (7, 1);
+                \draw[dotted] (8, 0) to (8, 1);
+
+                % pointer
+                \draw[->] (4.5, 1.5) -- (4.5, 1.1);
+                \node[above] at (4.5, 1.5) {\small $c[2]\ x$};
+
+                % labels
+                \node[above] at (4.5, 0.15) {\small $2$}; 
+                \node[above] at (5.5, 0.15) {\small $1$};
+                \node[above] at (6.5, 0.15) {\small \textbf{nil}}; 
+                \node[above] at (7.5, 0.15) {\small \textbf{nil}}; 
+            \end{tikzpicture}
+            \caption{\footnotesize Allocate an array of class $c$ and size $2$ in $x$ by $\textbf{new}\ c[2]\ x$}
+        \end{subfigure}%
+        \vskip 1em
+        \begin{subfigure}[t]{.5\textwidth}
+            \vspace{0pt}
+            \vskip 0pt
+            \centering
+            \begin{tikzpicture}[scale=0.75]
+                % Fills
+                \draw[fill=grey] (4,0) rectangle (8,1);
+                \draw[fill=grey] (2,0) rectangle (4,1);
+                
+                % Boxes
+                \draw (0,0) rectangle (8, 1);
+
+                % lines
+                \draw[dotted] (5, 0) to (5, 1);
+                \draw[dotted] (6, 0) to (6, 1);
+                \draw[dotted] (7, 0) to (7, 1);
+                \draw[dotted] (8, 0) to (8, 1);
+
+                % pointer
+                \draw[->] (4.5, 1.5) -- (4.5, 1.1);
+                \node[above] at (4.5, 1.5) {\small $c[2]\ x$};
+
+                % labels
+                \node[above] at (3, 0.15) {\small $c$};
+                \node[above] at (4.5, 0.15) {\small $2$}; 
+                \node[above] at (5.5, 0.15) {\small $1$};
+                \node[above] at (7.5, 0.15) {\small \textbf{nil}};                
+
+                % Arrows
+                \node[circle,fill,inner sep=1pt] at (6.5, 0.5) {};
+                \draw[-latex] (6.5, 0.5) to[out=-90, in=-90] (2.5, 0.5);
+                \draw[-latex, white] (7.5, 0.5) to[out=-90, in=-90] (0.5, 0.5);
+                \draw (0,0) rectangle (8, 1);
+            \end{tikzpicture}
+            \caption{\footnotesize Assign first cell with $\textbf{new}\ c\ x[0]$}
+        \end{subfigure}%
+        \begin{subfigure}[t]{.5\textwidth}
+            \vspace{0pt}
+            \vskip 0pt
+            \centering
+            \begin{tikzpicture}[scale=0.75]
+                % Fills
+                \draw[fill=grey] (4,0) rectangle (8,1);
+                \draw[fill=grey] (2,0) rectangle (4,1);
+                \draw[fill=grey] (0,0) rectangle (2,1);
+                
+                % Boxes
+                \draw (0,0) rectangle (8, 1);
+
+                % lines
+                \draw[dotted] (5, 0) to (5, 1);
+                \draw[dotted] (6, 0) to (6, 1);
+                \draw[dotted] (7, 0) to (7, 1);
+                \draw[dotted] (8, 0) to (8, 1);
+
+                % pointer
+                \draw[->] (4.5, 1.5) -- (4.5, 1.1);
+                \node[above] at (4.5, 1.5) {\small $c[2]\ x$};
+
+                % labels
+                \node[above] at (1, 0.15) {\small $c$};
+                \node[above] at (3, 0.15) {\small $c$};
+                \node[above] at (4.5, 0.15) {\small $2$}; 
+                \node[above] at (5.5, 0.15) {\small $1$};               
+
+                % Arrows
+                \node[circle,fill,inner sep=1pt] at (6.5, 0.5) {};
+                \draw[-latex] (6.5, 0.5) to[out=-90, in=-90] (2.5, 0.5);
+
+                \node[circle,fill,inner sep=1pt] at (7.5, 0.5) {};
+                \draw[-latex] (7.5, 0.5) to[out=-90, in=-90] (0.5, 0.5);
+            \end{tikzpicture}
+            \caption{\footnotesize Assign next cell with $\textbf{new}\ c\ x[1]$}
+        \end{subfigure}%
+    \caption{Illustration of array memory storage layout}
+    \label{fig:array-memory-storage}
+\end{figure}
+
+Figure~\ref{fig:array-memory-storage} shows how object arrays simply contain pointers to allocated objects. For integer arrays, the cell values would stored directly in the allocated array space instead. 
 
 \subsection{Array Element Access}
 \label{subsec:array-element-access}
@@ -1046,7 +1196,9 @@ The extensions made to \textsc{Roopl} in \rooplpp brings forth a number of addit
     \item The variable in the \textbf{copy} statement must be zero-cleared beforehand.
     \item An object variable must be initialized using \textbf{new} or \textbf{copy} before its methods can be called.
     \item An array variable must be initialized using \textbf{new} or \textbf{copy} before its fields can be accessed.
-    \item Array cell indices must be within bounds defined in the expression passed during initialization. 
+    \item Array cell indices must be within bounds defined in the expression passed during initialization.
+    \item Only one reference to an object or an array must exist when executing the \textbf{delete} statement.
+    \item Swapping cell values between a subtype $A$ variable and parent-type $B$ array is only allowed if the value stored in the variable is also $A$ afterwards.
 \end{itemize}
 
 It is the programmer's responsibility to meet these conditions. As these conditions, in general, cannot be determined at compile time, undefined program behaviour will occur as the termination will continue silently, resulting in erroneous program state. We can insert run time error checks in the generated instructions such that the program is terminated if one of the conditions does not hold. The run time error checks can be added as dynamic error checks using error routines defined at labels, such as $label_{uninitialized\_object}$ which the program can jump to, if such a condition is unmet. \citeauthor{th:roopl} presented an example for dynamic error checking for local blocks in~\cite{th:roopl}. \textsc{Pisa} and its simulator PendVM is, however, limited and does not support exit codes natively. To fully support dynamic error checking, PendVM could be extended to read from a value from a designated register to supply a more meaningful message for the programmer in the case of a run time exit.
@@ -1067,7 +1219,7 @@ As with the \textsc{Roopl} compiler, the \rooplpp compiler is structured around 
 
 Compiled \textsc{Roopl} programs have a size increase by a factor of 10 to 15 in terms of the lines of code. For \rooplpp the size increase is much larger, partially due to the increase of static code included in form of the memory manager using the buddy layout described in this chapter and partially because heap allocations are more costly than stack allocations in terms of lines of code.
 
-The \textsc{Roopl} compiler was implemented in $1400$ lines of \textsc{Haskell} and the \rooplpp compiler was extended to $2091$ lines of \textsc{Haskell}.
+The \textsc{Roopl} compiler was implemented in $1403$ lines of \textsc{Haskell} and the \rooplpp compiler was extended to $2046$ lines of \textsc{Haskell}.
 
 The entire compiler source code as well as example programs and their compiled versions are provided in the appendices and in the supplied ZIP archive. It is also hosted on Github as open source software under the MIT license at \url{https://github.com/cservenka/ROOPLPPC}.
 
@@ -1081,10 +1233,10 @@ For evaluating the results of the implemented compiler, it was tested against ex
     \centering
     \begin{tabular}{ c | c | c }
         \textbf{Program} & \textbf{\rooplpp LOC} & \textbf{\textsc{Pisa} LOC} \\ \hline 
-        Linked List & 61 & 1268 \\
-        Doubly-Linked List & 66 & 1331 \\
-        Binary Tree & 86 & 2048 \\ 
-        RTM Simulation & 211 & 6712 \\ 
+        Linked List & 61 & 1280 \\
+        Doubly-Linked List & 66 & 1339 \\
+        Binary Tree & 86 & 2056 \\ 
+        RTM Simulation & 211 & 6716 \\ 
       \end{tabular}
     \caption{Lines of code comparison between target and compiled \rooplpp programs}
     \label{fig:lines-of-code}
