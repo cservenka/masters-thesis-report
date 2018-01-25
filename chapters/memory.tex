@@ -353,19 +353,19 @@ The algorithm consists of an entry point named \textbf{malloc} and a recursion b
 
   procedure malloc1(int p, int osize, int freelists[], int counter, int csize)
     if (csize < osize) then
-        counter += 1
-        csize += 1
-        call malloc1(p, osize, freelists, counter, csize) 
-        csize -= 1
-        counter -= 1
+      counter += 1
+      csize += 1
+      call malloc1(p, osize, freelists, counter, csize) 
+      csize -= 1
+      counter -= 1
     else
-          p += freelists[counter]
-          freelists[counter] -= p
+      p += freelists[counter]
+      freelists[counter] -= p
 
-          // Swap head of free list with next block of p 
-          freelists[counter] ^= M(p)
-          M(p) ^= freelists[counter]
-          freelists[counter] ^= M(p)
+      // Swap head of free list with next block of p 
+      freelists[counter] ^= M(p)
+      M(p) ^= freelists[counter]
+      freelists[counter] ^= M(p)
     fi csize < osize   
 \end{lstlisting}
 
@@ -464,21 +464,21 @@ Listing~\ref{lst:one-heap-per-power-of-two} shows a modified \textbf{malloc1} re
         uncall double(csize)
         counter -= 1
     else
-        if freelists[counter] != 0 then
-            p += freelists[counter]
-            freelists[counter] -= p
+      if freelists[counter] != 0 then
+        p += freelists[counter]
+        freelists[counter] -= p
 
-            // Swap head of free list with next block of p
-            freelists[counter] ^= M(p)
-            M(p) ^= freelists[counter]
-            freelists[counter] ^= M(p)
-        else
-            counter += 1
-            call double(csize)
-            call malloc1(p, osize, freelists, counter, csize)
-            uncall double(csize)
-            counter -= 1
-        fi freelists[counter] = 0 || p != freelists[counter]
+        // Swap head of free list with next block of p
+        freelists[counter] ^= M(p)
+        M(p) ^= freelists[counter]
+        freelists[counter] ^= M(p)
+      else
+        counter += 1
+        call double(csize)
+        call malloc1(p, osize, freelists, counter, csize)
+        uncall double(csize)
+        counter -= 1
+      fi freelists[counter] = 0 || p != freelists[counter]
     fi csize < osize   
 \end{lstlisting}
 
