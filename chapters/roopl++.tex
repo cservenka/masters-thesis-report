@@ -983,7 +983,7 @@ The following sections contain the operational semantics of \rooplpp, as specifi
 
 \subsection{Preliminaries}
 \label{subsec:semantics-preliminaries}
-We define a memory location $l$ to be a location. We define a location for integer variables to bind to a single location in program memory and a vector of memory locations for object and array variables, where the vector is the size of the object or array. A memory location is in the set of non-negative integers, $\mathbb{N}_0$. An environment $\gamma$ is a partial function mapping variables to memory locations. A store $\mu$ is a partial function mapping memory locations to values. An object is a tuple of a class name and an environment mapping fields to memory locations. A value is either an integer, an object or a memory location.
+We define $l$ to be a location. We define a location for integer variables to bind to a single location in program memory and a vector of memory locations for object and array variables, where the vector is the size of the object or array. A memory location is in the set of non-negative integers, $\mathbb{N}_0$. An environment $\gamma$ is a partial function mapping variables to memory locations. A store $\mu$ is a partial function mapping memory locations to values. An object is a tuple of a class name and an environment mapping fields to memory locations. A value is either an integer, an object, a location or a vector of locations.
 
 Applications of environments $\gamma$ and stores $\mu$ are analogous to the type environment $\Gamma$, defined in section~\ref{subsec:preliminaries}. 
 
@@ -993,7 +993,7 @@ Applications of environments $\gamma$ and stores $\mu$ are analogous to the type
         \gamma \in\ &\text{Envs}     &&= \text{VarIDs} \rightharpoonup \text{Locs}\\
         \mu    \in\ &\text{Stores}   &&= \text{Locs} \rightharpoonup \text{Values}\\
         &\text{Objects} &&= \Big\{ \langle c_f,\ \gamma_f \rangle \mid c_f \in \text{ClassIDs}\ \wedge\ \gamma_f \in \text{Envs} \Big\}\\
-        v \in\ &\text{Values} &&= \mathbb{Z} \cup \text{Objects}\ \cup \text{Locs}
+        v \in\ &\text{Values} &&= \mathbb{Z} \cup \text{Objects}\ \cup \text{Locs} \cup [\text{Locs}]
     \end{alignat*}
     \caption{Semantic values, originally from~\cite{th:roopl}}
     \label{fig:semantic-values}
@@ -1208,8 +1208,6 @@ The following semantic rules have been simplified from the original \textsc{Roop
             % Call
             \AXC{$\gamma(this) = l$}
             \DP
-            \AXC{$\gamma(x_0) = l $}
-            \DP
             \AXC{$\mu(l) = l' $}
             \DP
             \AXC{$\mu(l') = \Big\langle c, (l_1,\ \dots, l_m) \Big\rangle$}
@@ -1352,14 +1350,17 @@ The following semantic rules have been simplified from the original \textsc{Roop
 
             % Local blocks
             \AXC{$\langle \gamma, \mu \rangle \vdash^{\Gamma}_{stmt}\ e_1 \Rightarrow v_1$}
-            \DP
-            \hskip 2em
+            \DP \hskip 2em
             \AXC{$\langle \gamma, \mu' \rangle \vdash^{\Gamma}_{stmt}\ e_2 \Rightarrow v_2$}
+            \DP \hskip 2em
+            \AXC{$r \notin\ \text{dom}(\mu)$}
             \DP \vskip 1em
-            \AXC{$\mu' = \mu[l' \mapsto v_1, r \mapsto l']$}
-            \AXC{$\gamma[x \mapsto r] \vdash^{\Gamma}_{stmt}\ s : \mu' \rightleftharpoons \mu$}
+            \AXC{$\mu' = \mu[r \mapsto v_1]$}
+            \AXC{$\gamma[x \mapsto r] \vdash^{\Gamma}_{stmt}\ s : \mu' \rightleftharpoons \mu''$}
+            \AXC{$\mu'' = \mu'[r \mapsto v_2]$}
+            \AXC{$\mu''' = \mu'' \setminus \{ r \}$}
             \RL{\textsc{LocalBlock}}
-            \BIC{$\gamma \vdash^{\Gamma}_{stmt}\ \textbf{local}\ c\ x = e_1 \quad s \quad \textbf{delocal}\ x = e_2\ :\ \mu \rightleftharpoons \mu$} 
+            \QIC{$\gamma \vdash^{\Gamma}_{stmt}\ \textbf{local}\ c\ x = e_1 \quad s \quad \textbf{delocal}\ x = e_2\ :\ \mu \rightleftharpoons \mu'''$} 
             \DP
         \end{center}  
         \caption{Extension to the semantic inference rules for statements in \rooplpp}
@@ -1379,7 +1380,7 @@ Rules \textsc{Call}, \textsc{Uncall}, \textsc{CallObj} and \textsc{UncallObj} re
 
 The statically scoped object blocks are defined in rule \textsc{ObjBlock}. The operation semantics of these blocks are similar to \textbf{local}-blocks from \textsc{Janus}. We add the reference $x$ to a new environment and afterwards map location of $x$ to the object tuple at location $l_0$, containing the locations of all object fields, all of which, along with $l_0$ must be unused in $\mu$. The result store $\mu''$ is obtained after executing the body statement $s$ in store $\mu'$ mapping $x$ to object reference at $l_0$, as long as all object fields are zero-cleared in $\mu''$ afterwards. If any of these conditions fail, the object block statement is undefined.
 
-Figures~\ref{fig:semantic-statements-extension} and~\ref{fig:semantic-statements-extension2} show the extensions to the semantics of \textsc{Roopl} with rules for \textbf{new}/\textbf{delete} and \textbf{copy}/\textbf{uncopy} statements, array element assignment and local blocks.
+Figure~\ref{fig:semantic-statements-extension} shows the extensions to the semantics of \textsc{Roopl} with rules for \textbf{new}/\textbf{delete} and \textbf{copy}/\textbf{uncopy} statements, array element assignment and local blocks.
 
 Rule \textsc{AssArrElemVar} defines reversible assignment to array elements. After evaluating expressions $e_1$ to $v_1$ and $e_2$ to $v_2$, the value at the location of variable $x[v_1]$ under environment $\gamma$ is mapped to the value $v_3$ resulting in an updated store $\mu'$.
 
@@ -1389,7 +1390,7 @@ Array construction and destruction is very similar to object construction and de
 
 Object and array referencing is defined by rules \textsc{Copy} and \textsc{Uncopy}. A reference is created and a new store $\mu'$ obtained by mapping $x'$ to the reference $r$ which $x$ current maps to, if $c$ matches the tuple mapped to the location $l$. A reference is removed and a new store $\mu'$ obtained if $x$ and $x'$ maps to the same reference $r$ and $x'$ then is removed from the store.
 
-Local blocks are as previously mentioned, semantically similar to object blocks, where the memory location of variable $x$ must be unused in the store $\mu$. The updated store $\mu'$ contains location $l'$ mapped to the evaluated value of $e_1$, $v_1$ and the reference $r$, which $x$ is bound to, mapped to $l'$. The result store after body statement execution, $\mu''$ must have $l'$ mapped to the expression value of $e_2$, $v_2$. Before the local block terminates, a third store update is executed, clearing the used memory locations, such that $l'$ and $r$ are mapped to zero and become unused again.
+Local blocks are as previously mentioned, semantically similar to object blocks, where the memory location of variable $x$ must be unused in the store $\mu$. The updated store $\mu'$ contains location $r$ mapped to the evaluated value of $e_1$, $v_1$ and the reference $r$, which $x$ is bound to. The result store after body statement execution, $\mu''$ must have $r$ mapped to the expression value of $e_2$, $v_2$. Before the local block terminates, a third store update is executed, clearing the used memory locations, such that and $r$ are mapped to zero and become unused again.
 
 \subsection{Programs}
 \label{subsec:semantics-programs}
@@ -1404,23 +1405,23 @@ defines the meaning of programs. The class $p$ containing the main method is ins
         
         \AXC{$\Gamma = \text{gen}(c_1,\ ...,\ c_n)$}
         \DP
-        \AXC{$\Gamma(c) = \Big( \overbrace{\{ \langle t_1, f_1 \rangle,\ ...,\ \langle t_n, f_n \rangle \}}^{fields},\ methods \Big)$}
+        \AXC{$\Gamma(c_1) = \Big( \overbrace{\{ \langle t_1, f_1 \rangle,\ ...,\ \langle t_n, f_n \rangle \}}^{fields},\ methods \Big)$}
         \DP
         \AXC{$\Big( \textbf{method main ()}\ s \Big) \in methods$}
         \DP
         \AXC{$\gamma = [f_1 \mapsto 1,\ ...,\ f_i \mapsto i]$}
         \DP
-        \AXC{$\mu = [1 \mapsto 0,\ ...,\ i \mapsto 0,\ i+1 \mapsto \langle c, \gamma \rangle]$}
-        \AXC{$\langle i+1, \gamma \rangle \vdash^{\Gamma}_{stmt}\ s\ :\ \mu \rightleftharpoons \mu'$}
+        \AXC{$\mu = [1 \mapsto 0,\ ...,\ i \mapsto 0,\ this \mapsto i+1, i+1 \mapsto \langle c_1, \gamma \rangle]$}
+        \AXC{$\gamma \vdash^{\Gamma}_{stmt}\ s\ :\ \mu \rightleftharpoons \mu'$}
         \RL{\textsc{Main}}
-        \BIC{$\vdash_{prog}\ c_1\ \cdots\ c_n \Rightarrow (\mu' \circ \gamma)$}
+        \BIC{$\vdash_{prog}\ c_1\ \cdots\ c_n \Rightarrow (\gamma, \mu')$}
         \DP
     \end{center}
     \caption{Semantic inference rules for programs, originally from~\cite{th:roopl}}
     \label{fig:semantics-programs}
 \end{figure}
 
-As with \textsc{Roopl} programs, the fields of the main method in the main class $c$ are bound in a new environment, starting at memory address $1$, as $0$ is reserved for \textbf{nil}. The fields are zero-initialized in the new store $\mu$ and address $i + 1$ which maps to the new instance of $c$. After body execution, store $\mu'$ is obtained. The function $\mu' \circ \gamma$ maps class fields to their respective final values and serves as output of program $p$.
+As with \textsc{Roopl} programs, the fields of the main method in the main class $c$ are bound in a new environment, starting at memory address $1$, as $0$ is reserved for \textbf{nil}. The fields are zero-initialized in the new store $\mu$ and address $i + 1$ which maps to the new instance of $c$. After body execution, store $\mu'$ is obtained.
 
 
 \section{Program Inversion}
