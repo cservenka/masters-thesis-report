@@ -256,7 +256,7 @@ This intuitively leads to the question of garbage classification. In the reversi
 \label{sec:referencing}
 Programming languages use different approaches for storing and synchronizing variables and objects in memory. Typing \textit{linearity} is a distinction, which can reduce storage management and synchronization costs~\cite{hb:linearity}.
 
-Reversible programming languages such as \textsc{Janus} and \textsc{Roopl} are linear in the sense that object and variable pointers cannot be copied and are only deleted during deallocation. Pointer copying greatly increases the flexibility of programming, especially in a reversible settings where zero-clearing is critical, at the cost of increased management in form of reference counting for e.g. objects. For variables, pointer copying is not particular interesting, nor would it add much flexibility as the values of a variable simply can be copied into statically-scoped local blocks. For objects however, tedious amounts of boilerplate work must be done if object $A$ and $B$ need to work on the same object $C$ and only one reference to each object is allowed.
+Reversible programming languages such as \textsc{Janus} and \textsc{Roopl} are linear in the sense that object and variable pointers cannot be copied and are only deleted during deallocation. Pointer copying greatly increases the flexibility of programming, especially in a reversible setting where zero-clearing is critical, at the cost of increased management in form of reference counting for e.g. objects. For variables, pointer copying is not particular interesting, nor would it add much flexibility as the values of a variable simply can be copied into statically-scoped local blocks. For objects however, tedious amounts of boilerplate work must be done if object $A$ and $B$ need to work on the same object $C$ and only one reference to each object is allowed. Copying is not an option as field modification in one copy does not affect the other copies.  
 
 \citeauthor{tm:refcounting} presented the reversible functional language \textsc{Rcfun} which use reference counting to allow multiple pointers to the same memory nodes as well as a translation from \textsc{Rcfun} into \textsc{Janus} in \cite{tm:refcounting}. In \textsc{Rcfun}, reference counting is used to manage and trace the number of pointer copies made by respectively incrementing and decrementing a \textit{reference count} stored in the memory node, whenever the original node pointer is copied or a copy pointer is deleted. For the presented heap manage, deletion of object nodes was only allowed when no references to a node remained.
 
@@ -265,11 +265,11 @@ In non-reversible languages, reference counting is also used in garbage collecti
 
 \section{Heap Manager Layouts}
 \label{sec:heap-manager-layout}
-Heap managers can be implemented in numerous ways. Different layouts yield advantages when allocating memory, finding a free block or when collecting garbage. As our goal is to construct a garbage-free heap manager, our finalized design should emphasize and reflect this objective in particular. Furthermore, we should attempt to allocate and deallocate memory as efficiently as possible, as merging and splitting of blocks is a non-trivial problem in a reversible setting and to avoid problematic fragmentation.
+Heap managers can be implemented in numerous ways. Different layouts yield different advantages when allocating memory, finding a free block or when collecting garbage. As our goal is to construct a garbage-free heap manager, our finalized design should emphasize and reflect this objective in particular. Furthermore, we should attempt to allocate and deallocate memory as efficiently as possible, as merging and splitting of blocks is a non-trivial problem in a reversible setting and to avoid problematic fragmentation.
 
 For the sake of simplicity, we will not consider the issue of retrieving memory pages reversibly. A reversible operating system is a long-term dream of the reversible researcher and as reversible programming language designers, we assume that \rooplpp will be running in an environment, in which an operating system will be supplying memory pages and their mappings. As such, the following heap memory designs reflect this preliminary assumption, that we can always query the operating system for more memory. 
 
-Historically, most object-oriented programming languages utilize a dynamic memory manager during program execution. In older, lower-level languages such as \textsc{C}, memory management is manual and allocation has to be stated explicitly and with the requested size through the \textbf{malloc} statement and deallocated using the \textbf{free} statement. Modern languages, such as \textsc{C\texttt{++}}, \textsc{Java} and \textsc{Python}, \textit{automagically} allocates and frees space for objects and variable-sized arrays by utilizing their dynamic memory manager and garbage collector to dispatch \textbf{malloc}- and \textbf{free}-like operations to the operating system and managing the obtained memory blocks in private heap(s)~\cite{wh:cpp_memory, bv:jvm, py:memory}. The heap layout of these managers vary from language to language and compiler to compiler.
+Historically, most object-oriented programming languages utilize a dynamic memory manager during program execution. In lower-level languages such as \textsc{C} or \textsc{C\texttt{++}}, memory management is manual and allocation has to be stated explicitly and with the requested size through the \textbf{malloc} statement and deallocated using the \textbf{free} statement. Modern languages, such as \textsc{Java} and \textsc{Python}, \textit{automagically} allocates and frees space for objects and variable-sized arrays by utilizing their dynamic memory manager and garbage collector to dispatch \textbf{malloc}- and \textbf{free}-like operations to the operating system and managing the obtained memory blocks in private heap(s)~\cite{wh:cpp_memory, bv:jvm, py:memory}. The heap layout of these managers vary from language to language and compiler to compiler.
 
 Previous work on reversible heap manipulation has been done for reversible functional languages in~\cite{ha:heap, jsk:translation, tm:garbage}.
 
@@ -298,7 +298,7 @@ Instead of allocating space for objects from a single free list and heap, we cou
     % Heaps
     \draw[step=1cm] (0,4) grid (4,5);
     \node[right] at (4,4.5) {$A$ heap}; 
-    \draw (0,2) rectangle (2,3) rectangle node[right, xshift=1cm] {$B$ heap} (4,2);
+    \draw (0,2) rectangle (1.33, 3) rectangle (2.66,2) rectangle node[right, xshift=.7cm] {$B$ heap} (4,3);
     \draw (0,0) rectangle node[right, xshift=2cm] {$C$ heap} (4,1);
 
     % Free lists
@@ -319,17 +319,15 @@ Instead of allocating space for objects from a single free list and heap, we cou
     % Arrow for 2nd heap pair
     \node[circle,fill,inner sep=1pt] at (-2, 2.5) {};
     \draw[-latex] (-2, 2.5) to[out=45, in=135] (0.5, 2.5);
-    \node[circle,fill,inner sep=1pt] at (1.5, 2.5) {};
-    \draw[-latex] (1.5, 2.5) to[out=45, in=135] (2.5, 2.5);
+    \node[circle,fill,inner sep=1pt] at (1, 2.5) {};
+    \draw[-latex] (1, 2.5) to[out=45, in=135] (1.66, 2.5);
+
+    \node[circle,fill,inner sep=1pt] at (2.33, 2.5) {};
+    \draw[-latex] (2.33, 2.5) to[out=45, in=135] (3, 2.5);
 
     % Arrow for 3rd heap pair
     \node[circle,fill,inner sep=1pt] at (-2, 0.5) {};
     \draw[-latex] (-2, 0.5) to[out=45, in=135] (0.5, 0.5);
-
-    % Braces
-    \draw[decoration={brace,raise=5pt},decorate] (0,1) -- node[above=6pt] {$4n$} (4,1);
-    \draw[decoration={brace,raise=5pt},decorate] (0,3) -- node[above=6pt] {$2n$} (2,3);
-    \draw[decoration={brace,raise=5pt},decorate] (0,5) -- node[above=6pt] {$n$} (1,5);
   \end{tikzpicture}
   \caption{Memory layout using one heap per record size}
   \label{fig:one-heap-per-record-size}
@@ -339,7 +337,7 @@ Figure~\ref{fig:one-heap-per-record-size} illustrates three heaps with respectiv
 
 The advantage of this approach would be effective elimination of internal and external fragmentation, as each heap fits their targeted record perfectly, making each allocation and deallocation tailored to the size of the record obtained from a static analysis during compilation, resulting in no over-allocation and no unusable chunks of freed memory appearing during varying deallocation order. Implementation-wise, allocation of an object of a given class simply becomes the task of popping the head of the respective free list, which can easily be determined at compile time. The deallocation is simply adding a new head to the free list.
 
-Listing~\ref{lst:one-heap-per-record-size} outlines the allocation algorithm for this layout written in extended \textsc{Janus} from~\cite{ty:ejanus}. We assume that the heads of the free lists are stored in a single array primitive, such that the free list for records of size $n$ are indexed at $n-2$ and $n > 2$ (as every record needs some overhead) and that we have heaps for continuous size range with no gaps. To maintain reversibility we only allow allocation from the head of the free list.
+Listing~\ref{lst:one-heap-per-record-size} outlines the allocation algorithm for this layout written in extended \textsc{Janus} from~\cite{ty:ejanus}. We assume that the heads of the free lists are stored in a single array primitive, such that the free list for records of size $n$ are indexed at $n-2$ and $n > 2$ (as every record needs some overhead) and that we have heaps for continuous size range with no gaps.
 
 The algorithm consists of an entry point named \textbf{malloc} and a recursion body named \textbf{malloc1}. Given a zero-cleared pointer $p$, the size of the object we are allocating $o_{size}$ and the array of free lists primitive, the recursion body is called after initializing a $counter$, which is an index into the free lists array and a counter size, $c_{size}$, which is the block size of the current free list the $counter$ is indexed in. The recursion body first updates the free list index until we find a free list with a size greater or equal to the size of the object we are allocating. Once such a free list has been found, the head of the free list is simply popped and the next block is set as the new head.\\
 
@@ -373,21 +371,21 @@ The obvious disadvantage to this layout is the amount of bookkeeping and workloa
 
 Additionally, helper classes of other sizes would spawn additional heaps and bookkeeping work, making the encapsulation concept of OOP rather unattractive, for the optimization-oriented reversible programmer. 
 
-Finally, while internal and external fragmentation is effectively eliminated, we are left with additional and considerable amounts of garbage in forms of all the heaps and free lists initialized in memory. If two record types only differ one word in size, two heaps would be initialized. Each heap intuitively need to be initialized with a chunk of memory from the underlying operating system such that objects can be allocated on their respective heaps, regardless of the number of times the heap is used during program execution. This is an obvious space requirement increase over the previously presented layout, and on average, the amount of required memory for a program compiled using this approach would probably be larger, than some of the following layouts, due to unoptimized heap utilization and sharing.
+Finally, while internal and external fragmentation is effectively eliminated, we are left with additional and considerable amounts of garbage in forms of all the heaps and free lists initialized in memory. If two record types only differ one word in size, two heaps would be initialized. Each heap intuitively need to be initialized with a chunk of memory from the underlying operating system such that objects can be allocated on their respective heaps, regardless of the number of times the heap is used during program execution. This is an obvious space requirement increase over the previously presented layout, and on average, the amount of required memory for a program compiled using this approach would probably be larger, than some of the following layouts, due to unoptimized heap utilization and sharing. Heap of some sizes may be mostly empty when another is full, resulting in wasted memory.
 
 
 \subsection{One Heap Per Power-Of-Two}
 \label{subsec:one-heap-per-power-of-two}
-To address the issues of the previous heap manager layout, we can optimize the amounts of heaps required by introducing a relatively small amount of internal fragmentation. Instead of having a heap per record size, we could have a heap per power-of-two. Records would be stored in the heap closest to their respective size and as such, we reduce the number of heaps needed, as many different records can be stored in the same heap. Records of size $5$, $6$, $7$ and $8$ would in the former layout be stored in four different heaps, where they would be stored in a single heap using this layout. Figure~\ref{fig:one-heap-per-power-of-two} illustrates the free lists and heaps up to $n^m$. 
+To address the issues of the previous heap manager layout, we can optimize the amounts of heaps required by introducing a relatively small amount of internal fragmentation. Instead of having a heap per record size, we could have a heap per power-of-two. Records would be stored in the heap closest to their respective size and, as such, we reduce the number of heaps needed, as many different records can be stored in the same heap. Records of size $5$, $6$, $7$ and $8$ would in the former layout be stored in four different heaps, where they would be stored in a single heap using this layout. Figure~\ref{fig:one-heap-per-power-of-two} illustrates the free lists and heaps up to $2^n$. 
 
 \begin{figure}[ht]
   \centering
   \begin{tikzpicture}
     % Heaps
     \draw[step=1cm] (0,4) grid (4,5);
-    \node[right] at (4,4.5) {$n^1$ heap}; 
-    \draw (0,2) rectangle (2,3) rectangle node[right, xshift=1cm] {$n^2$ heap} (4,2);
-    \draw (0,0) rectangle node[right, xshift=2cm] {$n^3$ heap} (4,1);
+    \node[right] at (4,4.5) {$1$ heap}; 
+    \draw (0,2) rectangle (2,3) rectangle node[right, xshift=1cm] {$2$ heap} (4,2);
+    \draw (0,0) rectangle node[right, xshift=2cm] {$3$ heap} (4,1);
 
     \draw (0,-3) -- (0, -2);
     \draw (0,-3) -- (1.5, -3);
@@ -395,13 +393,13 @@ To address the issues of the previous heap manager layout, we can optimize the a
     \draw (2.5,-3) -- (4, -3);
     \draw (2.5,-2) -- (4, -2);
     \draw (4,-3) -- (4, -2);
-    \node[right] at (4,-2.5) {$n^m$ heap};  
+    \node[right] at (4,-2.5) {$2^n$ heap};  
 
     % Free lists
-    \draw (-2.5, 4) rectangle node[left, xshift=-0.5cm] {$n^1$ free list} (-1.5, 5);
-    \draw (-2.5, 2) rectangle node[left, xshift=-0.5cm] {$n^2$ free list} (-1.5, 3);
-    \draw (-2.5, 0) rectangle node[left, xshift=-0.5cm] {$n^3$ free list} (-1.5, 1);
-    \draw (-2.5, -3) rectangle node[left, xshift=-0.5cm] {$n^m$ free list} (-1.5, -2);
+    \draw (-2.5, 4) rectangle node[left, xshift=-0.5cm] {$1$ free list} (-1.5, 5);
+    \draw (-2.5, 2) rectangle node[left, xshift=-0.5cm] {$2$ free list} (-1.5, 3);
+    \draw (-2.5, 0) rectangle node[left, xshift=-0.5cm] {$4$ free list} (-1.5, 1);
+    \draw (-2.5, -3) rectangle node[left, xshift=-0.5cm] {$2^n$ free list} (-1.5, -2);
     
     % Arrow for 1st heap pair
     \node[circle,fill,inner sep=1pt] at (-2, 4.5) {};
@@ -428,10 +426,10 @@ To address the issues of the previous heap manager layout, we can optimize the a
     \draw[-latex] (-2, -2.5) to[out=45, in=135] (0.5, -2.5);
 
     % Braces
-    \draw[decoration={brace,raise=5pt},decorate] (0,5) -- node[above=6pt] {$n^1$} (1,5);
-    \draw[decoration={brace,raise=5pt},decorate] (0,3) -- node[above=6pt] {$n^2$} (2,3);
-    \draw[decoration={brace,raise=5pt},decorate] (0,1) -- node[above=6pt] {$n^3$} (4,1);
-    \draw[decoration={brace,raise=5pt},decorate] (0,-2) -- node[above=6pt] {$n^m$} (4,-2);
+    \draw[decoration={brace,raise=5pt},decorate] (0,5) -- node[above=6pt] {$1$} (1,5);
+    \draw[decoration={brace,raise=5pt},decorate] (0,3) -- node[above=6pt] {$2$} (2,3);
+    \draw[decoration={brace,raise=5pt},decorate] (0,1) -- node[above=6pt] {$4$} (4,1);
+    \draw[decoration={brace,raise=5pt},decorate] (0,-2) -- node[above=6pt] {$2^n$} (4,-2);
 
     % Dots
     \node[above] at (-2, -1) {$\vdots$};
@@ -524,11 +522,11 @@ There is, however, still a considerable amount of bookkeeping involved in mainta
     \draw[-latex] (10.5, 2.5) to[out=270, in=90] (10.5, 0.5);
 
     % Braces
-    \draw[decoration={brace, mirror, raise=5pt},decorate] (0,0) -- node[below=6pt] {$4n$} (4,0);
-    \draw[decoration={brace, mirror, raise=5pt},decorate] (10,0) -- node[below=6pt] {$n$} (11,0);
-    \draw[decoration={brace, raise=5pt},decorate] (11,1) -- node[above=6pt] {$2n$} (13,1);
+    \draw[decoration={brace, mirror, raise=5pt},decorate] (0,0) -- node[below=6pt] {$4$} (4,0);
+    \draw[decoration={brace, mirror, raise=5pt},decorate] (10,0) -- node[below=6pt] {$1$} (11,0);
+    \draw[decoration={brace, raise=5pt},decorate] (11,1) -- node[above=6pt] {$2$} (13,1);
   \end{tikzpicture}
-  \caption{Record size-specific free lists on a shared heap}
+  \caption{Record size-specific free lists on a shared heap (powers of two)}
   \label{fig:shared-heap}
 \end{figure}
 
@@ -664,9 +662,9 @@ The Buddy Memory layout utilizes blocks of variable-sizes of the power-of-two, t
 
 Figure~\ref{fig:buddy-memory-block-splitting} illustrates an example of block splitting during allocation in the buddy system. Originally, one block of free memory is available. When allocating a record three factors smaller than the original block, three splits occurs. 
 
-This layout is somewhat of a middle ground between the previous three designs, addressing a number of problems found in these. The Buddy Memory layout uses a single heap for all record-types, thus eliminating the problems related to moving adjacent heaps reversibly in a multi-heap layout. To optimize the problems around initializing a usable amount of variable-sized blocks in a shared heap, we simply initialize one large block in the buddy system, which we will split into smaller parts during execution.
+This layout is somewhat of a middle ground between the previous three designs, addressing a number of problems found in these. The Buddy Memory layout uses a single heap for all record-types, thus eliminating the problems related to moving adjacent heaps reversibly in a multi-heap layout. To optimize the problems around initializing a usable amount of variable-sized blocks in a shared heap, we simply initialize one large block in the buddy system, which we will split into smaller parts during execution and merge where possible when freed.
 
-The only drawback from this layout is the amount of internal fragmentation. As we only allocate blocks of a power-of-two size, substantial internal fragmentation follows when allocating large records, i.e. allocating a block of size 128 for a record of size 65. However, as most real world programs uses much smaller sized records, we do not consider this a very frequent scenario. As discussed in section~\ref{subsec:one-heap-per-power-of-two}, we would split large records into chunks of $\sqrt{n}$ at the cost of additional bookkeeping.
+The main drawback from this layout is the amount of internal fragmentation. As we only allocate blocks of a power-of-two size, substantial internal fragmentation follows when allocating large records, i.e. allocating a block of size 128 for a record of size 65. However, as most real world programs uses much smaller sized records, we do not consider this a very frequent scenario. As discussed in section~\ref{subsec:one-heap-per-power-of-two}, we would split large records into chunks of $\sqrt{n}$ at the cost of additional bookkeeping.
 
 Implementation-wise, this design would require doubling and halving of numbers related to the power-of-two. This action translates well into the reversible setting, as a simply bit-shifting directly gives us the desired result.\\
 
@@ -699,5 +697,7 @@ Implementation-wise, this design would require doubling and halving of numbers r
     fi csize < osize   
 \end{lstlisting}
 
-Listing~\ref{lst:buddy-memory} shows the Buddy Memory algorithm implemented in the extended Janus variant with local blocks from~\cite{ty:ejanus}. For simplification, object sizes are rounded to the nearest power-of-two during compile-time and we only allow allocations using the head of the free lists. The algorithm extends on the one heap per power-of-two algorithm presented in listing~\ref{lst:one-heap-per-power-of-two}, page~\pageref{lst:one-heap-per-power-of-two}.
+Listing~\ref{lst:buddy-memory} shows the Buddy Memory algorithm implemented in the extended Janus variant with local blocks from~\cite{ty:ejanus}. For simplification, object sizes are rounded to the nearest power-of-two during compile-time. The algorithm extends on the one heap per power-of-two algorithm presented in listing~\ref{lst:one-heap-per-power-of-two}, page~\pageref{lst:one-heap-per-power-of-two}.
 The body of the allocation function is still executed recursively until a free list for a $2^n$ larger than the size of the object has been found. Once found, we continue searching until we have found a non-empty free list. If the non-empty free list for a $2^n$ larger than the object is found, the head of the list is popped and the popped block is split recursively, until a block the desired size is obtained. Throughout the splitting process, empty free lists are updated when a larger free block is split into a block which fits into those lists.
+
+Since a split block is always added as two blocks to an empty free list, we can only merge adjacent blocks if they are the only two blocks in a free list.
