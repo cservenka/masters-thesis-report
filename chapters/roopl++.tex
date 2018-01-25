@@ -1053,7 +1053,7 @@ As shown in figure~\ref{fig:semantics-expr-rules}, expression evaluation has no 
     \label{sec:semantics-expr-rule-extensions}
 \end{figure}
 
-For \rooplpp, we extend the expression ruleset with a single rule for array element variables shown in figure~\ref{sec:semantics-expr-rule-extensions}. As with the expressions inference rules in \textsc{Roopl}, this extension has no effect on the store. 
+For \rooplpp, we extend the expression ruleset with a single rule for array element variables shown in figure~\ref{sec:semantics-expr-rule-extensions}. As with the expressions inference rules in \textsc{Roopl}, this extension has no effect on the store.
 
 \begin{figure}[ht]
     \begin{align*}
@@ -1262,16 +1262,17 @@ The following semantic rules have been simplified from the original \textsc{Roop
             % Object block
             \AXC{$\Gamma(c) = \Big\langle \overbrace{(x_1,\ \dots, x_m)}^{fields}, methods \Big\rangle $}
             \DP
-            \AXC{$\gamma' = \gamma[x \mapsto 0]$}
+            \AXC{$\gamma' = \gamma[x \mapsto l_0]$}
             \DP
             \AXC{$l_0 \notin\ \text{dom}(\mu)\ \dots\ l_m \notin\ \text{dom}(\mu) $}
             \DP
             \AXC{$\mu' = \mu\Bigg[\gamma'(x) \mapsto l_0, l_0 \mapsto \Big\langle c, (l_1,\ \dots, 1_m) \Big\rangle, l_1 \mapsto 0,\ \dots, l_m \mapsto 0\Bigg]$}
             \DP
             \AXC{$\gamma' \vdash^\Gamma_{stmt}\ s\ :\ \mu' \rightleftharpoons \mu''$}
-            \AXC{$\mu'' = \mu' \setminus \{ \gamma'(x), l_0,\ \dots, l_m \}$}
+            \DP
+            \AXC{$\mu'' = \mu'''\Bigg[\gamma'(x) \mapsto l_0, l_0 \mapsto \Big\langle c, (l_1,\ \dots, 1_m) \Big\rangle, l_1 \mapsto 0,\ \dots, l_m \mapsto 0\Bigg]$}
             \RL{\textsc{ObjBlock}}
-            \BIC{$\gamma \vdash^{\Gamma}_{stmt}\ \textbf{construct}\ c\ x \quad s \quad \textbf{destruct}\ x\ :\ \mu \rightleftharpoons \mu''$}  
+            \UIC{$\gamma \vdash^{\Gamma}_{stmt}\ \textbf{construct}\ c\ x \quad s \quad \textbf{destruct}\ x\ :\ \mu \rightleftharpoons \mu'''$}  
             \DP
         \end{center}
         \caption{Semantic inference rules for statements, modified from~\cite{th:roopl} (cont)}
@@ -1352,15 +1353,11 @@ The following semantic rules have been simplified from the original \textsc{Roop
             \AXC{$\langle \gamma, \mu \rangle \vdash^{\Gamma}_{stmt}\ e_1 \Rightarrow v_1$}
             \DP \hskip 2em
             \AXC{$\langle \gamma, \mu' \rangle \vdash^{\Gamma}_{stmt}\ e_2 \Rightarrow v_2$}
-            \DP \hskip 2em
-            \AXC{$r \notin\ \text{dom}(\mu)$}
             \DP \vskip 1em
-            \AXC{$\mu' = \mu[r \mapsto v_1]$}
-            \AXC{$\gamma[x \mapsto r] \vdash^{\Gamma}_{stmt}\ s : \mu' \rightleftharpoons \mu''$}
-            \AXC{$\mu'' = \mu'[r \mapsto v_2]$}
-            \AXC{$\mu''' = \mu'' \setminus \{ r \}$}
+            \AXC{$r \notin\ \text{dom}(\mu)$}
+            \AXC{$\gamma[x \mapsto r] \vdash^{\Gamma}_{stmt}\ s : \mu[r \mapsto v_1] \rightleftharpoons \mu'[r \mapsto v_2]$}
             \RL{\textsc{LocalBlock}}
-            \QIC{$\gamma \vdash^{\Gamma}_{stmt}\ \textbf{local}\ c\ x = e_1 \quad s \quad \textbf{delocal}\ x = e_2\ :\ \mu \rightleftharpoons \mu'''$} 
+            \BIC{$\gamma \vdash^{\Gamma}_{stmt}\ \textbf{local}\ c\ x = e_1 \quad s \quad \textbf{delocal}\ x = e_2\ :\ \mu \rightleftharpoons \mu'$} 
             \DP
         \end{center}  
         \caption{Extension to the semantic inference rules for statements in \rooplpp}
@@ -1378,7 +1375,7 @@ For loops and conditionals, Rules \textsc{LoopMain}, \textsc{LoopBase} and \text
 
 Rules \textsc{Call}, \textsc{Uncall}, \textsc{CallObj} and \textsc{UncallObj} respectively define local and non-local method invocations. For local methods, method $q$ in current class $c$ should be of arity $n$ matching the number of arguments. The updated store $\mu'$ is obtained after statement body execution in the object environment. As local uncalling is the inverse of local calling, the direction of execution is simply reversed, and as such the input store a \textbf{call} statement serves as the output store of the \textbf{uncall} statement, similarly to techniques presented in~\cite{ty:janus, ty:ejanus}.
 
-The statically scoped object blocks are defined in rule \textsc{ObjBlock}. The operation semantics of these blocks are similar to \textbf{local}-blocks from \textsc{Janus}. We add the reference $x$ to a new environment and afterwards map location of $x$ to the object tuple at location $l_0$, containing the locations of all object fields, all of which, along with $l_0$ must be unused in $\mu$. The result store $\mu''$ is obtained after executing the body statement $s$ in store $\mu'$ mapping $x$ to object reference at $l_0$, as long as all object fields are zero-cleared in $\mu''$ afterwards. If any of these conditions fail, the object block statement is undefined.
+The statically scoped object blocks are defined in rule \textsc{ObjBlock}. The operation semantics of these blocks are similar to \textbf{local}-blocks from \textsc{Janus}. We add the reference $x$ to a new environment and afterwards map the location of $x$ to the object tuple at location $l_0$, containing the locations of all object fields, all of which, along with $l_0$, must be unused in $\mu$. The result store $\mu''$ is obtained after executing the body statement $s$ in store $\mu'$ mapping $x$ to object reference at $l_0$, as long as all object fields are zero-cleared in $\mu'''$ afterwards. If any of these conditions fail, the object block statement is undefined.
 
 Figure~\ref{fig:semantic-statements-extension} shows the extensions to the semantics of \textsc{Roopl} with rules for \textbf{new}/\textbf{delete} and \textbf{copy}/\textbf{uncopy} statements, array element assignment and local blocks.
 
@@ -1390,7 +1387,7 @@ Array construction and destruction is very similar to object construction and de
 
 Object and array referencing is defined by rules \textsc{Copy} and \textsc{Uncopy}. A reference is created and a new store $\mu'$ obtained by mapping $x'$ to the reference $r$ which $x$ current maps to, if $c$ matches the tuple mapped to the location $l$. A reference is removed and a new store $\mu'$ obtained if $x$ and $x'$ maps to the same reference $r$ and $x'$ then is removed from the store.
 
-Local blocks are as previously mentioned, semantically similar to object blocks, where the memory location of variable $x$ must be unused in the store $\mu$. The updated store $\mu'$ contains location $r$ mapped to the evaluated value of $e_1$, $v_1$ and the reference $r$, which $x$ is bound to. The result store after body statement execution, $\mu''$ must have $r$ mapped to the expression value of $e_2$, $v_2$. Before the local block terminates, a third store update is executed, clearing the used memory locations, such that and $r$ are mapped to zero and become unused again.
+Local blocks are as previously mentioned, semantically similar to object blocks, where the memory location of variable $x$ is mapped to an unused reference $r$ in the store $\mu$. Before body statement execution, we let $r$ bind to the evaluated value of $e_1$, $v_1$. The result store after body statement execution, $\mu'$ must have $r$ mapped to the expression value of $e_2$, $v_2$. $r$ is then zero-cleared using the value of expression evaluation and becomes unused again.
 
 \subsection{Programs}
 \label{subsec:semantics-programs}
