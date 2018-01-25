@@ -1041,13 +1041,6 @@ As shown in figure~\ref{fig:semantics-expr-rules}, expression evaluation has no 
 
 \begin{figure}[ht]
     \begin{center}
-        % \AXC{$\langle \gamma, \mu \rangle \vdash_{expr}\ e \Rightarrow v $}
-        % \RL{\textsc{ArrElemVar}}
-        % \UIC{$\langle \gamma, \mu \rangle \vdash_{expr}\ x[e] \Rightarrow \mu\Big( \gamma(x[v]) \Big)$}
-        % \DP
-
-        % \vskip 1.5em
-
         \AXC{$\langle \gamma, \mu \rangle \vdash_{expr}\ e \Rightarrow v$}
         \AXC{$\gamma(x) = l$}
         \AXC{$\mu(l)[v] = l'$}
@@ -1112,7 +1105,7 @@ The judgment
 \begin{prooftree}
     \AXC{$\gamma \vdash^{\Gamma}_{stmt}\ s : \mu \rightleftharpoons \mu'$}
 \end{prooftree}
-defines the meaning of statements. We say that under environment $\gamma$, statement $s$ with class map $\Gamma$ reversibly transforms store $\mu$ to store $\mu'$. Figure~\ref{fig:semantic-statements},~\ref{fig:semantic-statements-cont} and~\ref{fig:semantic-statements-cont2} defines the operational semantics of \rooplpp.
+defines the meaning of statements. We say that under environment $\gamma$, statement $s$ with class map $\Gamma$ reversibly transforms store $\mu$ to store $\mu'$. Figure~\ref{fig:semantic-statements},~\ref{fig:semantic-statements-cont} and~\ref{fig:semantic-statements-extension} defines the operational semantics of \rooplpp.
 
 The following semantic rules have been simplified from the original \textsc{Roopl} semantics~\cite{th:roopl} to better accommodate the extended language. 
 
@@ -1338,13 +1331,7 @@ The following semantic rules have been simplified from the original \textsc{Roop
             \RL{\textsc{ArrDelete}}
             \UIC{$\gamma \vdash^{\Gamma}_{stmt}\ \textbf{delete}\ a[e]\ x\ :\ \mu \rightleftharpoons \mu'$}
             \DP
-        \end{center}  
-        \caption{Extension to the semantic inference rules for statements in \rooplpp}
-        \label{fig:semantic-statements-extension}
-    \end{figure}
 
-    \begin{figure}[!ht]
-        \begin{center}   
             % Copy
             \AXC{$\gamma(x) = l$}
             \AXC{$\gamma(x') = l'$}
@@ -1374,9 +1361,9 @@ The following semantic rules have been simplified from the original \textsc{Roop
             \RL{\textsc{LocalBlock}}
             \BIC{$\gamma \vdash^{\Gamma}_{stmt}\ \textbf{local}\ c\ x = e_1 \quad s \quad \textbf{delocal}\ x = e_2\ :\ \mu \rightleftharpoons \mu$} 
             \DP
-        \end{center}
-        \caption{Extension to the semantic inference rules for statements in \rooplpp (cont)}
-        \label{fig:semantic-statements-extension2}
+        \end{center}  
+        \caption{Extension to the semantic inference rules for statements in \rooplpp}
+        \label{fig:semantic-statements-extension}
     \end{figure}
 \end{subfigures}
 
@@ -1460,7 +1447,7 @@ In order to truly show that \rooplpp in fact is a reversible language, we must d
     \label{fig:statement-inverter}
 \end{figure}
 
-Program inversion is conducted by recursive descent over components and statements. A proposed extension to the statement inverter for whole-program inversion, is retained in the \rooplpp statement inverter. The extension covers the case, which reveals itself during method calling. As a method call is equivalent to an uncall with the inverse method and we simply change calls to uncalls during inversion, the inversion of the method body cancels out. The proposed extension, presented in~\cite{ty:janus, th:roopl}, simply avoids inversion of calls and uncalls, as shown in figure~\ref{fig:inverter-extension}.
+Program inversion is conducted by recursive descent over components and statements. A proposed extension to the statement inverter for whole-program inversion is retained in the \rooplpp statement inverter. The extension covers a case that reveals itself during method calling. As a method call is equivalent to an uncall with the inverse method we simply change calls to uncalls during inversion, the inversion of the method body cancels out. The proposed extension, presented in~\cite{ty:janus, th:roopl}, simply avoids inversion of calls and uncalls, as shown in figure~\ref{fig:inverter-extension}.
 
 \begin{figure}[ht]    
     \centering
@@ -1501,33 +1488,34 @@ Given a well-typed statement, the statement inverter $\mathcal{I}$ should always
 
 \begin{proof}\let\qed\relax
     By structural induction on $\mathcal{T}$. Unmodified \textsc{Roopl} statements retained in \rooplpp has been omitted.
-    \newpage
+
     \begin{itemize}
         \item Case $\mathcal{T} =$\vskip 1em
             \begin{center}
-                \AXC{$\overbrace{x \in \text{IntegerArrayIDs}}^{\mathcal{C}_1}$}
+                \AXC{$\overbrace{\Pi(x) = \textbf{int}[\ ]}^{\mathcal{C}_1}$}
                 \DP\\
                 \AXC{$\overbrace{\Pi \vdash_{expr} e_1\ :\ \textbf{int}}^{\mathcal{E}_1}$}
-                \AXC{$\overbrace{x[e_1] \not\in \text{vars}(e_2)}^{\mathcal{C}_2}$}
+                \AXC{$\overbrace{\Big( {\ x\ } \cup \text{vars}(e_1) \Big) \cap \text{vars}(e_2) = \emptyset}^{\mathcal{C}_2}$}
                 \AXC{$\overbrace{\Pi \vdash_{expr}\ e_2 : \textbf{int}}^{\mathcal{E}_2}$}
                 \RL{\textsc{T-ArrElemAss}}
-                \TIC{$\langle \Pi, c \rangle \vdash^{\Gamma}_{stmt}\ x[e_1] \odot= e_2$}
+                \TIC{$\langle \Pi, c \rangle \vdash^{\Gamma}_{stmt}\ x[e_1]\ \texttt{$\odot$=}\ e_2$}
                 \DP\\
             \end{center}
             \vskip 1em
-            In this case, we have $\mathcal{I}\llbracket x\ \odot=\ e \rrbracket = x\ \odot'=\ e$, for some $\odot'$. Therefore, $\mathcal{T}'$ will also be a derivation of rule \textsc{T-ArrElemAss}, and as such, we can simply reuse the conditions $\mathcal{C}_1, \mathcal{C}_2$ and the expressions $\mathcal{E}_1. \mathcal{E}_2$ in construction of $\mathcal{T}'$
-            \begin{equation*}
-                \mathcal{T}' =
-                \AXC{$\overbrace{x \in \text{IntegerArrayIDs}}^{\mathcal{C}_1}$}
+            In this case, we have $\mathcal{I}\llbracket x\ \texttt{$\odot$=}\ e \rrbracket = x\ \texttt{$\odot'$=}\ e$, for some $\odot'$. Therefore, $\mathcal{T}'$ will also be a derivation of rule \textsc{T-ArrElemAss}, and as such, we can simply reuse the conditions $\mathcal{C}_1, \mathcal{C}_2$ and the expressions $\mathcal{E}_1. \mathcal{E}_2$ in construction of $\mathcal{T}'$
+            \begin{gather*}
+                \AXC{$\overbrace{\Pi(x) = \textbf{int}[\ ]}^{\mathcal{C}_1}$}
+                \DP\\
                 \AXC{$\overbrace{\Pi \vdash_{expr} e_1\ :\ \textbf{int}}^{\mathcal{E}_1}$}
-                \AXC{$\overbrace{x[e_1] \not\in \text{vars}(e_2)}^{\mathcal{C}_2}$}
+                \AXC{$\overbrace{\Big( {\ x\ } \cup \text{vars}(e_1) \Big) \cap \text{vars}(e_2) = \emptyset}^{\mathcal{C}_2}$}
                 \AXC{$\overbrace{\Pi \vdash_{expr}\ e_2 : \textbf{int}}^{\mathcal{E}_2}$}
-                \QIC{$\langle \Pi, c \rangle \vdash^{\Gamma}_{stmt}\ x[e_1] \odot'= e_2$}
+                \LL{$\mathcal{T}' =$}
+                \TIC{$\langle \Pi, c \rangle \vdash^{\Gamma}_{stmt}\ x[e_1]\ \texttt{$\odot'$=}\ e_2$}
                 \DP
-            \end{equation*}
+            \end{gather*}
 
         \item Case $\mathcal{T} =$
-            \AXC{$\overbrace{\Pi(x) = \textbf{nil}}^{\mathcal{C}_1}$}
+            \AXC{$\overbrace{\Pi(x) = c'}^{\mathcal{C}_1}$}
             \RL{\textsc{T-ObjNew}}
             \UIC{$\langle \Pi, c \rangle  \vdash^{\Gamma}_{stmt}\ \textbf{new}\ c'\ x$} 
             \DP\\
@@ -1547,7 +1535,7 @@ Given a well-typed statement, the statement inverter $\mathcal{I}$ should always
             \vskip 1em
             Inverse of the previous case, we now have $\mathcal{I} \llbracket \textbf{delete}\ c\ x\rrbracket\ = \textbf{new}\ c\ x$, meaning $\mathcal{T}'$ must be of the form: 
             \begin{equation*}
-                \mathcal{T}' =  \AXC{$\overbrace{\Pi(x) = \textbf{nil}}^{\mathcal{C}_2}$}
+                \mathcal{T}' =  \AXC{$\overbrace{\Pi(x) = c'}^{\mathcal{C}_2}$}
                 \UIC{$\langle \Pi, c \rangle  \vdash^{\Gamma}_{stmt}\ \textbf{new}\ c'\ x$} 
                 \DP
             \end{equation*}
@@ -1555,7 +1543,7 @@ Given a well-typed statement, the statement inverter $\mathcal{I}$ should always
         \item Case $\mathcal{T} =$ 
             \AXC{$\overbrace{\text{arrayType}(a) \in \Big\{ \text{classIDs}, \textbf{int} \Big\}}^{\mathcal{C}_1}$}
             \AXC{$\overbrace{\Pi \vdash_{expr}\ e = \textbf{int}}^{\mathcal{E}}$}
-            \AXC{$\overbrace{\Pi(x) = \textbf{nil}}^{\mathcal{C}_2}$}
+            \AXC{$\overbrace{\Pi(x) = a[\ ]}^{\mathcal{C}_2}$}
             \RL{\textsc{T-ArrNew}}
             \TIC{$\langle \Pi, c \rangle  \vdash^{\Gamma}_{stmt}\ \textbf{new}\ a[e]\ x$} 
             \DP\\
@@ -1564,7 +1552,7 @@ Given a well-typed statement, the statement inverter $\mathcal{I}$ should always
             \begin{equation*}
                 \mathcal{T}' = \AXC{$\overbrace{\text{arrayType}(a) \in \Big\{ \text{classIDs}, \textbf{int} \Big\}}^{\mathcal{C}_1}$}
                 \AXC{$\overbrace{\Pi \vdash_{expr}\ e = \textbf{int}}^{\mathcal{E}}$}
-                \AXC{$\overbrace{\Pi(x) = a}^{\mathcal{C}_3}$}
+                \AXC{$\overbrace{\Pi(x) = a[\ ]}^{\mathcal{C}_3}$}
                 \TIC{$\langle \Pi, c \rangle  \vdash^{\Gamma}_{stmt}\ \textbf{delete}\ a[e]\ x$}
                 \DP
             \end{equation*}
@@ -1572,7 +1560,7 @@ Given a well-typed statement, the statement inverter $\mathcal{I}$ should always
          \item Case $\mathcal{T} =$
             \AXC{$\overbrace{\text{arrayType}(a) \in \Big\{ \text{classIDs}, \textbf{int} \Big\}}^{\mathcal{C}_1}$}
             \AXC{$\overbrace{\Pi \vdash_{expr}\ e = \textbf{int}}^{\mathcal{E}}$}
-            \AXC{$\overbrace{\Pi(x) = a}^{\mathcal{C}_2}$}
+            \AXC{$\overbrace{\Pi(x) = a[\ ]}^{\mathcal{C}_2}$}
             \RL{\textsc{T-ArrDlt}}
             \TIC{$\langle \Pi, c \rangle  \vdash^{\Gamma}_{stmt}\ \textbf{delete}\ a[e]\ x$}
             \DP\\
@@ -1581,14 +1569,14 @@ Given a well-typed statement, the statement inverter $\mathcal{I}$ should always
             \begin{equation*}
                 \mathcal{T}' = \AXC{$\overbrace{\text{arrayType}(a) \in \Big\{ \text{classIDs}, \textbf{int} \Big\}}^{\mathcal{C}_1}$}
                 \AXC{$\overbrace{\Pi \vdash_{expr}\ e = \textbf{int}}^{\mathcal{E}}$}
-                \AXC{$\overbrace{\Pi(x) = \textbf{nil}}^{\mathcal{C}_3}$}
+                \AXC{$\overbrace{\Pi(x) = a[\ ]}^{\mathcal{C}_3}$}
                 \TIC{$\langle \Pi, c \rangle  \vdash^{\Gamma}_{stmt}\ \textbf{new}\ a[e]\ x$} 
                 \DP
             \end{equation*}
 
          \item Case $\mathcal{T} =$ 
             \AXC{$\overbrace{\Pi(x) = c'}^{\mathcal{C}_1}$}
-            \AXC{$\overbrace{\Pi(x') = \textbf{nil}}^{\mathcal{C}_2}$}
+            \AXC{$\overbrace{\Pi(x') = c'}^{\mathcal{C}_2}$}
             \RL{\textsc{T-Cp}}
             \BIC{$\langle \Pi, c \rangle  \vdash^{\Gamma}_{stmt}   \ \textbf{copy}\ c'\ x\ x'$} 
             \DP\\
@@ -1611,7 +1599,7 @@ Given a well-typed statement, the statement inverter $\mathcal{I}$ should always
             We have $\mathcal{I} \llbracket \textbf{uncopy}\ c\ x\ x' \rrbracket\ = \textbf{copy}\ c\ x\ x'$. Using $\mathcal{C}_1$, $\mathcal{T}'$ must as such be of the form
             \begin{equation*}
                 \mathcal{T}' = \AXC{$\overbrace{\Pi(x) = c'}^{\mathcal{C}_1}$}
-                \AXC{$\overbrace{\Pi(x') = \textbf{nil}}^{\mathcal{C}_3}$}
+                \AXC{$\overbrace{\Pi(x') = c'}^{\mathcal{C}_3}$}
                 \BIC{$\langle \Pi, c \rangle  \vdash^{\Gamma}_{stmt}   \ \textbf{copy}\ c'\ x\ x'$} 
                 \DP
             \end{equation*}
@@ -1683,9 +1671,9 @@ A RTM simulation implemented in \textsc{Roopl} by representing the set of states
 \subsection{Tape Representation}
 \label{subsec:tape-representation}
 As with regular Turing machines, the Reversible Turing machines also have tapes of infinite length. Therefore, we must simulate tape growth in either direction.
-\citeauthor{ty:ejanus} represented the tape using two stack primitives in the Janus RTM interpreter and \citeauthor{th:roopl} used list of objects. In \rooplpp, we could implement a stack, as objects are not statically scoped as in \textsc{Roopl}. However, in terms of easy of use, a doubly linked list implementation similar to the one presented in section~\ref{subsec:doubly-linked-list}, of simple cell objects containing a \textit{value}, \textit{left}, \textit{right} and \textit{self} field, is more intuitive.
+\citeauthor{ty:ejanus} represented the tape using two stack primitives in the Janus RTM interpreter and \citeauthor{th:roopl} used list of objects. In \rooplpp, we could implement a stack, as objects are not statically scoped as in \textsc{Roopl}. However, in terms of easy of use, a doubly linked list implementation similar to the one presented in section~\ref{subsec:doubly-linked-list}, of simple cell objects containing \textit{value}, \textit{left}, \textit{right} and \textit{self} fields, is more intuitive.
 
-As such, the tape head hovers a tape cell by inspecting a specific element of the doubly linked list tape representation. When we move in either direction, we simply set the neighbour element as the new tape head and allocate a new neighbour for the new tape head cell, if we are at the end of the list, to simulate the infinitely-length tape. Reversibly, this means that when we move in the opposite direction, cells are deallocated if we are moving the tape head away from the cell currently neighbouring either end of the tape.
+As such, the tape head finds a tape cell by inspecting a specific element of the doubly linked list tape representation. When we move in either direction, we simply set the neighbour element as the new tape head and allocate a new neighbour for the new tape head cell, if we are at the end of the list, to simulate the infinitely-length tape. Reversibly, this means that when we move in the opposite direction, blank cells are deallocated if we are moving the tape head away from the cell currently neighbouring either end of the tape.
 
 \begin{figure}[ht]
     \centering
@@ -1695,6 +1683,7 @@ As such, the tape head hovers a tape cell by inspecting a specific element of th
 \end{figure}
 
 Figure~\ref{fig:rtm-move-tape-head-method} shows the \textit{moveRight} method for moving the tape head right. If the current tape head has no instantiated right neighbour we construct one using the \textbf{new} statement. Uncalling this method will move the tape head left. If the tape head is empty after moving left, we simply allocate a new cell, thus allowing tape growth in both directions. 
+\newpage
 
 \subsection{Reversible Turing Machine Simulation}
 \label{subsec:rtm-simulation}
@@ -1707,7 +1696,7 @@ Figure~\ref{fig:rtm-instruction-method} shows the modified method \textit{inst} 
     \label{fig:rtm-instruction-method}
 \end{figure}
 
-Figure~\ref{fig:rtm-simulation-method} shows the simulate method which is the main method responsible for running the RTM simulation. The tape is extended in either direction when needed and the program counter is incremented.
+Figure~\ref{fig:rtm-simulation-method} shows the simulate method which is the main method responsible for running the RTM simulation. The tape is extended in either direction when needed, and the program counter is incremented.
 
 \begin{figure}[ht]
     \centering
@@ -1716,6 +1705,6 @@ Figure~\ref{fig:rtm-simulation-method} shows the simulate method which is the ma
     \label{fig:rtm-simulation-method}
 \end{figure} 
 
-Unlike the \textsc{Roopl} simulation, \rooplpp is not limited by stack allocated, statically-scoped objects. Due to this limitation, the \textsc{Roopl} RTM simulator cannot finish with the TM tape as its program output when the RTM halts, as the call stack of the simulation must unwind before termination. As objects in \rooplpp is not bound by this limitation, the TM tape will exist as the program output when the RTM halts.
+Unlike the \textsc{Roopl} simulation, \rooplpp is not limited by stack allocated, statically-scoped objects. Due to this limitation, the \textsc{Roopl} RTM simulator cannot finish with the TM tape as its program output when the RTM halts, as the call stack of the simulation must unwind before termination. As objects in \rooplpp are not bound by this limitation, the TM tape will exist as the program output when the RTM halts.\footnote{We are here breaking the rule that a \textbf{new} statement must eventually be followed by a \textbf{delete} statement to free the data.}
 
 Instantiating a RTM simulation consists of initializing an initial tape head cell, as well as the transition rule arrays. After initialization, the \textit{simulate} method is simply called and the simulation begins.
