@@ -216,8 +216,8 @@ In heap allocation layouts, we maintain one or more free lists to keep track of 
       \draw[-] (2,1.25) -- (6,1.25);
       \draw[-] (2,0.75) -- (6,0.75);
       \draw[-] (2,0.25) -- (6,0.25);
-      \draw[-] (-1,-0.5) node[left]{$out$} -- (9,-0.5) node[right] {$out$};
-      \draw[-] (4,0.24) node[circle,fill,inner sep=1pt] {} -- (4,-0.5) node[circle,fill,inner sep=1pt] {};
+      \draw[-] (-1,-0.5) node[left]{$0$} -- (9,-0.5) node[right] {$out$};
+      \draw[-] (4,0.24) node[circle,fill,inner sep=1pt] {} -- (4,-0.5) node {$\oplus$};
       
       % boxes
       \draw[fill = white] (0, 0) rectangle (2, 2) node[pos=0.5] {\Large $f$};
@@ -234,22 +234,19 @@ Returning the free list(s) to their original states is a non-trivial matter, whi
   \centering
   % \includegraphics[width=0.7\textwidth]{garbage-classes}
   \begin{tikzpicture}
-    % lines
-    \draw[-] (-1,1.75) node[left]{$free\ list$} -- (2,1.75);
-    \draw[-] (-1,0.25) node[left]{$in$} -- node[below] {$out$} (10,0.25) node[right] {$in$};
-    \draw (7,1.75) .. controls (6,1.75) and (6,1.75) .. (6,2.75) node[above] {$\forall\ free\ lists$};
-    \draw (2,1.75) .. controls (3,1.75) and (3,1.75) .. (3,2.75) node[above] {$free\ list'$};
-    \draw[-] (9,1.75) -- (10,1.75) node[right]{$free\ list''$};
-    
+    \draw[-] (-1,1.75) node[left]{$free\ list$} -- (4.5,1.75) node[above]{$free\ list'$} -- (10.5,1.75) node[right] {$free\ list''$};
+    \draw[-] (-1,0.25) node[left]{$input_f$} -- (3,0.25) node[right] {$output_f$};
+    \draw[-] (6,0.25) node[left]{$input_g$} -- (10,0.25) node[right] {$output_g$};
+          
     % boxes
     \draw[fill = white] (0, 0) rectangle (2, 2) node[pos=0.5] {\Large $f$};
-    \draw[fill = white] (7, 0) rectangle (9, 2) node[pos=0.5] {\Large $f^{-1}$};
+    \draw[fill = white] (7, 0) rectangle (9, 2) node[pos=0.5] {\Large $g$};
   \end{tikzpicture}
   \caption{All free lists are considered equivalent "garbage" in terms of injective functions}
   \label{fig:equivalent-free-lists}
 \end{figure}
 
-This intuitively leads to the question of garbage classification. In the reversible setting all functions are injective. Thus, given some $input_f$, in a reversible computation using heap allocation, the injective function $f$ produces some $output_f$ and some $garbage_f$ (e.g. garbage in form of storing data in the heap, so the free list changes, the heap grows, etc.). Its inverse function $f^{-1}$ must thus take the $output_f$ of $f$ and $garbage_f$ as $input_{f^{-1}}$ to produce its output $output_{f^{-1}}$ which is the $input_f$ of $f$. However, in the context of reversible heaps, we must consider all free lists as of "equivalent garbage class" and thus freely substitutable with each other, as injective functions still can drastically change the block layout, free list order, etc. during its execution in either direction. Figure~\ref{fig:equivalent-free-lists} shows how any free list can be passed between a function $f$ and its inverse $f^{-1}$.
+This intuitively leads to the question of garbage classification. In the reversible setting all functions are injective. Thus, given some $input_f$, in a reversible computation using heap allocation, the injective function $f$ produces some $output_f$ and some modified free list $free\ list'$, obtained after storing or freeing data in the heap during the execution of $f$ with an input $free\ list$. A future injective function in the program, function $g$, must thus take any modification of the original free list in addition to its input to produce its output $output_g$ and a potentially further modified free list, $free\ list''$. However, in the context of reversible heaps, we must consider all free lists as of equivalent, harmless garbage class and thus freely substitutable with each other, as injective functions still can drastically change the block layout, free list order, etc. during its execution in either direction. Figure~\ref{fig:equivalent-free-lists} shows how any free list can be passed between a function $f$ and a function $g$ further in the program.
 
 
 \section{Linearity and Reference Counting}
@@ -535,7 +532,7 @@ As the only change in this design are the heaps themselves, the allocation proce
 
 \subsection{Buddy Memory}
 \label{subsec:buddy-memory}
-The Buddy Memory layout utilizes blocks of variable-sizes of the power-of-two, typically with one free list per power-of-two using a shared heap. When allocating an object of size $m$, we simply check the free lists for a free block of size $n$, where $n \geq m$. Is such a block found and if $n > m$, we split the block into two halves recursively, until we obtain the smallest block capable of storing $m$. When deallocating a block of size $m$, we do the action described above in reverse, thus merging the blocks again, where possible.
+The Buddy Memory layout utilizes blocks of variable-sizes of the power-of-two, typically with one free list per power-of-two using a shared heap. When allocating an object of size $m$, we simply check the free lists for a free block of size $n$, where $n \geq m$. Is such a block found and if $n > m$, we split the block into two halves recursively, until we obtain the smallest block capable of storing $m$. When deallocating a block of size $m$, we do the action described above in reverse, thus merging the blocks again, where possible~\cite{dk:taocp}.
 
 \begin{figure}[ht]
   \centering

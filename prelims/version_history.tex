@@ -1,35 +1,18 @@
 \begin{versionhistory}
-  \vhEntry{0.1}{2017-05-02}{Martin}{\rooplpp design and heap design discussion}
-  \vhEntry{0.2}{2017-05-16}{Martin}{Updated front-page logo and expanded heap design section}
-  \vhEntry{0.3}{2017-05-24}{Martin}{Added Fragmentation and Garbage subsection. Added assumption about available heap manipulation subroutines for heap layout section. Added explanations of listings. Expanded Buddy-memory \texttt{get\_free} algorithm with early idea for heap splitting/merging and heap growth}
-  \vhEntry{0.4}{2017-06-24}{Martin}{Extended grammar in section~\ref{sec:syntax}. Added sections~\ref{sec:object-instantiation} to~\ref{sec:local-blocks}. Addressed Chapter~\ref{chp:compilation} feedback. Rewrote pseudo-code algorithms in \textsc{Extended Janus}.}
-  \vhEntry{0.5}{2017-10-11}{Martin}{Finalized a few sections in chapter~\ref{chp:introduction}. Update chapter~\ref{chp:compilation} to reflect work done on compiler.}
-  \vhEntry{0.6}{2017-10-12}{Martin}{Added first version of section~\ref{sec:object-allocation-deallocation}}
-  \vhEntry{0.7}{2017-10-25}{Martin}{Moved Dynamic Memory Management sections into their own chapter~\ref{chp:dynamic-memory-management}. Added computation strength section~\ref{sec:computational-strength}}
-  \vhEntry{0.8}{2017-11-07}{Martin}{Added section~\ref{sec:type-system} and~\ref{sec:language-semantics}. Started on section~\ref{sec:program-inversion}. Updated RTM in section~\ref{sec:computational-strength}.}
-  \vhEntry{0.9}{2017-12-15}{Martin}{Wrote section~\ref{sec:local-blocks}, finished remaining sections of chapter~\ref{chp:introduction}, addressed feedback in chapter~\ref{chp:rooplpp} (sections~\ref{sec:type-system},~\ref{sec:language-semantics}), updated syntax for updated arrays in section~\ref{sec:syntax}, revised array sections to current implementation in section~\ref{sec:array-model} and~\ref{sec:array-instantiation}. Updated type system and semantics with array specific rules in section~\ref{sec:type-system} and~\ref{sec:language-semantics}. Started on section~\ref{sec:error-handling}.}
-  \vhEntry{1.0}{2017-12-29}{Martin}{Adressed feedback in section~\ref{sec:local-blocks},~\ref{sec:rooplpp-expressiveness} and~\ref{sec:language-semantics}. Finished section~\ref{sec:program-inversion}. Updated section~\ref{sec:computational-strength} with new RTM implementation. Revised and rewrote large parts of chapter~\ref{chp:dynamic-memory-management}. Wrote section~\ref{sec:roopl-to-pisa-compiler}. Wrote section~\ref{sec:arrays} and section~\ref{sec:referencing-compilation} after finalizing compiler code. Finished section~\ref{sec:error-handling}. Wrote section~\ref{sec:implementation}. Added conclusion in chapter~\ref{chp:conclusions}. Added abstract and preface.}
-  \vhEntry{1.01}{2018-01-16}{Martin}{Proofreading and minor changes. Added section~\ref{sec:evaluation}. Update RTM algorithm}
-  \vhEntry{1.02}{2018-01-21}{Martin}{More Proofreading and minor changes. Updated example program in beginning of chapter~\ref{chp:rooplpp}. Reformatted reference list}
-  \vhEntry{1.03}{2018-01-23}{Martin}{Added figure~\ref{fig:sugar-construct-destruct} to clarify existing description. Added figure~\ref{fig:pseudo-instructions} to describe pseudo-instructions used in chapter. Updated figure~\ref{fig:pisa-program-layout} to reflect minor code changes. Added figure and description for translation of \rooplpp object blocks in section~\ref{sec:object-allocation-deallocation}. Added figure~\ref{fig:array-memory-storage} to illustrate array storage model. Added two more items that should be run-time checked in section~\ref{sec:error-handling}. Updated syntax of \textbf{construct}/\textbf{destruct} blocks to only allow objects as arrays does not make sense in section~\ref{sec:syntax}.}
-  \vhEntry{1.04}{2018-01-24}{Martin}{Addressed Torben's proofreading comments. Fixed type system, based on Torben's feedback. Added number of PendVM simulation steps in figure~\ref{fig:fig:lines-of-code}.}
+  % \vhEntry{0.1}{2017-05-02}{Martin}{\rooplpp design and heap design discussion}
+  % \vhEntry{0.2}{2017-05-16}{Martin}{Updated front-page logo and expanded heap design section}
+  % \vhEntry{0.3}{2017-05-24}{Martin}{Added Fragmentation and Garbage subsection. Added assumption about available heap manipulation subroutines for heap layout section. Added explanations of listings. Expanded Buddy-memory \texttt{get\_free} algorithm with early idea for heap splitting/merging and heap growth}
+  % \vhEntry{0.4}{2017-06-24}{Martin}{Extended grammar in section~\ref{sec:syntax}. Added sections~\ref{sec:object-instantiation} to~\ref{sec:local-blocks}. Addressed Chapter~\ref{chp:compilation} feedback. Rewrote pseudo-code algorithms in \textsc{Extended Janus}.}
+  % \vhEntry{0.5}{2017-10-11}{Martin}{Finalized a few sections in chapter~\ref{chp:introduction}. Update chapter~\ref{chp:compilation} to reflect work done on compiler.}
+  % \vhEntry{0.6}{2017-10-12}{Martin}{Added first version of section~\ref{sec:object-allocation-deallocation}}
+  % \vhEntry{0.7}{2017-10-25}{Martin}{Moved Dynamic Memory Management sections into their own chapter~\ref{chp:dynamic-memory-management}. Added computation strength section~\ref{sec:computational-strength}}
+  % \vhEntry{0.8}{2017-11-07}{Martin}{Added section~\ref{sec:type-system} and~\ref{sec:language-semantics}. Started on section~\ref{sec:program-inversion}. Updated RTM in section~\ref{sec:computational-strength}.}
+  % \vhEntry{0.9}{2017-12-15}{Martin}{Wrote section~\ref{sec:local-blocks}, finished remaining sections of chapter~\ref{chp:introduction}, addressed feedback in chapter~\ref{chp:rooplpp} (sections~\ref{sec:type-system},~\ref{sec:language-semantics}), updated syntax for updated arrays in section~\ref{sec:syntax}, revised array sections to current implementation in section~\ref{sec:array-model} and~\ref{sec:array-instantiation}. Updated type system and semantics with array specific rules in section~\ref{sec:type-system} and~\ref{sec:language-semantics}. Started on section~\ref{sec:error-handling}.}
+  % \vhEntry{1.0}{2017-12-29}{Martin}{Adressed feedback in section~\ref{sec:local-blocks},~\ref{sec:rooplpp-expressiveness} and~\ref{sec:language-semantics}. Finished section~\ref{sec:program-inversion}. Updated section~\ref{sec:computational-strength} with new RTM implementation. Revised and rewrote large parts of chapter~\ref{chp:dynamic-memory-management}. Wrote section~\ref{sec:roopl-to-pisa-compiler}. Wrote section~\ref{sec:arrays} and section~\ref{sec:referencing-compilation} after finalizing compiler code. Finished section~\ref{sec:error-handling}. Wrote section~\ref{sec:implementation}. Added conclusion in chapter~\ref{chp:conclusions}. Added abstract and preface.}
+  % \vhEntry{1.01}{2018-01-16}{Martin}{Proofreading and minor changes. Added section~\ref{sec:evaluation}. Update RTM algorithm}
+  % \vhEntry{1.02}{2018-01-21}{Martin}{More Proofreading and minor changes. Updated example program in beginning of chapter~\ref{chp:rooplpp}. Reformatted reference list}
+  % \vhEntry{1.03}{2018-01-23}{Martin}{Added figure~\ref{fig:sugar-construct-destruct} to clarify existing description. Added figure~\ref{fig:pseudo-instructions} to describe pseudo-instructions used in chapter. Updated figure~\ref{fig:pisa-program-layout} to reflect minor code changes. Added figure and description for translation of \rooplpp object blocks in section~\ref{sec:object-allocation-deallocation}. Added figure~\ref{fig:array-memory-storage} to illustrate array storage model. Added two more items that should be run-time checked in section~\ref{sec:error-handling}. Updated syntax of \textbf{construct}/\textbf{destruct} blocks to only allow objects as arrays does not make sense in section~\ref{sec:syntax}.}
+  % \vhEntry{1.04}{2018-01-24}{Martin}{Addressed Torben's proofreading comments. Fixed type system, based on Torben's feedback. Added number of PendVM simulation steps in figure~\ref{fig:fig:lines-of-code}.}
+  \vhEntry{1.01}{2018-04-11}{Martin}{Fixed incorrect subfigures (d, e, f) in Figure~\ref{fig:deallocation-order-free-list}. Updated Figure~\ref{fig:injective-garbage-in-out} to better emphesize output copying. Updated Figure~\ref{fig:equivalent-free-lists} to better reflect the harmless garbage flow through programs.}
 
-\end{versionhistory}  
-
-% TODOs:
-% \begin{itemize}
-  % \item Finalize Chapter~\ref{chp:introduction}
-  % \item Revise section~\ref{sec:computational-strength} with updated RTM implementation and description
-  % \item Finalize section~\ref{sec:program-inversion} 
-  % \item Revise chapter~\ref{chp:dynamic-memory-management} and finish figures
-  % \item Update chapter~\ref{chp:compilation} to reflect code updates
-  % \item Describe reference counting and array implementation in chapter~\ref{chp:compilation}
-  % \item Write chapter~\ref{chp:conclusions}.
-  % \item Write abstract and preface
-  % \item Address feedback
-  % \item Proofreading :-)
-  % \item Fix references
-
-
-  % TODO: Validate that one allocation figure showing splits actually works IRL
-% \end{itemize}
+\end{versionhistory} 

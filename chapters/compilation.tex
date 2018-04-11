@@ -442,9 +442,9 @@ During the design of the reversible Buddy Memory algorithm limitations on the me
 
 \begin{figure}[ht]
     \centering
-    \begin{subfigure}{.5\textwidth}
+    \begin{subfigure}[t]{.5\textwidth}
         \centering
-        \begin{tikzpicture}[scale=0.62]
+        \begin{tikzpicture}[scale=0.8]
             % Boxes
             \draw[step=1] (2,2) grid (6,3);
             \draw (0,0) rectangle (8, 1);
@@ -462,9 +462,9 @@ During the design of the reversible Buddy Memory algorithm limitations on the me
         \end{tikzpicture}
         \caption{\footnotesize Initial memory block}
     \end{subfigure}%
-    \begin{subfigure}{.5\textwidth}
+    \begin{subfigure}[t]{.5\textwidth}
         \centering
-        \begin{tikzpicture}[scale=0.62]
+        \begin{tikzpicture}[scale=0.8]
             % Fills
             \draw[fill=grey] (7,0) rectangle (8,1);
             
@@ -497,9 +497,9 @@ During the design of the reversible Buddy Memory algorithm limitations on the me
         \caption{\footnotesize Allocate an object of size $2^1$}
     \end{subfigure}%
     \vskip 1em
-    \begin{subfigure}{.5\textwidth}
+    \begin{subfigure}[t]{.5\textwidth}
         \centering
-        \begin{tikzpicture}[scale=0.62]
+        \begin{tikzpicture}[scale=0.8]
             % Fills
             \draw[fill=grey] (7,0) rectangle (8,1);
             \draw[fill=grey] (0,0) rectangle (4,1);
@@ -529,87 +529,83 @@ During the design of the reversible Buddy Memory algorithm limitations on the me
         \end{tikzpicture}
         \caption{\footnotesize Allocate an object of size $2^3$}
     \end{subfigure}%
-    \begin{subfigure}{.5\textwidth}
+    \begin{subfigure}[t]{.5\textwidth}
         \centering
-        \begin{tikzpicture}[scale=0.62]
+        \begin{tikzpicture}[scale=0.8]
             % Fills
-            \draw[fill=grey] (7,0) rectangle (8,1);
-            \draw[fill=grey] (0,0) rectangle (4,1);
-            \draw[fill=grey] (4,0) rectangle (6,1);
-            
+            \draw[fill=grey] (0,0) rectangle (8,1);
+            % \draw[fill=grey] (0,0) rectangle (4,1);
+            % \draw[fill=grey] (4,0) rectangle (6,1);
+  
             % Boxes
             \draw[step=1] (2,2) grid (6,3);
             \draw (0,0) rectangle (8, 1);
-            
+  
             % Labels
             \node[above] at (4, 3.2) {Free lists}; 
             \node[above] at (2.5, 2.2) {$2^1$}; 
             \node[above] at (3.5, 2.2) {$2^2$}; 
             \node[above] at (4.5, 2.2) {$2^3$}; 
             \node[above] at (5.5, 2.2) {$2^4$}; 
-            
+  
             % Lines
             \draw (4,0) -- (4, 1);
             \draw (6,0) -- (6, 1);
             \draw (7,0) -- (7, 1);
-            
-            % Arrows
-            \node[circle,fill,inner sep=1pt] at (2.5, 2.2) {};
-            \draw[-latex] (2.5, 2.2) to[out=270, in=90] (6.5, 0.5);
         \end{tikzpicture}
-        \caption{\footnotesize Allocate an object of size $2^2$}
+        \caption{\footnotesize Allocate an object of size $2^2$ and $2^1$}
     \end{subfigure}%
     \vskip 1em
-    \begin{subfigure}{.5\textwidth}
+    \begin{subfigure}[t]{.5\textwidth}
         \centering
-        \begin{tikzpicture}[scale=0.62]
+        \begin{tikzpicture}[scale=0.8]
             % Fills
-            \draw[fill=grey] (0,0) rectangle (6,1);
-            
+            \draw[fill=grey] (0,0) rectangle (7,1);
+  
             % Boxes
             \draw[step=1] (2,2) grid (6,3);
             \draw (0,0) rectangle (8, 1);
-            
+  
             % Labels
             \node[above] at (4, 3.2) {Free lists}; 
             \node[above] at (2.5, 2.2) {$2^1$}; 
             \node[above] at (3.5, 2.2) {$2^2$}; 
             \node[above] at (4.5, 2.2) {$2^3$}; 
             \node[above] at (5.5, 2.2) {$2^4$}; 
-            
+  
             % Lines
             \draw (4,0) -- (4, 1);
             \draw (6,0) -- (6, 1);
             \draw (7,0) -- (7, 1);
-            
+  
             % Arrows            
             \node[circle,fill,inner sep=1pt] at (2.5, 2.2) {};
             \draw[-latex] (2.5, 2.2) to[out=270, in=90] (7.25, 0.5);
 
-            \node[circle,fill,inner sep=1pt] at (7.75, .5) {};
-            \draw[-latex] (7.75, .5) to[out=-135, in=-45] (6.5, .5);
+            % \node[circle,fill,inner sep=1pt] at (7.75, .5) {};
+            % \draw[-latex] (7.75, .5) to[out=-135, in=-45] (6.5, .5);
         \end{tikzpicture}
-        \caption{\footnotesize Deallocate the object of size $2^1$}
+        \caption{\footnotesize Deallocate first object of size $2^1$}
     \end{subfigure}%
-    \begin{subfigure}{.5\textwidth}
+    \begin{subfigure}[t]{.5\textwidth}
         \centering
-        \begin{tikzpicture}[scale=0.62]           
+        \begin{tikzpicture}[scale=0.8]           
             % Boxes
             \draw[step=1] (2,2) grid (6,3);
             \draw (0,0) rectangle (8, 1);
-            
+  
             % Labels
             \node[above] at (4, 3.2) {Free lists}; 
             \node[above] at (2.5, 2.2) {$2^1$}; 
             \node[above] at (3.5, 2.2) {$2^2$}; 
             \node[above] at (4.5, 2.2) {$2^3$}; 
             \node[above] at (5.5, 2.2) {$2^4$}; 
-            
+  
             % Lines
             \draw (4,0) -- (4, 1);
             \draw (6,0) -- (6, 1);
             \draw (7,0) -- (7, 1);
-            
+  
             % Arrows            
             \node[circle,fill,inner sep=1pt] at (2.5, 2.2) {};
             \draw[-latex] (2.5, 2.2) to[out=270, in=90] (7.25, 0.5);
@@ -623,7 +619,7 @@ During the design of the reversible Buddy Memory algorithm limitations on the me
             \node[circle,fill,inner sep=1pt] at (4.5, 2.2) {};
             \draw[-latex] (4.5, 2.2) to[out=270, in=90] (0.5, 0.5);
         \end{tikzpicture}
-        \caption{\footnotesize Deallocate the object of size $2^3$, then the object of $2^2$}
+        \caption{\footnotesize Deallocate the object of size $2^3$, then the object of $2^2$ and $2^1$}
     \end{subfigure}%
     \caption{Non-opposite deallocation results in a different free list after termination}
     \label{fig:deallocation-order-free-list}
