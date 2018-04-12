@@ -1,0 +1,1049 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 2.8 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \sortlist[entry]{nyt/global/}
+    \entry{ha:translation}{inbook}{}
+      \name{author}{1}{}{%
+        {{hash=98a35e33c09d2ac20d63a973c7a1222b}{%
+           family={Axelsen},
+           familyi={A\bibinitperiod},
+           given={Holger\bibnamedelima Bock},
+           giveni={H\bibinitperiod\bibinitdelim B\bibinitperiod}}}%
+      }
+      \name{editor}{1}{}{%
+        {{hash=5c89d7dd684953efc9e6d4abcfa42e79}{%
+           family={Knoop},
+           familyi={K\bibinitperiod},
+           given={Jens},
+           giveni={J\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Springer}%
+      }
+      \strng{namehash}{98a35e33c09d2ac20d63a973c7a1222b}
+      \strng{fullhash}{98a35e33c09d2ac20d63a973c7a1222b}
+      \strng{authornamehash}{98a35e33c09d2ac20d63a973c7a1222b}
+      \strng{authorfullhash}{98a35e33c09d2ac20d63a973c7a1222b}
+      \strng{editornamehash}{5c89d7dd684953efc9e6d4abcfa42e79}
+      \strng{editorfullhash}{5c89d7dd684953efc9e6d4abcfa42e79}
+      \field{sortinit}{A}
+      \field{sortinithash}{3248043b5fe8d0a34dab5ab6b8d4309b}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Compiler Construction - 20th International Conference, {CC} 2011, Held as Part of the Joint European Conferences on Theory and Practice of Software, {ETAPS} 2011, Saarbrücken, Germany, March 26-April 3, 2011. Proceedings}
+      \field{series}{Lecture Notes in Computer Science}
+      \field{title}{Clean Translation of an Imperative Reversible Programming Language}
+      \field{volume}{6601}
+      \field{year}{2011}
+      \field{pages}{144\bibrangedash 163}
+      \range{pages}{20}
+    \endentry
+    \entry{ha:heap}{inbook}{}
+      \name{author}{2}{}{%
+        {{hash=98a35e33c09d2ac20d63a973c7a1222b}{%
+           family={Axelsen},
+           familyi={A\bibinitperiod},
+           given={Holger\bibnamedelima Bock},
+           giveni={H\bibinitperiod\bibinitdelim B\bibinitperiod}}}%
+        {{hash=0d2b49381e0bd5c108c28a8b379df2fe}{%
+           family={Glück},
+           familyi={G\bibinitperiod},
+           given={Robert},
+           giveni={R\bibinitperiod}}}%
+      }
+      \name{editor}{2}{}{%
+        {{hash=edebe08ee146881671b6a8d8f13cb5c0}{%
+           family={Dueck},
+           familyi={D\bibinitperiod},
+           given={Gerhard\bibnamedelima W.},
+           giveni={G\bibinitperiod\bibinitdelim W\bibinitperiod}}}%
+        {{hash=dd286fbf3ac6104aae25a79588c1ffce}{%
+           family={Miller},
+           familyi={M\bibinitperiod},
+           given={D.\bibnamedelimi Michael},
+           giveni={D\bibinitperiod\bibinitdelim M\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Springer}%
+      }
+      \strng{namehash}{29ccb3db1f18ecef5f4dbd0792ab6190}
+      \strng{fullhash}{29ccb3db1f18ecef5f4dbd0792ab6190}
+      \strng{authornamehash}{29ccb3db1f18ecef5f4dbd0792ab6190}
+      \strng{authorfullhash}{29ccb3db1f18ecef5f4dbd0792ab6190}
+      \strng{editornamehash}{98a6311ca851aa9e063d1fd60cbbe69f}
+      \strng{editorfullhash}{98a6311ca851aa9e063d1fd60cbbe69f}
+      \field{sortinit}{A}
+      \field{sortinithash}{3248043b5fe8d0a34dab5ab6b8d4309b}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Reversible Computation - 5th International Conference, {RC} 2013, Victoria, BC, Canada, July 4-5, 2013. Proceedings}
+      \field{series}{Lecture Notes in Computer Science}
+      \field{title}{Reversible Representation and Manipulation of Constructor Terms in the Heap}
+      \field{volume}{7948}
+      \field{year}{2013}
+      \field{pages}{96\bibrangedash 109}
+      \range{pages}{14}
+    \endentry
+    \entry{ha:architecture}{inbook}{}
+      \name{author}{3}{}{%
+        {{hash=98a35e33c09d2ac20d63a973c7a1222b}{%
+           family={Axelsen},
+           familyi={A\bibinitperiod},
+           given={Holger\bibnamedelima Bock},
+           giveni={H\bibinitperiod\bibinitdelim B\bibinitperiod}}}%
+        {{hash=0d2b49381e0bd5c108c28a8b379df2fe}{%
+           family={Glück},
+           familyi={G\bibinitperiod},
+           given={Robert},
+           giveni={R\bibinitperiod}}}%
+        {{hash=36ec1e5798b613392e24bf6c33b659be}{%
+           family={Yokoyama},
+           familyi={Y\bibinitperiod},
+           given={Tetsuo},
+           giveni={T\bibinitperiod}}}%
+      }
+      \name{editor}{3}{}{%
+        {{hash=45f848a44d9249a30e95f96e02b9e839}{%
+           family={Diekert},
+           familyi={D\bibinitperiod},
+           given={Volker},
+           giveni={V\bibinitperiod}}}%
+        {{hash=447212f622bf83c30b5fb50b61e42fe8}{%
+           family={Volkov},
+           familyi={V\bibinitperiod},
+           given={Mikhail\bibnamedelima V.},
+           giveni={M\bibinitperiod\bibinitdelim V\bibinitperiod}}}%
+        {{hash=e50601e4532a3894411413925585a523}{%
+           family={Voronkov},
+           familyi={V\bibinitperiod},
+           given={Andrei},
+           giveni={A\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Springer}%
+      }
+      \strng{namehash}{1cfb2573b837dacf969c0f44ccaea941}
+      \strng{fullhash}{6a45d43ca05325e1a68b172eaadf9b78}
+      \strng{authornamehash}{1cfb2573b837dacf969c0f44ccaea941}
+      \strng{authorfullhash}{6a45d43ca05325e1a68b172eaadf9b78}
+      \strng{editornamehash}{f394c22a6e090f17a2f988f80f1c78fa}
+      \strng{editorfullhash}{e0396662468520449ec2ac438be0d26d}
+      \field{sortinit}{A}
+      \field{sortinithash}{3248043b5fe8d0a34dab5ab6b8d4309b}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Computer Science - Theory and Applications, Second International Symposium on Computer Science in Russia, {CSR} 2007, Ekaterinburg, Russia, September 3-7, 2007, Proceedings}
+      \field{series}{Lecture Notes in Computer Science}
+      \field{title}{Reversible Machine Code and Its Abstract Processor Architecture}
+      \field{volume}{4649}
+      \field{year}{2007}
+      \field{pages}{56\bibrangedash 69}
+      \range{pages}{14}
+    \endentry
+    \entry{hb:linearity}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=3582dac4e865c84889ccdbc38b099088}{%
+           family={Baker},
+           familyi={B\bibinitperiod},
+           given={Henry\bibnamedelima G.},
+           giveni={H\bibinitperiod\bibinitdelim G\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {Nimble Computer Corporation}%
+      }
+      \strng{namehash}{3582dac4e865c84889ccdbc38b099088}
+      \strng{fullhash}{3582dac4e865c84889ccdbc38b099088}
+      \strng{authornamehash}{3582dac4e865c84889ccdbc38b099088}
+      \strng{authorfullhash}{3582dac4e865c84889ccdbc38b099088}
+      \field{sortinit}{B}
+      \field{sortinithash}{5f6fa000f686ee5b41be67ba6ff7962d}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{'Use-Once' Variables and Linear Objects -- Storage Management, Reflection and Multi-Threading}
+      \field{urlday}{22}
+      \field{urlmonth}{1}
+      \field{urlyear}{2018}
+      \field{urldateera}{ce}
+      \verb{url}
+      \verb http://home.pipeline.com/~hbaker1/Use1Var.html
+      \endverb
+    \endentry
+    \entry{cr:pendvm}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=a4fd76acf85e7aa3f527fa16e7528897}{%
+           family={Clark},
+           familyi={C\bibinitperiod},
+           given={Cristopher\bibnamedelima R.},
+           giveni={C\bibinitperiod\bibinitdelim R\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {University of Florida}%
+      }
+      \strng{namehash}{a4fd76acf85e7aa3f527fa16e7528897}
+      \strng{fullhash}{a4fd76acf85e7aa3f527fa16e7528897}
+      \strng{authornamehash}{a4fd76acf85e7aa3f527fa16e7528897}
+      \strng{authorfullhash}{a4fd76acf85e7aa3f527fa16e7528897}
+      \field{sortinit}{C}
+      \field{sortinithash}{095692fd22cc3c74d7fe223d02314dbd}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Improving the Reversible Programming Language R and its Supporting Tools}
+      \field{urlday}{22}
+      \field{urlmonth}{1}
+      \field{urlyear}{2018}
+      \field{urldateera}{ce}
+      \verb{url}
+      \verb http://www.cise.ufl.edu/research/revcomp/users/cclark/pendvm-fall2001/
+      \endverb
+    \endentry
+    \entry{digiconomist:bitcoin}{article}{}
+      \name{author}{1}{}{%
+        {{hash=8a15eb44dda450f9b3dff44b7fd2ccc7}{%
+           family={Digiconomist},
+           familyi={D\bibinitperiod}}}%
+      }
+      \strng{namehash}{8a15eb44dda450f9b3dff44b7fd2ccc7}
+      \strng{fullhash}{8a15eb44dda450f9b3dff44b7fd2ccc7}
+      \strng{authornamehash}{8a15eb44dda450f9b3dff44b7fd2ccc7}
+      \strng{authorfullhash}{8a15eb44dda450f9b3dff44b7fd2ccc7}
+      \field{sortinit}{D}
+      \field{sortinithash}{d10b5413de1f3d197b20897dd0d565bb}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Digiconomist}
+      \field{title}{Bitcoin Energy Consumption Index}
+      \field{urlday}{22}
+      \field{urlmonth}{1}
+      \field{urlyear}{2018}
+      \field{year}{2017-12-06}
+      \field{urldateera}{ce}
+      \verb{url}
+      \verb https://digiconomist.net/bitcoin-energy-consumption
+      \endverb
+    \endentry
+    \entry{mf:r}{unpublished}{}
+      \name{author}{1}{}{%
+        {{hash=ef8e292a7f154e8dc8928a07454fcf1c}{%
+           family={Frank},
+           familyi={F\bibinitperiod},
+           given={M.\bibnamedelimi P.},
+           giveni={M\bibinitperiod\bibinitdelim P\bibinitperiod}}}%
+      }
+      \strng{namehash}{ef8e292a7f154e8dc8928a07454fcf1c}
+      \strng{fullhash}{ef8e292a7f154e8dc8928a07454fcf1c}
+      \strng{authornamehash}{ef8e292a7f154e8dc8928a07454fcf1c}
+      \strng{authorfullhash}{ef8e292a7f154e8dc8928a07454fcf1c}
+      \field{sortinit}{F}
+      \field{sortinithash}{276475738cc058478c1677046f857703}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{MIT Reversible Computing Project Memo \#M8}
+      \field{title}{The R Programming Language and Compiler}
+      \field{year}{1997}
+    \endentry
+    \entry{rg:rwhile}{article}{}
+      \name{author}{2}{}{%
+        {{hash=0d2b49381e0bd5c108c28a8b379df2fe}{%
+           family={Glück},
+           familyi={G\bibinitperiod},
+           given={Robert},
+           giveni={R\bibinitperiod}}}%
+        {{hash=36ec1e5798b613392e24bf6c33b659be}{%
+           family={Yokoyama},
+           familyi={Y\bibinitperiod},
+           given={Tetsuo},
+           giveni={T\bibinitperiod}}}%
+      }
+      \strng{namehash}{421eb405bb7f7f9d9b98ac7ae97d84bf}
+      \strng{fullhash}{421eb405bb7f7f9d9b98ac7ae97d84bf}
+      \strng{authornamehash}{421eb405bb7f7f9d9b98ac7ae97d84bf}
+      \strng{authorfullhash}{421eb405bb7f7f9d9b98ac7ae97d84bf}
+      \field{sortinit}{G}
+      \field{sortinithash}{618d986594b7198ba52cf8b00d348f3f}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Computer Software}
+      \field{number}{3}
+      \field{title}{A Linear-Time Self-Interpreter of a Reversible Imperative Language}
+      \field{volume}{33}
+      \field{year}{2016}
+      \field{pages}{108\bibrangedash 128}
+      \range{pages}{21}
+    \endentry
+    \entry{rg:rcore}{article}{}
+      \name{author}{2}{}{%
+        {{hash=0d2b49381e0bd5c108c28a8b379df2fe}{%
+           family={Glück},
+           familyi={G\bibinitperiod},
+           given={Robert},
+           giveni={R\bibinitperiod}}}%
+        {{hash=36ec1e5798b613392e24bf6c33b659be}{%
+           family={Yokoyama},
+           familyi={Y\bibinitperiod},
+           given={Tetsuo},
+           giveni={T\bibinitperiod}}}%
+      }
+      \strng{namehash}{421eb405bb7f7f9d9b98ac7ae97d84bf}
+      \strng{fullhash}{421eb405bb7f7f9d9b98ac7ae97d84bf}
+      \strng{authornamehash}{421eb405bb7f7f9d9b98ac7ae97d84bf}
+      \strng{authorfullhash}{421eb405bb7f7f9d9b98ac7ae97d84bf}
+      \field{sortinit}{G}
+      \field{sortinithash}{618d986594b7198ba52cf8b00d348f3f}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{{IEICE} Transactions}
+      \field{number}{5}
+      \field{title}{A Minimalist's Reversible While Language}
+      \field{volume}{100-D}
+      \field{year}{2017}
+      \field{pages}{1026\bibrangedash 1034}
+      \range{pages}{9}
+    \endentry
+    \entry{jsk:translation}{thesis}{}
+      \name{author}{1}{}{%
+        {{hash=0e2b87c83d49b9757feb639d706325ee}{%
+           family={Hansen},
+           familyi={H\bibinitperiod},
+           given={Jonas\bibnamedelimb Stig\bibnamedelima Kämpf},
+           giveni={J\bibinitperiod\bibinitdelim S\bibinitperiod\bibinitdelim K\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {University of Copenhagen, DIKU}%
+      }
+      \strng{namehash}{0e2b87c83d49b9757feb639d706325ee}
+      \strng{fullhash}{0e2b87c83d49b9757feb639d706325ee}
+      \strng{authornamehash}{0e2b87c83d49b9757feb639d706325ee}
+      \strng{authorfullhash}{0e2b87c83d49b9757feb639d706325ee}
+      \field{sortinit}{H}
+      \field{sortinithash}{2f664b453ec75da1fe3804ca92633405}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Translation of a Reversible Functional Programming Language}
+      \field{type}{mathesis}
+      \field{year}{2014}
+    \endentry
+    \entry{th:roopl}{article}{}
+      \name{author}{1}{}{%
+        {{hash=bbfa3a51e66e173b067930d2ce9be971}{%
+           family={Haulund},
+           familyi={H\bibinitperiod},
+           given={Tue},
+           giveni={T\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {University of Copenhagen, DIKU}%
+      }
+      \strng{namehash}{bbfa3a51e66e173b067930d2ce9be971}
+      \strng{fullhash}{bbfa3a51e66e173b067930d2ce9be971}
+      \strng{authornamehash}{bbfa3a51e66e173b067930d2ce9be971}
+      \strng{authorfullhash}{bbfa3a51e66e173b067930d2ce9be971}
+      \field{sortinit}{H}
+      \field{sortinithash}{2f664b453ec75da1fe3804ca92633405}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{CoRR}
+      \field{title}{Design and Implementation of a Reversible Object-Oriented Programming Language}
+      \field{volume}{abs/1707.07845}
+      \field{year}{2017}
+    \endentry
+    \entry{th:roopl2}{inbook}{}
+      \name{author}{3}{}{%
+        {{hash=bbfa3a51e66e173b067930d2ce9be971}{%
+           family={Haulund},
+           familyi={H\bibinitperiod},
+           given={Tue},
+           giveni={T\bibinitperiod}}}%
+        {{hash=585737d768257f96a80838aa4eb22053}{%
+           family={Mogensen},
+           familyi={M\bibinitperiod},
+           given={Torben\bibnamedelima Ægidius},
+           giveni={T\bibinitperiod\bibinitdelim Æ\bibinitperiod}}}%
+        {{hash=0d2b49381e0bd5c108c28a8b379df2fe}{%
+           family={Glück},
+           familyi={G\bibinitperiod},
+           given={Robert},
+           giveni={R\bibinitperiod}}}%
+      }
+      \name{editor}{2}{}{%
+        {{hash=92f852e7fd0edd2a2f6e247d32916002}{%
+           family={Phillips},
+           familyi={P\bibinitperiod},
+           given={Iain},
+           giveni={I\bibinitperiod}}}%
+        {{hash=f84925dc74ce9068ba44e3c909aa3de5}{%
+           family={Rahaman},
+           familyi={R\bibinitperiod},
+           given={Hafizur},
+           giveni={H\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Springer}%
+      }
+      \strng{namehash}{d09a3e19f577ee35becc88c63fff755d}
+      \strng{fullhash}{a6389131f6870a9eab03ce1c7ee1e001}
+      \strng{authornamehash}{d09a3e19f577ee35becc88c63fff755d}
+      \strng{authorfullhash}{a6389131f6870a9eab03ce1c7ee1e001}
+      \strng{editornamehash}{eef15c2cffc545aab8abd7f3bd337546}
+      \strng{editorfullhash}{eef15c2cffc545aab8abd7f3bd337546}
+      \field{sortinit}{H}
+      \field{sortinithash}{2f664b453ec75da1fe3804ca92633405}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Reversible Computation - 9th International Conference, {RC} 2017, Kolkata, India, July 6-7, 2017, Proceedings}
+      \field{series}{Lecture Notes in Computer Science}
+      \field{title}{Implementing Reversible Object-Oriented Language Features on Reversible Machines}
+      \field{volume}{10301}
+      \field{year}{2017}
+      \field{pages}{66\bibrangedash 73}
+      \range{pages}{8}
+    \endentry
+    \entry{dk:taocp}{book}{}
+      \name{author}{1}{}{%
+        {{hash=ed66cb471cf2e677302994d162a003b0}{%
+           family={Knuth},
+           familyi={K\bibinitperiod},
+           given={Donald\bibnamedelima Erwin},
+           giveni={D\bibinitperiod\bibinitdelim E\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Addison-Wesley}%
+      }
+      \strng{namehash}{ed66cb471cf2e677302994d162a003b0}
+      \strng{fullhash}{ed66cb471cf2e677302994d162a003b0}
+      \strng{authornamehash}{ed66cb471cf2e677302994d162a003b0}
+      \strng{authorfullhash}{ed66cb471cf2e677302994d162a003b0}
+      \field{sortinit}{K}
+      \field{sortinithash}{4c244ceae61406cdc0cc2ce1cb1ff703}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{isbn}{0-201-89683-4}
+      \field{series}{The Art of Computer Programming}
+      \field{title}{The Art of Computer Programming: Fundamental Algorithms}
+      \field{year}{1998}
+      \field{pages}{435\bibrangedash 455}
+      \range{pages}{21}
+    \endentry
+    \entry{rl:irreversibility}{article}{}
+      \name{author}{1}{}{%
+        {{hash=d79f4c07f6e5468564e98d3a5dd339a4}{%
+           family={Landauer},
+           familyi={L\bibinitperiod},
+           given={Rolf},
+           giveni={R\bibinitperiod}}}%
+      }
+      \strng{namehash}{d79f4c07f6e5468564e98d3a5dd339a4}
+      \strng{fullhash}{d79f4c07f6e5468564e98d3a5dd339a4}
+      \strng{authornamehash}{d79f4c07f6e5468564e98d3a5dd339a4}
+      \strng{authorfullhash}{d79f4c07f6e5468564e98d3a5dd339a4}
+      \field{sortinit}{L}
+      \field{sortinithash}{7bba64db83423e3c29ad597f3b682cf3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{IBM Journal of Research and Development}
+      \field{number}{3}
+      \field{title}{Irreversibility and Heat Generation in the Computing Process}
+      \field{volume}{5}
+      \field{year}{1961}
+      \field{pages}{183\bibrangedash 191}
+      \range{pages}{9}
+    \endentry
+    \entry{wh:cpp_memory}{article}{}
+      \name{author}{2}{}{%
+        {{hash=1e6a8bb6a6a2950c3c7fddb67c10fddd}{%
+           family={Lee},
+           familyi={L\bibinitperiod},
+           given={Woo\bibnamedelima Hyong},
+           giveni={W\bibinitperiod\bibinitdelim H\bibinitperiod}}}%
+        {{hash=a727d9b4c7f883b8df171ba2734662cf}{%
+           family={Chang},
+           familyi={C\bibinitperiod},
+           given={Morris},
+           giveni={M\bibinitperiod}}}%
+      }
+      \strng{namehash}{376da41568564688447a378794ac425a}
+      \strng{fullhash}{376da41568564688447a378794ac425a}
+      \strng{authornamehash}{376da41568564688447a378794ac425a}
+      \strng{authorfullhash}{376da41568564688447a378794ac425a}
+      \field{sortinit}{L}
+      \field{sortinithash}{7bba64db83423e3c29ad597f3b682cf3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Comput. Lang.}
+      \field{number}{3}
+      \field{title}{A study of dynamic memory management in {C++} programs}
+      \field{volume}{28}
+      \field{year}{2002}
+      \field{pages}{237\bibrangedash 272}
+      \range{pages}{36}
+    \endentry
+    \entry{cl:janus}{unpublished}{}
+      \name{author}{1}{}{%
+        {{hash=2614e27d1e0eff5f28a20d46eae53e1a}{%
+           family={Lutz},
+           familyi={L\bibinitperiod},
+           given={Christopher},
+           giveni={C\bibinitperiod}}}%
+      }
+      \strng{namehash}{2614e27d1e0eff5f28a20d46eae53e1a}
+      \strng{fullhash}{2614e27d1e0eff5f28a20d46eae53e1a}
+      \strng{authornamehash}{2614e27d1e0eff5f28a20d46eae53e1a}
+      \strng{authorfullhash}{2614e27d1e0eff5f28a20d46eae53e1a}
+      \field{sortinit}{L}
+      \field{sortinithash}{7bba64db83423e3c29ad597f3b682cf3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{Letter to R. Landauer}
+      \field{title}{Janus: a time-reversible language}
+      \field{year}{1986}
+    \endentry
+    \entry{jm:concepts}{book}{}
+      \name{author}{2}{}{%
+        {{hash=0e4f337a85b3fc7d880113f73dc447c4}{%
+           family={Mitchell},
+           familyi={M\bibinitperiod},
+           given={John\bibnamedelima C.},
+           giveni={J\bibinitperiod\bibinitdelim C\bibinitperiod}}}%
+        {{hash=1589f26b0cb21f82bff8c60e74ea8f5e}{%
+           family={Apt},
+           familyi={A\bibinitperiod},
+           given={Krzysztof},
+           giveni={K\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {New York, NY, USA}%
+      }
+      \list{publisher}{1}{%
+        {Cambridge University Press}%
+      }
+      \strng{namehash}{18f24e0e30162767618fd6b97c20d220}
+      \strng{fullhash}{18f24e0e30162767618fd6b97c20d220}
+      \strng{authornamehash}{18f24e0e30162767618fd6b97c20d220}
+      \strng{authorfullhash}{18f24e0e30162767618fd6b97c20d220}
+      \field{sortinit}{M}
+      \field{sortinithash}{c26a05ef03e4429073ed5c825140fac3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{isbn}{0521780985}
+      \field{title}{Concepts in Programming Languages}
+      \field{year}{2001}
+    \endentry
+    \entry{tm:refcounting}{inbook}{}
+      \name{author}{1}{}{%
+        {{hash=585737d768257f96a80838aa4eb22053}{%
+           family={Mogensen},
+           familyi={M\bibinitperiod},
+           given={Torben\bibnamedelima Ægidius},
+           giveni={T\bibinitperiod\bibinitdelim Æ\bibinitperiod}}}%
+      }
+      \name{editor}{2}{}{%
+        {{hash=9d0bf8461286612624e10a673e258378}{%
+           family={Yamashita},
+           familyi={Y\bibinitperiod},
+           given={Shigeru},
+           giveni={S\bibinitperiod}}}%
+        {{hash=de52f22338b7ce42735ed21f86ccfd60}{%
+           family={Minato},
+           familyi={M\bibinitperiod},
+           given={Shin{-}ichi},
+           giveni={S\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Springer}%
+      }
+      \strng{namehash}{585737d768257f96a80838aa4eb22053}
+      \strng{fullhash}{585737d768257f96a80838aa4eb22053}
+      \strng{authornamehash}{585737d768257f96a80838aa4eb22053}
+      \strng{authorfullhash}{585737d768257f96a80838aa4eb22053}
+      \strng{editornamehash}{5a9e4508cb9aa9347e14f24bc9cef52f}
+      \strng{editorfullhash}{5a9e4508cb9aa9347e14f24bc9cef52f}
+      \field{sortinit}{M}
+      \field{sortinithash}{c26a05ef03e4429073ed5c825140fac3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Reversible Computation - 6th International Conference, {RC} 2014, Kyoto, Japan, July 10-11, 2014. Proceedings}
+      \field{series}{Lecture Notes in Computer Science}
+      \field{title}{Reference Counting for Reversible Languages}
+      \field{volume}{8507}
+      \field{year}{2014}
+      \field{pages}{82\bibrangedash 94}
+      \range{pages}{13}
+    \endentry
+    \entry{tm:garbage}{inbook}{}
+      \name{author}{1}{}{%
+        {{hash=585737d768257f96a80838aa4eb22053}{%
+           family={Mogensen},
+           familyi={M\bibinitperiod},
+           given={Torben\bibnamedelima Ægidius},
+           giveni={T\bibinitperiod\bibinitdelim Æ\bibinitperiod}}}%
+      }
+      \name{editor}{2}{}{%
+        {{hash=9e672444b136f2ecbcc7e28805bf4fbe}{%
+           family={Krivine},
+           familyi={K\bibinitperiod},
+           given={Jean},
+           giveni={J\bibinitperiod}}}%
+        {{hash=4f32ea124e99ba394689313ec544bf6e}{%
+           family={Stefani},
+           familyi={S\bibinitperiod},
+           given={Jean{-}Bernard},
+           giveni={J\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Springer}%
+      }
+      \strng{namehash}{585737d768257f96a80838aa4eb22053}
+      \strng{fullhash}{585737d768257f96a80838aa4eb22053}
+      \strng{authornamehash}{585737d768257f96a80838aa4eb22053}
+      \strng{authorfullhash}{585737d768257f96a80838aa4eb22053}
+      \strng{editornamehash}{2ca59d3991c572efea27581d8719d526}
+      \strng{editorfullhash}{2ca59d3991c572efea27581d8719d526}
+      \field{sortinit}{M}
+      \field{sortinithash}{c26a05ef03e4429073ed5c825140fac3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Reversible Computation - 7th International Conference, {RC} 2015, Grenoble, France, July 16-17, 2015, Proceedings}
+      \field{series}{Lecture Notes in Computer Science}
+      \field{title}{Garbage Collection for Reversible Functional Languages}
+      \field{volume}{9138}
+      \field{year}{2015}
+      \field{pages}{79\bibrangedash 94}
+      \range{pages}{16}
+    \endentry
+    \entry{tm:languages}{unpublished}{}
+      \name{author}{1}{}{%
+        {{hash=585737d768257f96a80838aa4eb22053}{%
+           family={Mogensen},
+           familyi={M\bibinitperiod},
+           given={Torben\bibnamedelima Ægidius},
+           giveni={T\bibinitperiod\bibinitdelim Æ\bibinitperiod}}}%
+      }
+      \strng{namehash}{585737d768257f96a80838aa4eb22053}
+      \strng{fullhash}{585737d768257f96a80838aa4eb22053}
+      \strng{authornamehash}{585737d768257f96a80838aa4eb22053}
+      \strng{authorfullhash}{585737d768257f96a80838aa4eb22053}
+      \field{sortinit}{M}
+      \field{sortinithash}{c26a05ef03e4429073ed5c825140fac3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Programming Language Design and Implementation (Unpublished)}
+      \field{pages}{65\bibrangedash 93}
+      \range{pages}{29}
+    \endentry
+    \entry{py:memory}{misc}{}
+      \list{institution}{1}{%
+        {The Python Software Foundation}%
+      }
+      \field{sortinit}{P}
+      \field{sortinithash}{24100cef455d7974167575052c29146e}
+      \field{labeltitlesource}{title}
+      \field{title}{Python Software Foundation: Memory Management}
+      \field{urlday}{22}
+      \field{urlmonth}{1}
+      \field{urlyear}{2018}
+      \field{urldateera}{ce}
+      \verb{url}
+      \verb https://docs.python.org/2/c-api/memory.html
+      \endverb
+    \endentry
+    \entry{us:joule}{inbook}{}
+      \name{author}{2}{}{%
+        {{hash=afba7bc8385c04bf1167c48c4a03f849}{%
+           family={Schultz},
+           familyi={S\bibinitperiod},
+           given={Ulrik\bibnamedelima Pagh},
+           giveni={U\bibinitperiod\bibinitdelim P\bibinitperiod}}}%
+        {{hash=98a35e33c09d2ac20d63a973c7a1222b}{%
+           family={Axelsen},
+           familyi={A\bibinitperiod},
+           given={Holger\bibnamedelima Bock},
+           giveni={H\bibinitperiod\bibinitdelim B\bibinitperiod}}}%
+      }
+      \name{editor}{2}{}{%
+        {{hash=02d20047685380ee402a71948485c40e}{%
+           family={Devitt},
+           familyi={D\bibinitperiod},
+           given={Simon\bibnamedelima J.},
+           giveni={S\bibinitperiod\bibinitdelim J\bibinitperiod}}}%
+        {{hash=bbb49644b74d8274fe1ac9f0986369bf}{%
+           family={Lanese},
+           familyi={L\bibinitperiod},
+           given={Ivan},
+           giveni={I\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Springer}%
+      }
+      \strng{namehash}{96d9310799722b4db610905ad535ffc4}
+      \strng{fullhash}{96d9310799722b4db610905ad535ffc4}
+      \strng{authornamehash}{96d9310799722b4db610905ad535ffc4}
+      \strng{authorfullhash}{96d9310799722b4db610905ad535ffc4}
+      \strng{editornamehash}{a81693dc2bf83abf71697b1238a118d7}
+      \strng{editorfullhash}{a81693dc2bf83abf71697b1238a118d7}
+      \field{sortinit}{S}
+      \field{sortinithash}{3c1547c63380458f8ca90e40ed14b83e}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Reversible Computation - 8th International Conference, {RC} 2016, Bologna, Italy, July 7-8, 2016, Proceedings}
+      \field{series}{Lecture Notes in Computer Science}
+      \field{title}{Elements of a Reversible Object-Oriented Language - Work-in-Progress Report}
+      \field{volume}{9720}
+      \field{year}{2016}
+      \field{pages}{153\bibrangedash 159}
+      \range{pages}{7}
+    \endentry
+    \entry{mt:bob}{inbook}{}
+      \name{author}{3}{}{%
+        {{hash=e96d3d0d3fa13cc2044d0830d68cc697}{%
+           family={Thomsen},
+           familyi={T\bibinitperiod},
+           given={Michael\bibnamedelima Kirkedal},
+           giveni={M\bibinitperiod\bibinitdelim K\bibinitperiod}}}%
+        {{hash=98a35e33c09d2ac20d63a973c7a1222b}{%
+           family={Axelsen},
+           familyi={A\bibinitperiod},
+           given={Holger\bibnamedelima Bock},
+           giveni={H\bibinitperiod\bibinitdelim B\bibinitperiod}}}%
+        {{hash=0d2b49381e0bd5c108c28a8b379df2fe}{%
+           family={Glück},
+           familyi={G\bibinitperiod},
+           given={Robert},
+           giveni={R\bibinitperiod}}}%
+      }
+      \name{editor}{2}{}{%
+        {{hash=0fec015f24ca901d7eceb4b48ea31524}{%
+           family={Vos},
+           familyi={V\bibinitperiod},
+           given={Alexis\bibnamedelima De},
+           giveni={A\bibinitperiod\bibinitdelim D\bibinitperiod}}}%
+        {{hash=942bfb89eecd82018713153f8561459b}{%
+           family={Wille},
+           familyi={W\bibinitperiod},
+           given={Robert},
+           giveni={R\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Springer}%
+      }
+      \strng{namehash}{3cf6404eeb38aa23eb99a6658de5abe8}
+      \strng{fullhash}{9bc83466f42dd230cdec307af42dda9f}
+      \strng{authornamehash}{3cf6404eeb38aa23eb99a6658de5abe8}
+      \strng{authorfullhash}{9bc83466f42dd230cdec307af42dda9f}
+      \strng{editornamehash}{cefb4382c1472bf5aef88d02585810c1}
+      \strng{editorfullhash}{cefb4382c1472bf5aef88d02585810c1}
+      \field{sortinit}{T}
+      \field{sortinithash}{2e5c2f51f7fa2d957f3206819bf86dc3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Reversible Computation - Third International Workshop, {RC} 2011, Gent, Belgium, July 4-5, 2011. Revised Papers}
+      \strng{crossref}{DBLP:conf/rc/2011}
+      \field{series}{Lecture Notes in Computer Science}
+      \field{title}{A Reversible Processor Architecture and Its Reversible Logic Design}
+      \field{volume}{7165}
+      \field{year}{2011}
+      \field{pages}{30\bibrangedash 42}
+      \range{pages}{13}
+    \endentry
+    \entry{bloomberg:facebook}{article}{}
+      \name{author}{1}{}{%
+        {{hash=10d07dd551c1adad3c6d94d8a06fc735}{%
+           family={Vance},
+           familyi={V\bibinitperiod},
+           given={Ashlee},
+           giveni={A\bibinitperiod}}}%
+      }
+      \strng{namehash}{10d07dd551c1adad3c6d94d8a06fc735}
+      \strng{fullhash}{10d07dd551c1adad3c6d94d8a06fc735}
+      \strng{authornamehash}{10d07dd551c1adad3c6d94d8a06fc735}
+      \strng{authorfullhash}{10d07dd551c1adad3c6d94d8a06fc735}
+      \field{sortinit}{V}
+      \field{sortinithash}{555737dafdcf1396ebfeae5822e5bde2}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Bloomberg}
+      \field{title}{Inside the Arctic Circle, Where Your Facebook Data Lives}
+      \field{urlday}{22}
+      \field{urlmonth}{1}
+      \field{urlyear}{2018}
+      \field{year}{2013-12-04}
+      \field{urldateera}{ce}
+      \verb{url}
+      \verb https://www.bloomberg.com/news/articles/2013-10-04/facebooks-new-data-center-in-sweden-puts-the-heat-on-hardware-makers
+      \endverb
+    \endentry
+    \entry{bv:jvm}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=4f73d3c9fa69ceb9612bb63bdb7f5db5}{%
+           family={Venners},
+           familyi={V\bibinitperiod},
+           given={Bill},
+           giveni={B\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {Aritma, Inc.}%
+      }
+      \strng{namehash}{4f73d3c9fa69ceb9612bb63bdb7f5db5}
+      \strng{fullhash}{4f73d3c9fa69ceb9612bb63bdb7f5db5}
+      \strng{authornamehash}{4f73d3c9fa69ceb9612bb63bdb7f5db5}
+      \strng{authorfullhash}{4f73d3c9fa69ceb9612bb63bdb7f5db5}
+      \field{sortinit}{V}
+      \field{sortinithash}{555737dafdcf1396ebfeae5822e5bde2}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{The Java Virtual Machine}
+      \field{urlday}{22}
+      \field{urlmonth}{1}
+      \field{urlyear}{2018}
+      \field{urldateera}{ce}
+      \verb{url}
+      \verb http://www.artima.com/insidejvm/ed2/jvmP.html
+      \endverb
+    \endentry
+    \entry{cv:pendulum}{thesis}{}
+      \name{author}{1}{}{%
+        {{hash=bd2cff36df4e6dd86d0262eb322012a4}{%
+           family={Vieri},
+           familyi={V\bibinitperiod},
+           given={Carlin\bibnamedelima James},
+           giveni={C\bibinitperiod\bibinitdelim J\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {University of California at Berkeley}%
+      }
+      \strng{namehash}{bd2cff36df4e6dd86d0262eb322012a4}
+      \strng{fullhash}{bd2cff36df4e6dd86d0262eb322012a4}
+      \strng{authornamehash}{bd2cff36df4e6dd86d0262eb322012a4}
+      \strng{authorfullhash}{bd2cff36df4e6dd86d0262eb322012a4}
+      \field{sortinit}{V}
+      \field{sortinithash}{555737dafdcf1396ebfeae5822e5bde2}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Pendulum: A Reversible Computer Architecture}
+      \field{type}{mathesis}
+      \field{year}{1993}
+    \endentry
+    \entry{DBLP:conf/rc/2011}{proceedings}{}
+      \name{editor}{2}{}{%
+        {{hash=0fec015f24ca901d7eceb4b48ea31524}{%
+           family={Vos},
+           familyi={V\bibinitperiod},
+           given={Alexis\bibnamedelima De},
+           giveni={A\bibinitperiod\bibinitdelim D\bibinitperiod}}}%
+        {{hash=942bfb89eecd82018713153f8561459b}{%
+           family={Wille},
+           familyi={W\bibinitperiod},
+           given={Robert},
+           giveni={R\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Springer}%
+      }
+      \strng{namehash}{cefb4382c1472bf5aef88d02585810c1}
+      \strng{fullhash}{cefb4382c1472bf5aef88d02585810c1}
+      \strng{editornamehash}{cefb4382c1472bf5aef88d02585810c1}
+      \strng{editorfullhash}{cefb4382c1472bf5aef88d02585810c1}
+      \field{sortinit}{V}
+      \field{sortinithash}{555737dafdcf1396ebfeae5822e5bde2}
+      \true{crossrefsource}
+      \field{labelnamesource}{editor}
+      \field{labeltitlesource}{title}
+      \field{series}{Lecture Notes in Computer Science}
+      \field{title}{Reversible Computation - Third International Workshop, {RC} 2011, Gent, Belgium, July 4-5, 2011. Revised Papers}
+      \field{volume}{7165}
+      \field{year}{2012}
+    \endentry
+    \entry{wi:semantics}{book}{}
+      \name{author}{1}{}{%
+        {{hash=ac9148668fcbbf80b9bd8c23d6a42e58}{%
+           family={Winskel},
+           familyi={W\bibinitperiod},
+           given={Glynn},
+           giveni={G\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Cambridge, MA, USA}%
+      }
+      \list{publisher}{1}{%
+        {MIT Press}%
+      }
+      \strng{namehash}{ac9148668fcbbf80b9bd8c23d6a42e58}
+      \strng{fullhash}{ac9148668fcbbf80b9bd8c23d6a42e58}
+      \strng{authornamehash}{ac9148668fcbbf80b9bd8c23d6a42e58}
+      \strng{authorfullhash}{ac9148668fcbbf80b9bd8c23d6a42e58}
+      \field{sortinit}{W}
+      \field{sortinithash}{6d25b3eefe5aa2147d1f339686808918}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{The Formal Semantics of Programming Languages: An Introduction}
+      \field{year}{1993}
+    \endentry
+    \entry{ty:ejanus}{inbook}{}
+      \name{author}{3}{}{%
+        {{hash=36ec1e5798b613392e24bf6c33b659be}{%
+           family={Yokoyama},
+           familyi={Y\bibinitperiod},
+           given={Tetsuo},
+           giveni={T\bibinitperiod}}}%
+        {{hash=98a35e33c09d2ac20d63a973c7a1222b}{%
+           family={Axelsen},
+           familyi={A\bibinitperiod},
+           given={Holger\bibnamedelima Bock},
+           giveni={H\bibinitperiod\bibinitdelim B\bibinitperiod}}}%
+        {{hash=0d2b49381e0bd5c108c28a8b379df2fe}{%
+           family={Glück},
+           familyi={G\bibinitperiod},
+           given={Robert},
+           giveni={R\bibinitperiod}}}%
+      }
+      \name{editor}{3}{}{%
+        {{hash=0479cb0bcec3680c952b5e814eb9227e}{%
+           family={Ramírez},
+           familyi={R\bibinitperiod},
+           given={Alex},
+           giveni={A\bibinitperiod}}}%
+        {{hash=90135c29bf61e9b6bf01557caf22d86f}{%
+           family={Bilardi},
+           familyi={B\bibinitperiod},
+           given={Gianfranco},
+           giveni={G\bibinitperiod}}}%
+        {{hash=d41895e4fca09a2ffb0c95190f6d6aca}{%
+           family={Gschwind},
+           familyi={G\bibinitperiod},
+           given={Michael},
+           giveni={M\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {ACM}%
+      }
+      \strng{namehash}{d006963a7edfe0faf96c7d7567fa173e}
+      \strng{fullhash}{f7a410d16bfa9b6f5583fa076f049c52}
+      \strng{authornamehash}{d006963a7edfe0faf96c7d7567fa173e}
+      \strng{authorfullhash}{f7a410d16bfa9b6f5583fa076f049c52}
+      \strng{editornamehash}{325b0a1a45e6629139b3efdd3eec7349}
+      \strng{editorfullhash}{1f0f9d02cc0a9531226ebbf297b3d570}
+      \field{sortinit}{Y}
+      \field{sortinithash}{f86c10978eb0c0879609ce6a4f43da7b}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Proceedings of the 5th Conference on Computing Frontiers, 2008, Ischia, Italy, May 5-7, 2008}
+      \field{title}{Principles of a reversible programming language}
+      \field{year}{2008}
+      \field{pages}{43\bibrangedash 54}
+      \range{pages}{12}
+    \endentry
+    \entry{ty:rfun}{inbook}{}
+      \name{author}{3}{}{%
+        {{hash=36ec1e5798b613392e24bf6c33b659be}{%
+           family={Yokoyama},
+           familyi={Y\bibinitperiod},
+           given={Tetsuo},
+           giveni={T\bibinitperiod}}}%
+        {{hash=98a35e33c09d2ac20d63a973c7a1222b}{%
+           family={Axelsen},
+           familyi={A\bibinitperiod},
+           given={Holger\bibnamedelima Bock},
+           giveni={H\bibinitperiod\bibinitdelim B\bibinitperiod}}}%
+        {{hash=0d2b49381e0bd5c108c28a8b379df2fe}{%
+           family={Glück},
+           familyi={G\bibinitperiod},
+           given={Robert},
+           giveni={R\bibinitperiod}}}%
+      }
+      \name{editor}{2}{}{%
+        {{hash=0fec015f24ca901d7eceb4b48ea31524}{%
+           family={Vos},
+           familyi={V\bibinitperiod},
+           given={Alexis\bibnamedelima De},
+           giveni={A\bibinitperiod\bibinitdelim D\bibinitperiod}}}%
+        {{hash=942bfb89eecd82018713153f8561459b}{%
+           family={Wille},
+           familyi={W\bibinitperiod},
+           given={Robert},
+           giveni={R\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Springer}%
+      }
+      \strng{namehash}{d006963a7edfe0faf96c7d7567fa173e}
+      \strng{fullhash}{f7a410d16bfa9b6f5583fa076f049c52}
+      \strng{authornamehash}{d006963a7edfe0faf96c7d7567fa173e}
+      \strng{authorfullhash}{f7a410d16bfa9b6f5583fa076f049c52}
+      \strng{editornamehash}{cefb4382c1472bf5aef88d02585810c1}
+      \strng{editorfullhash}{cefb4382c1472bf5aef88d02585810c1}
+      \field{sortinit}{Y}
+      \field{sortinithash}{f86c10978eb0c0879609ce6a4f43da7b}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Reversible Computation - Third International Workshop, {RC} 2011, Gent, Belgium, July 4-5, 2011. Revised Papers}
+      \strng{crossref}{DBLP:conf/rc/2011}
+      \field{series}{Lecture Notes in Computer Science}
+      \field{title}{Towards a Reversible Functional Language}
+      \field{volume}{7165}
+      \field{year}{2011}
+      \field{pages}{14\bibrangedash 29}
+      \range{pages}{16}
+    \endentry
+    \entry{ty:janus}{inbook}{}
+      \name{author}{2}{}{%
+        {{hash=36ec1e5798b613392e24bf6c33b659be}{%
+           family={Yokoyama},
+           familyi={Y\bibinitperiod},
+           given={Tetsuo},
+           giveni={T\bibinitperiod}}}%
+        {{hash=0d2b49381e0bd5c108c28a8b379df2fe}{%
+           family={Glück},
+           familyi={G\bibinitperiod},
+           given={Robert},
+           giveni={R\bibinitperiod}}}%
+      }
+      \name{editor}{2}{}{%
+        {{hash=4882b50812a07b865e2d32d9f11fa274}{%
+           family={Ramalingam},
+           familyi={R\bibinitperiod},
+           given={G.},
+           giveni={G\bibinitperiod}}}%
+        {{hash=05c571c161af3b68085a0f3a9cb29efa}{%
+           family={Visser},
+           familyi={V\bibinitperiod},
+           given={Eelco},
+           giveni={E\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {ACM}%
+      }
+      \strng{namehash}{1ca20f7d2e0abb710049cd1128ea23a9}
+      \strng{fullhash}{1ca20f7d2e0abb710049cd1128ea23a9}
+      \strng{authornamehash}{1ca20f7d2e0abb710049cd1128ea23a9}
+      \strng{authorfullhash}{1ca20f7d2e0abb710049cd1128ea23a9}
+      \strng{editornamehash}{6d1f915438fd6f3b3b3acbdbe5722f87}
+      \strng{editorfullhash}{6d1f915438fd6f3b3b3acbdbe5722f87}
+      \field{sortinit}{Y}
+      \field{sortinithash}{f86c10978eb0c0879609ce6a4f43da7b}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Proceedings of the 2007 {ACM} {SIGPLAN} Workshop on Partial Evaluation and Semantics-based Program Manipulation, 2007, Nice, France, January 15-16, 2007}
+      \field{title}{A reversible programming language and its invertible self-interpreter}
+      \field{year}{2007}
+      \field{pages}{144\bibrangedash 153}
+      \range{pages}{10}
+    \endentry
+  \endsortlist
+\endrefsection
+\endinput
+
