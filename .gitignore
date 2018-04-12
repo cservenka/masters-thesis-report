@@ -21,7 +21,6 @@
 # *.pdf
 
 ## Bibliography auxiliary files (bibtex/biblatex/biber):
-*.bbl
 *.bcf
 *.blg
 *-blx.aux
@@ -187,3 +186,4 @@ Thesis draft 2017-10-11.pdf
 .vscode/settings.json
 .vscode/spellright.dict
 .DS_Store
+title.bbl
